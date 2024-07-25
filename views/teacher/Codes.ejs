@@ -220,12 +220,18 @@
         })
 
         socket.on('creatingCodes', (data) => {
+            document.getElementById('createGCodeWarning').style.display="inline"
+            console.log(data)
+       
+                document.getElementById('nCodesFinishedG').innerHTML=data.nCodesFinished
+                document.getElementById('numberOfCodesG').innerHTML=data.numberOfCodes
+        });
+        socket.on('creatingSCodes', (data) => {
             document.getElementById('createCodeWarning').style.display="inline"
             console.log(data)
                 document.getElementById('nCodesFinishedS').innerHTML=data.nCodesFinished
                 document.getElementById('numberOfCodesS').innerHTML=data.numberOfCodes
-                document.getElementById('nCodesFinishedG').innerHTML=data.nCodesFinished
-                document.getElementById('numberOfCodesG').innerHTML=data.numberOfCodes
+       
         });
 
  
