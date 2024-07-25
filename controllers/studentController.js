@@ -513,15 +513,24 @@ const ranking_get = async (req,res)=>{
     }
     
     else{
-    await User.find({Grade: req.userData.Grade},{Username:1,Code:1,totalScore:1}).sort({ totalscore: -1 })  
- 
-    .then(async (result) => {
-      const count = await Code.countDocuments({});
-      const nextPage = parseInt(page) + 1;
-      const hasNextPage = nextPage <= Math.ceil(count / perPage);
-      const hasPreviousPage = page > 1;
-      
-      res.render("student/ranking", { title: "Ranking", path: req.path, userData: req.userData ,rankedUsers :result , nextPage: hasNextPage ? nextPage : null, previousPage: hasPreviousPage ? page - 1 : null,  userRank: null ,isSearching : false});
+await User.find({ Grade: req.userData.Grade }, { Username: 1, Code: 1, totalScore: 1 })
+  .sort({ totalScore: -1 })
+  .then(async (result) => {
+    const count = await Code.countDocuments({});
+    const nextPage = parseInt(page) + 1;
+    const hasNextPage = nextPage <= Math.ceil(count / perPage);
+    const hasPreviousPage = page > 1;
+
+    res.render("student/ranking", {
+      title: "Ranking",
+      path: req.path,
+      userData: req.userData,
+      rankedUsers: result,
+      nextPage: hasNextPage ? nextPage : null,
+      previousPage: hasPreviousPage ? page - 1 : null,
+      userRank: null,
+      isSearching: false
+    });
 
     }).catch((err)=>{
       console.log(err)
