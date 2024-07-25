@@ -282,7 +282,7 @@ const buyVideo = async (req, res) => {
 
     // Update Code document
     const CodeData = await Code.findOneAndUpdate(
-      { "Code": code, "isUsed": false, "codeType": "Video", "codeFor": videoId },
+      { "Code": code, "isUsed": false },
       { "isUsed": true, "usedBy": req.userData.Code },
       { new: true }
     );
