@@ -482,14 +482,14 @@ const ranking_get = async (req,res)=>{
     
       // Find all students and sort them by totalScore
       const allStudents = await User.find({}, { Username: 1, Code: 1, totalScore: 1 })
-        .sort({ totalScore: -1 })
+        .sort({ totalScore: 1 })
     
 
       // Find the index of the student in the sorted array
       const userRank = allStudents.findIndex(s => s.Code === +searchInput) + 1;
       console.log(userRank);
       const paginatedStudents = await User.find({ Code: searchInput }, { Username: 1, Code: 1, totalScore: 1 })
-        .sort({ totalScore: -1 })
+        .sort({ totalScore: 1 })
     
     
       const count = await User.countDocuments({});
