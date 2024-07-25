@@ -20,8 +20,8 @@ const { v4: uuidv4 } = require('uuid')
 const dash_get = async (req, res) => {
   try {
 
-      const rankedUsers = await User.find({},{Username:1,userPhoto:1}).sort({ totalScore: -1 }).limit(3);
-      console.log(rankedUsers[0]);
+    const rankedUsers = await User.find({Grade:req.userData.Grade},{Username:1,userPhoto:1}).sort({ totalScore: -1 }).limit(3);
+  
     res.render("student/dash", { title: "DashBoard", path: req.path, userData: req.userData ,rankedUsers :rankedUsers });
   } catch (error) {
     res.send(error.message);
@@ -553,7 +553,7 @@ await User.find({ Grade: req.userData.Grade }, { Username: 1, Code: 1, totalScor
 const exams_get = async (req, res) => {
   try {
 
-    const rankedUsers = await User.find({},{Username:1,userPhoto:1}).sort({ totalscore: -1 }).limit(3);
+    const rankedUsers = await User.find({Grade:req.userData.Grade},{Username:1,userPhoto:1}).sort({ totalScore: -1 }).limit(3);
 
     const exams = await Quiz.find({ "Grade": req.userData.Grade  }).sort({ createdAt: 1 });
  
