@@ -42,13 +42,17 @@
                         <form action="/student/settings" method="post">
                      <% if (userData) { %>
                         <div class="profile-photo mx-auto">
-                            <img src="<%= userData.userPhoto %>" id="selbtn" >
+                            <img src="<%= userData.userPhoto %>"  >
                         </div>
-                        <h2>اضغط علي الصوره لاختيار صوره جديده</h2>
+                        <h2>  تعديل الصوره </h2>
+                        <input type="file"  id="userPhotoBtn">
                         <div class="progress">
                             <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0% ;   background-color:#20ade5!important;" aria-valuenow="0" >0%</div>
                         </div>
-                
+                        <input type="text" vlaue="" name="userPhoto" id="userPhoto" style="width: 0.5px; height: 0.5px; border: none; color: transparent;">
+                        <button id="BtnPhotoUpload" class="btn btn-primary" type="button">رفع الصوره</button>
+                        <h2>  تعديل البيانات </h2>
+                      
                
                          
                   
@@ -83,10 +87,9 @@
     <script src="/assest/bootstrap.min.js"></script>
 
 
-
-    <script type="module" >
-          // Import the functions you need from the SDKs you need
-          import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
+<script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
             import {
                 getDatabase,
                 ref,
@@ -109,7 +112,6 @@
                 FacebookAuthProvider,
                 onAuthStateChanged,
             } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js";
-           
             import {
                 getStorage,
                 ref as sRef,
@@ -156,75 +158,77 @@
 
 
 
-let files = []
-let reader = new FileReader();
-let imgUrl 
-var SelBtn = document.getElementById('selbtn');
-var UpBtn = document.getElementById('upbtn');
 
-var input = document.createElement('input');
-input.type = 'file';
-
-input.onchange = e => {
-    files = e.target.files;
-    reader.readAsDataURL(files[0]);
-    UploadProcess() 
-}
-
-reader.onload = function () {
-    SelBtn.src = reader.result
-}
-
-SelBtn.onclick = function () {
-  input.click();
-}
+            let files = [];
+            let reader = new FileReader();
+            let imgUrl;
+            var input = document.getElementById("userPhotoBtn");
+            var UpBtn = document.getElementById("BtnPhotoUpload");
 
 
-const newUserName = document.getElementById('newUserName')
-const studentPhone = document.getElementById('studentPhone')
-const parentPhone = document.getElementById('parentPhone')
-const WhatsApp = document.getElementById('WhatsApp')
-const Government = document.getElementById('government')
-const markez = document.getElementById('government')
-const schoolName = document.getElementById('schoolName')
-const ID = document.getElementById('ID')
+            input.onchange = (e) => {
+                files = e.target.files;
+                reader.readAsDataURL(files[0]);
+            };
 
-async function UploadProcess() {
-    document.getElementById("saveChanges").setAttribute("disabled", "true")
-    document.querySelector(".progress").style.display ="inline"
-    document.getElementById("progress-bar").innerHTML = "برجاء الانتظار يتم رفع الصوره"  
-    var ImgToUpload = files[0];
-    const metaData = {
-            contentType: ImgToUpload.type
-    }
-        const storage = getStorage(storageApp);
-        const stroageRef = sRef(storage, "BioDiva/"+ "profilePhotos/"+  files[0].name);
-        const UploadTask = uploadBytesResumable(stroageRef, ImgToUpload, metaData);
-        UploadTask.on('state-changed', (snapshot) => {
-            var progess = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            
-            document.getElementById("progress-bar").innerHTML =progess.toFixed(2) + "%"
-            document.getElementById("progress-bar").style.width = progess.toFixed(2) + "%" 
-        },
-        (error) => {
-                alert("error")
-            },
-            () => {
-                getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
-                imgUrl = downloadURL
-                document.getElementById("userPhoto").value = imgUrl
-                document.getElementById("progress-bar").innerHTML = "Done"   
-                document.getElementById("saveChanges").removeAttribute("disabled")
-                })
+            reader.onload = function () {
+                // SelBtn.remove();
+                // editPhotoBtn.style.display = "inline";
+                // document.getElementById("imgUploaded").classList.remove("d-none");
+                // document.getElementById("imgUploaded").src = reader.result;
+
+            };
+
+
+
+            UpBtn.onclick = () => {
+                uploadphoto();
             }
-        );
 
-    }
-  
+            async function uploadphoto() {
+                var imgToUpload = files[0];
 
+                const metaData = {
+                    contentType: imgToUpload.type,
+                };
 
-      
-    </script>
+                const storage = getStorage(storageApp);
+                console.log(imgToUpload);
+                const stroageRef = sRef(
+                    storage,
+                    "BioDiva/" + "New/" + files[0].name
+                );
+                const UploadTask = uploadBytesResumable(stroageRef, imgToUpload, metaData);
+                UploadTask.on(
+                    "state-changed",
+                    (snapshot) => {
+                        var progess = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        UpBtn.innerHTML = progess.toFixed(2) + "%";
+                    },
+                    (error) => {
+                        console.log(error)
+
+                    },
+                    () => {
+                        getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
+                            imgUrl = downloadURL;
+                            document.getElementById('userPhoto').setAttribute('value', imgUrl)
+                            document.getElementById('BtnPhotoUpload').innerHTML = "تم الرفع"
+
+                            document.getElementById('BtnVideoUpload').removeAttribute('disabled')
+                        });
+                    }
+                );
+            }
+
+            document.getElementById('BtnVideoUpload').addEventListener('click',()=>{
+                document.getElementById('BtnVideoUpload').innerHTML = "يتم التجهيز للرفع برجاء عدم اغلاق الصفحه نهائيا"
+            })
+
+        }
+
+        
+</script>
 
 </body>
 
