@@ -49,7 +49,7 @@
                         <div class="progress">
                             <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0% ;   background-color:#20ade5!important;" aria-valuenow="0" >0%</div>
                         </div>
-                        <input type="text" vlaue="" name="userPhoto" id="userPhoto" style="width: 0.5px; height: 0.5px; border: none; color: transparent;">
+                        <input type="text" vlaue="<%= userData.userPhoto %>" name="userPhoto" id="userPhoto" style="width: 0.5px; height: 0.5px; border: none; color: transparent;">
                         <button id="BtnPhotoUpload" class="btn btn-primary" type="button">رفع الصوره</button>
                         <h2>  تعديل البيانات </h2>
                       
@@ -63,7 +63,6 @@
                             <h2 style="font-weight: bolder;">رقم هاتف ولي الامر  :  <span  ><%=  userData.parentPhone  %></span> </h2> 
                             <label for="government">المحافطه   </label><input type="text" name="gov"  value="<%=  userData.gov  %> "   > 
                             
-                            <input type="text" name="userPhoto" id="userPhoto" value="<%= userData.userPhoto %>" class="d-none">
                             <button class="saveUserInfoBtn" type="submit" id="saveChanges" >حفظ التغيرات  </button>
                         </div>
                         <% } %>
@@ -225,7 +224,7 @@
                 document.getElementById('BtnVideoUpload').innerHTML = "يتم التجهيز للرفع برجاء عدم اغلاق الصفحه نهائيا"
             })
 
-        }
+       
 
         
 </script>
