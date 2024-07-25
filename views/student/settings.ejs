@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<%- include("./partials/head.ejs") %>
+
+
+
+<body>
+    <%- include("./partials/preloader.ejs") %>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-2 col-md-1">
+                <%- include("./partials/aside.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+            <div class="col-xl-9 col-md-9 ">
+
+
+                <div class="left">
+                    <div class="top">
+                        <button id="menu-btn">
+                            <span class="material-icons-sharp">
+                                menu
+                            </span>
+                        </button>
+                        <div class="theme-toggler">
+                            <span class="material-icons-sharp active">
+                                light_mode
+                            </span>
+                            <span class="material-icons-sharp">
+                                dark_mode
+                            </span>
+                        </div>
+                    </div>
+                    <!-- END OF TOP -->                   
+                </div>
+
+
+                <main>
+                    <div class="settings">
+                        <form action="/student/settings" method="post">
+                     <% if (userData) { %>
+                        <div class="profile-photo mx-auto">
+                            <img src="<%= userData.userPhoto %>" id="selbtn" >
+                        </div>
+                        <h2>اضغط علي الصوره لاختيار صوره جديده</h2>
+                        <div class="progress">
+                            <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0% ;   background-color:#20ade5!important;" aria-valuenow="0" >0%</div>
+                        </div>
+                
+               
+                         
+                  
+                        <div id="UserInfo">
+                            <label for="newUserName">اسمك  </label><input type="text" name="Username" placeholder="الاسم الجديد" value="<%= userData.Username %>"> 
+                            <h2 style="font-weight: bolder;"> الكود الخاص بك :  <span ><%=  userData.Code  %></span> </h2> 
+                            <h2 style="font-weight: bolder;"> رقم الهاتف الخاص بك :   <span  ><%=  userData.phone  %></span> </h2> 
+                            <h2 style="font-weight: bolder;">رقم هاتف ولي الامر  :  <span  ><%=  userData.parentPhone  %></span> </h2> 
+                            <label for="government">المحافطه   </label><input type="text" name="gov"  value="<%=  userData.gov  %> "   > 
+                            
+                            <input type="text" name="userPhoto" id="userPhoto" value="<%= userData.userPhoto %>" class="d-none">
+                            <button class="saveUserInfoBtn" type="submit" id="saveChanges" >حفظ التغيرات  </button>
+                        </div>
+                        <% } %>
+
+                    </form>
+                    
+                
+                    </div> 
+                </main>
+            </div>
+
+            <!-------------------- END OF MAIN --------------------->
+           
+        </div>
+    </div>
+
+
+
+
+    <script src="/assest/bootstrap.bundle.min.js"></script>
+    <script src="/assest/bootstrap.min.js"></script>
+
+
+
+    <script type="module" >
+          // Import the functions you need from the SDKs you need
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
+            import {
+                getDatabase,
+                ref,
+                set,
+                onValue,
+                child,
+                get,
+                update,
+                remove,
+                push,
+            } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-database.js";
+            import {
+                getAuth,
+                createUserWithEmailAndPassword,
+                signInWithEmailAndPassword,
+                signOut,
+                GoogleAuthProvider,
+                signInWithPopup,
+                signInWithRedirect,
+                FacebookAuthProvider,
+                onAuthStateChanged,
+            } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js";
+           
+            import {
+                getStorage,
+                ref as sRef,
+                uploadBytesResumable,
+                getDownloadURL,
+            } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-storage.js";
+
+            // Your web app's Firebase configuration
+            const dbfirebaseConfig = {
+                apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
+                authDomain: "allasharaf.firebaseapp.com",
+                databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
+                projectId: "allasharaf",
+                storageBucket: "allasharaf.appspot.com",
+                messagingSenderId: "638342504235",
+                appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
+            };
+            const storageConfig = {
+                apiKey: "AIzaSyC0VUgV2B_ClqKImLQAafbklwKZRabod0A",
+                authDomain: "biodiva-fa1b0.firebaseapp.com",
+                databaseURL: "https://biodiva-fa1b0-default-rtdb.firebaseio.com",
+                projectId: "biodiva-fa1b0",
+                storageBucket: "biodiva-fa1b0.appspot.com",
+                messagingSenderId: "262124821606",
+                appId: "1:262124821606:web:09311e0be3fc9b7634a1a7"
+            };
+            const storageApp = initializeApp(storageConfig, "storage");
+            const dbApp = initializeApp(dbfirebaseConfig, "db");
+            const db = getDatabase(dbApp);
+            const authConfig = {
+                apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
+                authDomain: "allasharaf.firebaseapp.com",
+                databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
+                projectId: "allasharaf",
+                storageBucket: "allasharaf.appspot.com",
+                messagingSenderId: "638342504235",
+                appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
+            };
+            const authApp = initializeApp(authConfig, "auth");
+            const auth = getAuth(authApp);
+            const dbRef = ref(db);
+
+
+
+
+
+let files = []
+let reader = new FileReader();
+let imgUrl 
+var SelBtn = document.getElementById('selbtn');
+var UpBtn = document.getElementById('upbtn');
+
+var input = document.createElement('input');
+input.type = 'file';
+
+input.onchange = e => {
+    files = e.target.files;
+    reader.readAsDataURL(files[0]);
+    UploadProcess() 
+}
+
+reader.onload = function () {
+    SelBtn.src = reader.result
+}
+
+SelBtn.onclick = function () {
+  input.click();
+}
+
+
+const newUserName = document.getElementById('newUserName')
+const studentPhone = document.getElementById('studentPhone')
+const parentPhone = document.getElementById('parentPhone')
+const WhatsApp = document.getElementById('WhatsApp')
+const Government = document.getElementById('government')
+const markez = document.getElementById('government')
+const schoolName = document.getElementById('schoolName')
+const ID = document.getElementById('ID')
+
+async function UploadProcess() {
+    document.getElementById("saveChanges").setAttribute("disabled", "true")
+    document.querySelector(".progress").style.display ="inline"
+    document.getElementById("progress-bar").innerHTML = "برجاء الانتظار يتم رفع الصوره"  
+    var ImgToUpload = files[0];
+    const metaData = {
+            contentType: ImgToUpload.type
+    }
+        const storage = getStorage(storageApp);
+        const stroageRef = sRef(storage, "BioDiva/"+ "profilePhotos/"+  files[0].name);
+        const UploadTask = uploadBytesResumable(stroageRef, ImgToUpload, metaData);
+        UploadTask.on('state-changed', (snapshot) => {
+            var progess = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            
+            document.getElementById("progress-bar").innerHTML =progess.toFixed(2) + "%"
+            document.getElementById("progress-bar").style.width = progess.toFixed(2) + "%" 
+        },
+        (error) => {
+                alert("error")
+            },
+            () => {
+                getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
+                imgUrl = downloadURL
+                document.getElementById("userPhoto").value = imgUrl
+                document.getElementById("progress-bar").innerHTML = "Done"   
+                document.getElementById("saveChanges").removeAttribute("disabled")
+                })
+            }
+        );
+
+    }
+  
+
+
+      
+    </script>
+
+</body>
+
+
+</html>

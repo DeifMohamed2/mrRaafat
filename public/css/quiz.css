@@ -1,0 +1,318 @@
+/* Root VARAIBLES */
+:root {
+    --color-primary: #7380ec;
+    --color-danger: #ff7782;
+    --color-success: #41f1b6;
+    --color-warning: #ffbb55;
+    --color-white: #fff;
+    --color-info-dark: #7d8da1;
+    --color-info-light: #dce1eb;
+  
+    --color-dark: #363949;
+    --color-light: rgba(132, 139, 200, 0.18);
+    --color-primary-variant: #111e88;
+    --color-dark-variant: #677483;
+    --color-background: #f6f6f9;
+    --card-border-radius: 2rem;
+    --border-radius-1: 0.4rem;
+    --border-radius-2: 0.8rem;
+    --border-radius-3: 1.2rem;
+    --card-padding: 1.8rem;
+    --padding-1: 1.2rem;
+    --box-shadow: 0 2rem 3rem var(--color-light);
+  }
+  /* -========================================= Dark THEME ================== */
+  
+  .dark-theme-variables {
+    --color-background: #181a1e;
+    --color-white: #202528;
+    --color-dark: #edeffd;
+    --color-dark-variant: #a3bdcc;
+    --color-light: rgba(0, 0, 0, 0.4);
+    --box-shadow: 0 2rem 3rem var(--color-light);
+  }
+  .Grade{
+    background-color:  var( --color-white);
+    border-radius: var(--border-radius-1);
+    padding: 0.5rem 1rem;
+    border: 1px solid  var( --color-dark);
+    margin: 1rem 0;
+    color: var( --color-dark);
+    
+  }
+  .Grade:disabled{
+    opacity: 0.7;
+  }
+  .slections{
+    background-color:  var( --color-white);
+    border-radius: var(--border-radius-1);
+    padding: 0.5rem 1rem;
+    border: 1px solid  var( --color-dark);
+    margin: 1rem 0;
+    color: var( --color-dark);
+    margin-right: 1rem;
+    transition: all 400ms ease;
+  }
+  .slections:disabled{
+    opacity: 0.6;
+  }
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+  
+  * {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    appearance: none;
+    text-decoration: none;
+    list-style: none;
+    border: 0;
+    box-sizing: border-box;
+  }
+  html {
+    font-size: 14px;
+  }
+  body {
+    font-family: "Poppins", sans-serif;
+    background-color: var(--color-background);
+  
+    color: var(--color-dark);
+  }
+  
+  a {
+    color: var(--color-dark);
+    text-decoration: none;
+  }
+  img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: 1.8rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+  }
+  h3 {
+    font-size: 0.87rem;
+  }
+  h4 {
+    font-size: 0.8rem;
+  }
+  h5 {
+    font-size: 0.7rem;
+  }
+
+
+
+
+.quiz-info{
+    padding: 1rem;
+    border: 1px dashed #fff;
+    border-radius: 1rem;
+    transform: translateY(20%);
+    width: 70%;
+  }
+  .quiz-info h2{
+   font-size: 1.8rem;
+   font-weight: bolder;
+  }
+  .quiz-info p {
+    font-size: 1.3rem;
+    margin: 0.7rem;
+    align-items: flex-start;
+  }
+  .quiz-info .time{
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid rgb(245, 211, 15);
+    width: 20%;
+    border-radius: 2rem;
+  }
+  .quiz-info .questionsLeft{
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid rgb(245, 211, 15);
+    width: 20%;
+    border-radius: 2rem;
+  }
+  .quiz-info .questionSec{
+    background-color: rgb(80, 80, 80);
+    padding: 0.8rem;
+    border-radius: 1rem;
+    word-wrap:break-word ;
+  }
+  .quiz-info input[type="radio"] {
+    display: none;  
+  
+  }
+  .quiz-info input[type="radio"] + label {
+    font-size: 20px;
+    line-height: 25px;
+    background-color: var(--color-info-dark);  
+    border-radius: var(--border-radius-1);
+    padding: 0.8rem;
+    margin: 0.6rem 0;
+    transition: all 0.5s ease;
+    width: 100%;
+    line-height: 1.9rem;
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .quiz-info input[type="radio"]:checked + label  {
+    background-color:#f75742f3;  
+    color: rgb(226, 226, 226);
+  }
+  .quiz-info input[type="radio"]:hover + label  {
+    background-color:#f75742f3;  
+    color: rgb(226, 226, 226);
+  }
+  .quiz-info .prev{
+    float: left;
+  }
+  .quiz-info .next{
+    float: right;
+  }
+  
+  /* ==== side bar ===== */
+  .sidebar {
+      direction: rtl;
+      height: 100%; /* 100% Full-height */
+      width: 0; /* 0 width - change this with JavaScript */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Stay on top */
+      top: 0;
+      left:0;
+      background-color: #111; /* Black*/
+      overflow-x: hidden; /* Disable horizontal scroll */
+      padding-top: 60px; /* Place content 60px from the top */
+      transition: 0.5s; /* 0.5 second transition effect to slide in the sidebar */
+      padding: 60px 0px;
+    }
+    
+    /* The sidebar links */
+    .sidebar .questions  button{
+  
+      padding: 20px 20px;
+      border: 3px solid #fff;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      text-decoration: none;
+      font-size: 25px;
+      color: var(--color-primary);
+      display: block;
+      transition: 0.3s;
+      position: relative;
+    }
+    
+    /* When you mouse over the navigation links, change their color */
+    .sidebar button:hover {
+      background-color: var(--color-warning);
+      border-color:var(--color-background) ;
+      color: white;
+    }
+    .active{
+      background-color: var(--color-warning);
+      border-color:var(--color-background) !important;
+      color: white !important;
+    }
+    .sidebar button::after{
+      content: "";
+      width: 2rem;
+      height: 3px;
+      position: absolute;
+      background-color: var(--color-warning);
+      bottom: 1rem;
+      right: 0.7rem;
+    }
+    .sidebar #toFinish{
+      padding: 8px 8px;
+      font-size: 20px;
+    }
+    
+   
+    
+    .sidebar #toFinish::after{
+      content: "";
+      background-color: none;
+      width: 0px;
+    }
+  
+    /* Position and style the close button (top right corner) */
+    .sidebar .closebtn {
+      position: absolute;
+      top: 0;
+      right: 25px;
+      font-size: 36px;
+      margin-left: 50px;
+    }
+    
+    /* The button used to open the sidebar */
+    .openbtn {
+      font-size: 20px;
+      cursor: pointer;
+      background-color: #111;
+      color: white;
+      padding:2px 3px;
+      border-radius: 1.4rem;
+      border: none;
+      transition: all 0.5s ease;
+    }
+    .openbtn .uil {
+      font-size: 40px;
+    }
+    
+    .openbtn:hover {
+      background-color: #444;
+    }
+    
+  
+  
+  
+  @media screen and (max-width:600px) {
+    
+    .quiz-info h2{
+      font-size: 1.5rem;
+      font-weight: bolder;
+     }
+     .quiz-info p {
+       font-size: 1rem;
+       align-items: flex-start;
+     }
+     .quiz-info .time{
+    
+      width: 50%;
+    }
+    .quiz-info .questionsLeft{
+    
+      width: 50%;
+  
+    }
+  }
+  
+  
+  @media screen and (max-width:1000px) {
+    
+  
+     .quiz-info .time{
+    
+      width: 50%;
+    }
+    .quiz-info .questionsLeft{
+    
+      width: 50%;
+  
+    }
+  }
+  
+  @media screen and (max-width:990px) {
+    
+    .quiz-info{
+    
+      width: 100%;
+    }
+  }
+  

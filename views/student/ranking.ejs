@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <%- include("./partials/head.ejs") %>
+
+    
+
+<body>
+    <%- include("./partials/preloader.ejs") %>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2">
+           <%- include("./partials/aside.ejs") %>
+
+            </div>
+
+
+            <!-- Button trigger modal -->
+
+
+        
+            <!--------------------END ASIDE  ------------------>
+
+            <div class=" col-lg-10 ">
+                <main>
+
+                    <div class="row">
+                        <div class="col-md-6">
+
+                        </div>
+                        <div class=" col-md-6 ">
+                            <div class="left">
+                            
+                                <%- include("./partials/top.ejs") %>
+                            
+                                <!-- END OF TOP -->
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-11  col-sm-12">
+                            <div class="student-table" style="margin: 0;">
+                                <form action="" method="get">
+
+                                    <div class="row" style="margin-bottom: 0 !important;">
+                                   
+                                      
+                                        <div class="col-md-6">  
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <button  type="submit" class="primary" ><i class="fa-solid fa-magnifying-glass"></i></button>
+
+                                                </div>
+                                               
+                                                <div class="col-md-1 d-flex justify-content-center align-items-center ">
+                                            
+                                                    <% if (isSearching) { %>
+                                                     
+                                                
+                                                        <button type="button"><a href="/student/ranking" class="primary" style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;" ><i class="fa-solid fa-x"></i></a></button>
+
+                                                        <% } %>
+
+                                            
+                                                </div>  
+                                          
+                                            </div>
+                                          
+                                        </div>
+
+                                        <div class="col-md-6"> 
+                                            <input type="text" class="mx-auto" name="searchInput" placeholder="بحث..">
+                                        </div>
+                                    </div>
+                                </form>
+                                <table id="myTable">
+                                    <thead>
+                                        <th style="padding: 10px;"># </th>
+                                        <th style="padding-left: 20px;">اسم الطالب</th>
+                                        <th style="padding-left: 20px;">كود الطالب</th>
+                                        <th style="padding-left: 20px;"> مجموع الدرجات </th>
+                                    </thead>
+                                    <tbody id="tbody">
+                                       <% if (rankedUsers&&!isSearching) { %>
+                                            <% counter =1 %>
+                                            <% rankedUsers.forEach(user => { %>
+                                                <tr>
+                                                    <td><%= counter++ %></td>
+                                                    <td><%= user.Username %></td>
+                                                    <td><%= user.Code %></td>
+                                                    <td><%= user.totalScore %></td>
+                                                
+                                                </tr>
+                                            <% }) %>
+                                          
+                                       <% } else {%>
+                                            <% if (rankedUsers&&isSearching) { %>
+                                            
+                                                <% rankedUsers.forEach(user => { %>
+                                                    <tr>
+                                                        <td><%= userRank  %></td>
+                                                        <td><%= user.Username %></td>
+                                                        <td><%= user.Code %></td>
+                                                        <td><%= user.totalScore %></td>
+                                                    </tr>
+                                                <% }) %>
+                                            <% } %>
+                                        <% } %>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+
+<!-- 
+                            <div class="pagination justify-content-between">
+                                        
+                                <div>
+
+                                    <% if (nextPage !== null) { %>
+
+                                        
+                                        <a  href="/student/ranking?page=<%= nextPage %>" > <button class="paginationBtns">Next</button> </a>
+
+                               
+
+                                    <% } %>
+                                </div>
+                             
+                            
+                             
+                                <div>
+                                    <% if (previousPage !== null) { %>
+
+
+
+                                            <a  href="/student/ranking?page=<%= previousPage %> " > <button class="paginationBtns">Pervious</button> </a>
+
+                                  
+
+                                    <% } %>
+                                </div>
+                            </div> -->
+ 
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-------------------- END OF MAIN --------------------->
+
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
+        integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="./js/ranking.js"></script>
+    <script >
+        module={}
+    </script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="icon" href="images/logo.png" type="image/x-icon">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/assest/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.6/css/unicons.css">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/Register.css">
+</head>
+
+<body>
+
+  <%- include("./partials/nav.ejs") %>
+
+
+    <!-- Modal -->
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="success-animation ">
+              <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
+            </div>
+          </div>
+          <div class="modal-body text-center " style="color: black;">
+            <h3>تم ارسال طلبك بنجاح!</h3>
+            <h4> هذا هوا الكود الخاص بك يرجي الاحتفاظ به جيداً</h4>
+            <span style="font-size: 2rem; "> <b>#</b><b id="student_id"></b> </span>
+          </div>
+          
+          <div class="modal-footer mx-auto">
+            <a href="login"><button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="copyCode"> حسنا
+              </button></a>
+          </div>
+          </div>
+     
+        </div>
+      </div>
+    </div>
+
+
+
+    <section class="contact">
+
+      <div class="container contact__container">
+
+        <button type="button" style="display: none;" id="modelbtn" class="btn btn-primary" data-bs-toggle="modal"
+          data-bs-target="#exampleModal">
+          Launch demo modal
+        </button>
+
+        <aside class="contact__aside">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="right">
+                <div class="aside__image">
+                  <i class="fa-solid fa-handshake-angle" style="font-size: 5rem;"> </i>
+                </div>
+                <h2>تواصل معنا في حال واجهتك مشكله</h2>
+                <p>
+                  فريق الدعم الفني متواجد من الساعه العاشره صباحاً حتي العاشره مساءً
+                </p>
+                <ul class="contact__details">
+                  <li>
+                    <i class="uil uil-phone"></i>
+                    <h5>01128996780</h5>
+                  </li>
+                  <li>
+                    <i class="uil uil-phone"></i>
+                    <h5>01288246998</h5>
+                  </li>
+                  <li>
+                    <i class="uil uil-envelope"></i>
+                    <h5>info@mrRafat.com</h5>
+                  </li>
+
+                </ul>
+                <ul class="contact__socials">
+                  <li> <a href="https://www.facebook.com/profile.php?id=100090767258666&mibextid=LQQJ4d"
+                      target="_blank"><i class="uil uil-facebook-f"></i></a>
+                  </li>
+                  <li> <a href="https://wa.me/+201128996780" target="_blank"><i class="uil uil-whatsapp"></i></a> </li>
+                  <li> <a href="https://wa.me/+201288246998" target="_blank"><i class="uil uil-whatsapp"></i></a> </li>
+
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </aside>
+
+
+        <form action="/Register" method="post" class="contact__form ">
+          <% if (typeof errors !=='undefined' ) { %>
+            <ul class="errors">
+              <% for (const key in errors) { %>
+                <li class="erorr">
+                  <%= errors[key] %>
+                </li>
+                <% } %>
+
+
+            </ul>
+            <% } %>
+
+              <div class="row  justify-content-center align-items-center">
+
+                <div class="col-12 text-center ">
+                  <input type="text" name="Username" placeholder=" اسم الطالب بالكامل"
+                    value="<%= formData.Username || '' %>" required>
+                </div>
+
+
+                <div class="col-12 text-center">
+                  <input type="number" name="phone"  id="phone" 
+                    placeholder="رقم هاتف الطالب" value="<%= formData.phone || '' %>" required>
+                    <h5 class="text-warning">ده الرقم الي هتعمل بيه تسجيل دخول</h5>
+                    <h5 class="text-warning"> لازم الرقم يكون عليه واتساب</h5>
+                </div> 
+                
+         
+                <div class="col-12 text-center">
+                    <input type="password" name="Password"   placeholder="كلمه المرور"
+                      value="<%= formData.Password || '' %>" required>
+                    <!-- <span class="toggle-password fas fa-eye" onclick="togglePasswordVisibility()"></span> -->
+                </div>
+                <div class="col-12 text-center">
+                  <select  name="gov"  value="<%= formData.gov || '' %>" required>
+                    <option  value="">اختر المحافظه</option>
+                    <option value="القاهرة">القاهرة</option>
+                    <option value="الغربية">الغربية</option>
+                    <option value="الجيزة">الجيزة </option>
+                    <option value="الإسماعيلية">الإسماعيلية</option>
+                    <option value="كفر الشيخ">كفر الشيخ</option>
+                    <option value="مطروح">مطروح</option>
+                    <option value="المنيا">المنيا</option>
+                    <option value="المنوفية">المنوفية</option>
+                    <option value="الوادي الجديد">الوادي الجديد</option>
+                    <option value="شمال سيناء">شمال سيناء</option>
+                    <option value="بورسعيد">بورسعيد</option>
+                    <option value="القليوبية">القليوبية</option>
+                    <option value="قنا">قنا</option>
+                    <option value="البحر الأحمر">البحر الأحمر</option>
+                    <option value="الشرقية">الشرقية</option>
+                    <option value="سوهاج">سوهاج</option>
+                    <option value="جنوب سيناء">جنوب سيناء</option>
+                    <option value="السويس">السويس</option>
+                    <option value="الأقصر">الأقصر</option>
+                    <option value="الإسكندرية">الإسكندرية</option>
+                    <option value="الفيوم">الفيوم</option>
+                    <option value="أسوان">أسوان</option>
+                    <option value="أسيوط">أسيوط</option>
+                    <option value="البحيرة">البحيرة</option>
+                    <option value="بني سويف">بني سويف</option>
+                    <option value="الدقهلية">الدقهلية</option>
+                    <option value="دمياط">دمياط</option>
+                  </select>
+                </div>
+                <div class="col-12 text-center">
+                  <input type="text" name="Markez" id="Markez" placeholder="  المركز او المنطقه التابع ليها "
+                    value="<%= formData.Markez || '' %>" required>
+
+                </div>
+                <div class="col-12 text-center">
+                  <input type="text" name="schoolName" id="schoolName" placeholder="اسم مدرستك "
+                    value="<%= formData.schoolName || '' %>" required>
+
+                </div>
+
+                <div class="col-12 text-center">
+                  <select name="gender"  value="<%= formData.gender || '' %>" required>
+                    <option value=""> اختر الجنس </option>
+                    <option value="male">ذكر</option>
+                    <option value="female">انثي</option>
+                  </select>
+                </div>
+              
+         
+                <div class="col-12 text-center">
+                  <input type="number" name="parentPhone" id="parentPhone"
+                    placeholder=" رقم هاتف ولي الامر " value="<%= formData.parentPhone || '' %>" required>
+                </div>
+                <div class="col-12 text-center">
+                  <select name="Grade" class="regSel" value="<%= formData.Grade || '' %>" required>
+                    <option  value=""> اختر الصف الدراسي </option>
+                    <option value="Grade1">الصف الاول الثانوي</option>
+                    <option value="Grade2">الصف الثاني الثانوي</option>
+                    <option value="Grade3"> الصف الثالث الثانوي </option>
+                  </select>
+                </div>
+                <div class="col-12 text-center">
+                  <h4 class="text-warning  mt-2">بتحضر معانا فين ؟</h4>
+                </div>
+                <div class="col-12 text-center">
+                  <select name="place" id="place" value="<%= formData.place || '' %>" required>
+                    <option selected value="center"> سنتر </option>
+                    <option value="online"> اونلاين </option>
+                    <option value="hosting"> استضافه فقط </option>
+
+                  </select>
+                </div>
+                <div class="col-12 text-center d-none">
+                  <h4 class="text-warning  mt-2">  اختار انت عربي ولا لغات </h4>
+                </div>
+                <div class="col-12 text-center d-none">
+                  <select name="ARorEN" id="place" value="<%= formData.ARorEN || '' %>" required>
+                    <option selected value="AR"> انا عربي </option>
+                    <option value="EN"> انا لغات </option>
+              
+                  </select>
+                </div>
+                <div class="col-12 text-center">
+                  <button type="submit" class="btn btn-primary"> ارسال طلب</button><label><span>
+
+                </div>
+              </div>
+
+
+ 
+        </form>
+      </div>
+    </section>
+
+    <%- include("./partials/footer.ejs") %>
+
+
+      <script src="/assest/bootstrap.min.js"></script>
+      <script src="/assest/bootstrap.bundle.min.js"></script>
+
+
+      <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+          // Function to get the value of a query string parameter
+          const getQueryStringParameter = (name) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+          };
+
+          // Get the student code query string parameter
+          const studentCode = getQueryStringParameter('StudentCode');
+
+          // Check if the student code exists
+          if (studentCode) {
+            // Show the modal
+            document.getElementById("modelbtn").click();
+
+
+            document.getElementById('student_id').innerText = studentCode;
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete('StudentCode');
+            history.replaceState(null, null, url);
+
+          }
+
+        });
+
+        function togglePasswordVisibility() {
+          const passwordField = document.getElementById("Password");
+          const toggleIcon = document.querySelector(".toggle-password");
+
+          if (passwordField.type === "password") {
+            passwordField.type = "text";
+            toggleIcon.classList.remove("fa-eye");
+            toggleIcon.classList.add("fa-eye-slash");
+          } else {
+            passwordField.type = "password";
+            toggleIcon.classList.remove("fa-eye-slash");
+            toggleIcon.classList.add("fa-eye");
+          }
+        }
+
+
+      </script>
+</body>
+
+</html>

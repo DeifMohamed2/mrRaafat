@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%- include("./partials/head.ejs") %>
+
+
+
+<style>
+.spinner {
+   width: 11.2px;
+   height: 11.2px;
+   border-radius: 11.2px;
+   box-shadow: 28px 0px 0 0 rgba(71, 102, 255, 0.921), 22.7px 16.5px 0 0 rgba(71,101,255,0.4), 8.68px 26.6px 0 0 rgba(71,101,255,0.6), -8.68px 26.6px 0 0 rgba(71,101,255,0.8), -22.7px 16.5px 0 0 #4765ff;
+   animation: spinner-b87k6z 1s infinite linear;
+}
+
+@keyframes spinner-b87k6z {
+   to {
+      transform: rotate(360deg);
+   }
+}
+
+
+</style>
+
+
+  <body>
+
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="success-animation mx-auto">
+              <svg class="checkmark" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
+            </div>
+          </div>
+          <div class="modal-body text-center " style="color: black;">
+            <h1>مبرووك ! </h1>
+            <h2 style="font-size: 1.6rem;"> لقد حصلت علي </h2>
+            <h3 style="font-size: 1.4rem; font-weight: bolder;"><span id="successModalGrade"></span> / <span
+                id="successModalTotalQuestions"></span></h3>
+          </div>
+          <div class="modal-footer mx-auto">
+            <h2 style="color: black;">يتم توجيهك الي صفحه الامتحانات الان برجاء عدم اعاده تحميل الصفحه</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="failModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header mx-auto">
+            <div class="wrong-animation ">
+              <i class="fa-sharp fa-regular fa-circle-xmark"></i>
+            </div>
+          </div>
+          <div class="modal-body text-center " style="color: black;">
+            <h1>لأسف ! </h1>
+            <h2 style="font-size: 1.6rem;"> لقد حصلت علي </h2>
+            <h3 style="font-size: 1.4rem; font-weight: bolder;"><span id="failModalGrade"></span> / <span
+                id="failModalTotalQuestions"></span></h3>
+            <h2> عاش بردو وعوض اكتر في الي جاي يبطل </h2>
+          </div>
+          <div class="modal-footer mx-auto">
+            <h2 style="color: black;">يتم توجيهك الي صفحه الامتحانات الان برجاء عدم اعاده تحميل الصفحه</h2>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <button type="button" style="display: none;" id="successmodelbtn" class="btn btn-primary" data-bs-toggle="modal"
+      data-bs-target="#successModal">
+      Launch demo modal
+    </button>
+    <button type="button" style="display: none;" id="failmodelbtn" class="btn btn-warning" data-bs-toggle="modal"
+      data-bs-target="#failModal">
+      Launch demo modal
+    </button>
+
+
+
+
+    <!-- <div id="preloader"></div>  -->
+    <div id="mySidebar" class="sidebars" >
+      <div class="questions" dir="ltr">
+        <div class="row" id="sidebarQuestions">
+        <%   quiz["Questions"].forEach(quesion => {  %> 
+            <div class="col-3">
+              <button onclick="window.location.href='/student/reviewAnswers/<%=quiz._id%>?qNumber=<%= quesion.qNumber %>'"><%= quesion.qNumber %></button>
+            </div>
+          <% }) %>
+
+  
+        </div>
+      </div>
+    </div>
+    <div class="theme-toggler" style="display: none;">
+      <span class="material-icons-sharp active">
+        light_mode
+      </span>
+      <span class="material-icons-sharp">
+        dark_mode
+      </span>
+    </div>
+
+
+    <div class="container ">
+      <div id="main" style="display: inline;">
+        <button class="openbtn" id="openNav" onclick="openNav()"><i class="fa-solid fa-angles-right"></i></button>
+        <button class="openbtn" id="closeNav" onclick="closeNav()" style="display: none;"><i
+            class="fa-solid fa-angles-left"></i></button>
+      </div>
+
+    
+  
+      <div class="quiz-info mx-auto " id="quiz-info">
+        <% if (quiz) { %>
+          <div class="progress mb-3" role="progressbar" style="height: 40%;" aria-label="Warning striped example" aria-valuenow="<%= (userQuizInfo['Score'] / quiz.questionsCount  )*100 %>" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar progress-bar-striped bg-warning " style="width: '<%= (userQuizInfo['Score'] / quiz.questionsCount  )*100 %>%' ; color:black; padding: 0.4rem; font-weight: bolder; font-size: 15px;"  > <%=Math.floor((userQuizInfo['Score'] / quiz.questionsCount) * 100)%>%</div>
+          </div>
+          
+          <div class="quizStart" >
+            <div class="row">
+
+              <div class="col ">
+                <div class="questionsLeft float-end"><span id="QuestionInProgress">1</span> / <span>
+                    <%= quiz.questionsCount %>
+                  </span></div>
+              </div>
+            </div> 
+
+            <form id="questionSec" class="answersSec" action="">
+         
+            </form>
+            
+
+            <div class="TraverseBtn">
+              <button id="next" class="next"> التالي &raquo; </button>
+              <button  onclick="window.location.href='/student/exams'" > رجوع الي الصفحه الرئيسيه </button>
+              <button id="prev" class="inactive prev"> &laquo; السابق </button>
+            </div>
+
+          </div>
+
+          <% } %>
+    
+
+      </div>
+
+    </div>
+
+
+
+    <script src="/assest/bootstrap.bundle.min.js"></script>
+    <script src="/assest/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.2/jquery.min.js" integrity="sha512-tWHlutFnuG0C6nQRlpvrEhE4QpkG1nn2MOUMWmUeRePl4e3Aki0VB6W1v3oLjFtd0hVOtRQ9PHpSfN6u6/QXkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+
+    <script>
+
+
+  // ================== side bar  ====== ///
+
+      /* Set the width of the sidebar to 250px and the left margin of the page content to 250px */
+      function openNav() {
+        document.getElementById("mySidebar").style.width = "310px";
+        document.getElementById("mySidebar").style.paddingRight = "20px";
+        document.getElementById("mySidebar").style.paddingLeft = "20px";
+        document.getElementById("main").style.marginLeft = "300px";
+        document.getElementById("openNav").style.display = "none";
+        document.getElementById("closeNav").style.display = "inline";
+      }
+
+      /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+      function closeNav() {
+        document.getElementById("mySidebar").style.width = "0";
+        document.getElementById("mySidebar").style.paddingRight = "0";
+        document.getElementById("mySidebar").style.paddingLeft = "0";
+
+        document.getElementById("main").style.marginLeft = "0";
+        document.getElementById("closeNav").style.display = "none";
+        document.getElementById("openNav").style.display = "inline";
+      }
+
+
+      // ==================  end side bar  ====== ///
+
+
+      // ==================  Set up variblaes and local storage  ========= ///
+
+      let qNumber= null
+
+
+
+      const quizData = <%- JSON.stringify(quiz) %>;
+      const question =<%- JSON.stringify(question) %>;
+      const userQuizInfo = <%- JSON.stringify(userQuizInfo) %>;
+
+
+ 
+      // Check if the question and qNumber exist
+      if (question && question.qNumber) { 
+        qNumber = +question.qNumber;
+      }   
+
+      // Check if the current question number is equal to the total number of questions
+      if (qNumber == quizData.questionsCount) {
+        document.querySelector("#next").style.display = "none";
+      } else if (qNumber == 1) {
+        document.querySelector("#prev").style.display = "none";
+      }
+
+      // Update the question in progress display
+      document.getElementById("QuestionInProgress").innerHTML = qNumber || 0;
+
+
+
+    if (question==null) {
+          document.getElementById("StartQuiz").addEventListener('click', () => {
+          qNumber ++
+          window.location.href = `/student/reviewAnswers/${quizData._id}?qNumber=${qNumber}`;
+
+          localStorage.setItem("QuizID", `${quizData._id}`)
+
+       
+          document.getElementById("mySidebar").style.display = "inline"
+          document.getElementById("main").style.display = "inline"
+
+          })
+
+      }
+
+   
+      
+
+      if (qNumber >= 1 ) {
+        
+        localStorage.setItem("QuizID", `${quizData._id}`)
+        updateQuestion(question) 
+
+        document.getElementById("mySidebar").style.display = "inline"
+        document.getElementById("main").style.display = "inline"
+
+      }
+
+
+
+
+
+      document.getElementById("next").addEventListener('click', () => {
+        setTimeout(() => {
+          next();
+       }, 1);
+
+        // updateQuestion(question)
+      })
+
+
+      document.getElementById("prev").addEventListener('click', () => {
+        setTimeout(() => {
+        
+           prev();
+        }, 1);
+   
+      
+      })
+
+
+      function next() {
+        setTimeout(() => {
+          const selectedOption = document.querySelector(
+          'input[name="answer"]:checked'
+        );
+        console.log(selectedOption)
+        if (selectedOption) {
+          questionSec.innerHTML = `     <div class="spinner mx-auto mb-4"></div>`
+
+
+        }else{
+          questionSec.innerHTML = `     <div class="spinner mx-auto mb-4"></div>`
+
+        }
+        
+        document.querySelector("#prev").style.display = "inline";
+        qNumber++
+        if (qNumber === quizData.questionsCount) {
+          document.querySelector("#next").style.display = "none";
+        }
+        window.location.href = `/student/reviewAnswers/${quizData._id}?qNumber=${qNumber}`;
+        }, 100); // Delay of 100 milliseconds
+    }
+
+      function prev() {
+
+          const selectedOption = document.querySelector(
+          'input[name="answer"]:checked'
+        );
+        console.log(selectedOption)
+        if (selectedOption) {
+          questionSec.innerHTML = `     <div class="spinner mx-auto mb-4"></div>`
+
+
+        }else{
+          questionSec.innerHTML = `     <div class="spinner mx-auto mb-4"></div>`
+
+        }
+
+
+        document.querySelector("#prev").style.display = "inline";
+        qNumber--
+  
+        if (qNumber ==1) {
+          document.querySelector("#prev").style.display = "none";
+ 
+        }
+        window.location.href = `/student/reviewAnswers/${quizData._id}?qNumber=${qNumber}`;
+      }
+
+
+
+async function updateQuestion() {
+  // Show loader
+
+  const userAnswer = userQuizInfo['answers'][question.qNumber]
+  let questionSec = document.getElementById("questionSec");
+ 
+      // document.getElementById("questionSec").style.display = "inline";
+    if(question.questionPhoto!=""){
+          
+      questionSec.innerHTML = `
+      <div class="box-img mb-3">
+    <img src="${question.questionPhoto}" >
+    </div>
+    <h1 class="questionSec" id="titleOfQuestion">${question.title}</h1>
+    <input disabled type="radio" name="answer" class="RD form-check-input" value="1" id="answer1" ${question.ranswer === '1' ? 'checked class= "RD form-check-input green-answer"' : ""}><label for="answer1" class="text">${await question.answer1}</label><br/>
+    <input disabled type="radio" name="answer" class="RD form-check-input" value="2" id="answer2" ${question.ranswer === '2' ? 'checked class= "RD form-check-input green-answer"' : ""}><label for="answer2" class="text">${await question.answer2}</label><br/>
+    <input disabled type="radio" name="answer" class="RD form-check-input" value="3" id="answer3" ${question.ranswer === '3' ?'checked class= "RD form-check-input green-answer"': ""}><label for="answer3" class="text">${await question.answer3}</label><br/>
+    <input disabled type="radio" name="answer" class="RD form-check-input" value="4" id="answer4" ${question.ranswer === '4' ? 'checked class= "RD form-check-input green-answer"' : ""}><label for="answer4" class="text">${await question.answer4}</label><br/>
+      `;
+    }else{
+      questionSec.innerHTML = `
+    <h1 class="questionSec" id="titleOfQuestion">${question.title}</h1>
+    <div class="form-check">
+        <input disabled type="radio" name="answer" id="answer1" ${userAnswer == '1' ? "checked" : ""}>
+        <label for="answer1"  ${question.ranswer == '1'  ? `${question.ranswer == '1' && userAnswer == '1'  ? ` class= " text right-answer" ` :` class= " text green-answer" ` }`   : ""}">
+          ${await question.answer1}
+          ${question.ranswer == '1' && userAnswer == '1' ? '<i class="fas fa-check-circle" style="float: right; font-size: 1.2rem;"></i>' : `${userAnswer == '1' ? '<i class="fas fa-times-circle" style="float: right; font-size: 1.2rem;"></i>' : ''}`}
+          
+          </label><br/>
+    </div>
+    <div class="form-check">
+        <input disabled type="radio" name="answer" id="answer2" ${userAnswer == '2' ? "checked" : ""}>
+        <label for="answer2"  ${question.ranswer == '2'  ? `${question.ranswer == '2' && userAnswer == '2'  ? ` class= " text right-answer" ` :` class= " text green-answer" ` }`   : ""}">
+          ${await question.answer2}
+          ${question.ranswer == '2' && userAnswer == '2' ? '<i class="fas fa-check-circle" style="float: right; font-size: 1.2rem;"></i>' : `${userAnswer == '2' ? '<i class="fas fa-times-circle" style="float: right; font-size: 1.2rem;"></i>' : ''}`}
+
+          </label><br/>
+    </div>
+    <div class="form-check">
+        <input disabled type="radio" name="answer" id="answer3" ${userAnswer == '3' ? "checked" : ""}>
+        <label for="answer3"  ${question.ranswer == '3'  ? `${question.ranswer == '3' && userAnswer == '3'  ? ` class= " text right-answer" ` :` class= " text green-answer" ` }`   : ""}">
+          ${await question.answer3}
+          ${question.ranswer == '3' && userAnswer == '3' ? '<i class="fas fa-check-circle" style="float: right; font-size: 1.2rem;"></i>' : `${userAnswer == '3' ? '<i class="fas fa-times-circle" style="float: right; font-size: 1.2rem;"></i>' : ''}`}
+
+          </label><br/>
+    </div>
+    <div class="form-check">
+        <input disabled type="radio" name="answer" id="answer4" ${userAnswer == '4' ? "checked" : ""}>
+        <label for="answer4"  ${question.ranswer == '4'  ? `${question.ranswer == '4' && userAnswer == '4'  ? ` class= " text right-answer" ` :` class= " text green-answer" ` }`   : ""}">
+          ${await question.answer4}
+          ${question.ranswer == '4' && userAnswer == '4' ? '<i class="fas fa-check-circle" style="float: right; font-size: 1.2rem;"></i>' : `${userAnswer == '4' ? '<i class="fas fa-times-circle" style="float: right; font-size: 1.2rem;"></i>' : ''}`}
+
+          </label><br/>
+    </div>
+`;
+
+
+      
+    }
+      
+
+    console.log(question.ranswer , userAnswer);
+    
+
+
+
+  // Hide loader once the question is loaded
+}
+
+
+
+
+
+
+    </script>
+
+    
+  </body>
+
+</html>

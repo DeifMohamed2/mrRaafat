@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<%- include("./partials/head.ejs") %>
+
+
+
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2">
+                    <%- include("./partials/nav.ejs") %>
+                </div>
+                <!--------------------END ASIDE  ------------------>
+                <div class=" col-md-10 ">
+                    <main>
+                        <div class="row">
+
+                            <div class=" col-md-6 ">
+                                <div class="left float-start ms-3" style="margin-top: 0.2rem;">
+                                    <div class="top">
+                                        <button id="menu-btn">
+                                            <span class="material-icons-sharp">
+                                                menu
+                                            </span>
+                                        </button>
+                                        <div class="theme-toggler">
+                                            <span class="material-icons-sharp active">
+                                                light_mode
+                                            </span>
+                                            <span class="material-icons-sharp">
+                                                dark_mode
+                                            </span>
+                                        </div>
+                                        <div class="profile">
+                                            <div class="info">
+                                                <p>اهلا بك،<b id="userName"> </b></p>
+                                            </div>
+                                            <div class="profile-photo">
+                                                <img src="../images/profile-1.jpg" alt="profile photo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END OF TOP -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row chapter_Box">
+
+                            <div class="col-md-8">
+                                <h1>تعديل علي Chapters </h1>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <form action="/teacher/getAllChaptersInHandle" method="post"
+                                            id="getAllChaptersInHandle">
+
+                                            <div class="row">
+                                                <div class="col-md-12 ">
+                                                    <select name="chapterGrade" id="chapterGrade"
+                                                        class="Grade w-100 text-center" required>
+                                                        <option>اختر الصف الدراسي </option>
+                                                        <option value="Grade1">الصف الاول الثانوي</option>
+                                                        <option value="Grade2">الصف الثاني الثانوي </option>
+                                                        <option value="Grade3">الصف الثالث الثانوي</option>
+                                                    </select>
+                                                </div>
+
+                                            </div>
+
+                                        </form>
+
+                                    </div>
+                                    <div class="col-md-8 ">
+                                        <form action="/teacher/getChapterDataToEdit" method="post"
+                                            id="getChapterDataToEdit">
+                                            <div class="row">
+
+                                                <div class="col-md-8">
+                                                    <% if (chaptersData) { %>
+                                                        <select id="ChaptersNames" name="ChaptersIds"
+                                                            class="Grade w-100 text-center">
+
+                                                            <% }else { %>
+
+                                                                <select id="ChaptersNames" name="ChaptersIds" disabled
+                                                                    class="Grade w-100 text-center">
+                                                                    <% } %>
+
+                                                                        <option>اختر اسم chapter </option>
+
+                                                                        <% if (chaptersData) { %>
+                                                                            <% chaptersData.forEach(chapter=> { %>
+                                                                                <option
+                                                                                    value="<%= chapter.chapterId %>">
+                                                                                    <%= chapter.chapterName %>
+                                                                                </option>
+                                                                                <% }) %>
+                                                                                    <% } %>
+                                                                </select>
+                                                </div>
+
+
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <form action="/teacher/editChapterData" method="post">
+
+                                    <% if (chapterData) { %>
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <div class="product-info">
+                                                    <textarea name="chapterName" cols="25" rows="2"
+                                                        placeholder="عنوان Chapter"
+                                                        required><%= chapterData.chapterName||"" %></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3 ">
+                                                <select class="Grade" id="chapterAccessibility"
+                                                    name="chapterAccessibility" required>
+                                                    <% if (chapterData.chapterAccessibility==="EnterInFree" ) { %>
+                                                        <option selected value="EnterInFree">دخول ال Chapter مجانا
+                                                        </option>
+                                                        <option value="EnterInPay">شراء ال Chapter اولا </option>
+                                                        <% } else { %>
+
+                                                            <option value="EnterInFree">دخول ال Chapter مجانا</option>
+                                                            <options elected value="EnterInPay">شراء ال Chapter اولا
+                                                                </option>
+                                                                <% } %>
+
+                                                </select>
+                                                <% if (chapterData.chapterPrice) { %>
+                                                    <input type="number" class="ChapterPrice" name="chapterPrice"
+                                                        id="ChapterPrice" value="<%= chapterData.chapterPrice ||0 %>"
+                                                        placeholder="السعر" required>
+                                                    <% } else { %>
+
+                                                        <input type="number" class="ChapterPrice" name="chapterPrice"
+                                                            id="ChapterPrice"
+                                                            value="<%= chapterData.chapterPrice ||0 %>"
+                                                            placeholder="السعر" disabled required>
+                                                        <% } %>
+                                            </div>
+
+
+
+
+                                            <div class="col-md-4 mx-auto ">
+                                                <button class="me-5 mt-4 Add_New_Chapter" id="Add_New_Chapter">تعديل
+                                                    البيانات الجديدة</button>
+                                            </div>
+
+
+                                        </div>
+                                        <% } else { %>
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="product-info">
+                                                        <textarea name="chapterName" cols="25" rows="2"
+                                                            placeholder="عنوان Chapter" required></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3 ">
+                                                    <select class="Grade" id="chapterAccessibility"
+                                                        name="chapterAccessibility" required>
+                                                        <option selected value="EnterInFree">دخول ال Chapter مجانا
+                                                        </option>
+                                                        <option value="EnterInPay">شراء ال Chapter اولا </option>
+
+
+
+
+                                                    </select>
+
+
+                                                    <input type="number" class="ChapterPrice" name="chapterPrice"
+                                                        id="ChapterPrice" placeholder="السعر" disabled required>
+
+                                                </div>
+
+                                                <div class="col-md-4 mx-auto ">
+                                                    <button class="me-5 mt-4 Add_New_Chapter" id="Add_New_Chapter">تعديل
+                                                        البيانات الجديدة</button>
+                                                </div>
+
+
+                                            </div>
+                                            <%} %>
+
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row addToChapterStructure">
+                            
+                        <% if (chapterData) { %>
+                            <h1>Videos Of <%= chapterData.chapterName  %> </h1>
+                            <div class="row courses" id="Videos">
+                               
+                                <hr>
+                                <h1 style="text-align: left;">Lectures</h1>
+                         
+                                    <% chapterData['chapterLectures'].forEach(lec => { %>
+                                        <div class="col-md-4">
+                                    <form action="/teacher/handleVideo/<%= lec._id %>?page=1" method="post">
+
+                                      
+                                            <article class="course ">
+                                                <div class="price-tag">
+                                                    <i class="fa-solid fa-tag"></i>
+                                                    <% if (lec.paymentStatus=="Pay") { %>
+                                                        <h3><%= lec.videoPrice %></h3>
+                                                    <% }else{ %>
+                                                        <h3>Free</h3>
+                                                    <% } %>
+                                                </div>
+                                                <div class="course__image">
+                                                    <img src="../images/dna.svg">
+                                                </div>
+                                                <div class="course__info">
+                                                    <h3><%= lec.videoTitle %></h3>
+                                                    <hr>
+                                              <button class="btn btn-primary" type="submit">عرض التفاصيل او التعديل</button>
+                                                  
+                                                </div>
+                                            </article>
+                                      
+                                    </form>
+                                </div>
+                                    <% }) %>
+                       
+                         
+
+                                <hr>
+                                <h1 style="text-align: left;">Summaries</h1>
+                                    <% chapterData['chapterSummaries'].forEach(lec => { %>
+                                        <div class="col-md-4">
+                                    <form action="/teacher/handleVideo/<%= lec._id %>?page=1" method="post">
+
+                                            <article class="course ">
+                                                <div class="price-tag">
+                                                    <i class="fa-solid fa-tag"></i>
+                                                    <% if (lec.paymentStatus=="Pay") { %>
+                                                        <h3><%= lec.videoPrice %></h3>
+                                                    <% }else{ %>
+                                                        <h3>Free</h3>
+                                                    <% } %>
+                                                </div>
+                                                <div class="course__image">
+                                                    <img src="../images/dna.svg">
+                                                </div>
+                                                <div class="course__info">
+                                                    <h3><%= lec.videoTitle %></h3>
+                                                    <hr>
+                                                   <button class="btn btn-primary" >عرض التفاصيل او التعديل</button>
+                                                 
+                                                </div>
+                                            </article>
+                                        </form>
+                                    </div>
+                                    <% }) %>
+                               
+                               
+                                <hr>
+                                <h1 style="text-align: left;">H.Ws</h1>
+                                    <% chapterData['chapterSolvings'].forEach(lec => { %>
+                                        <div class="col-md-4">
+                                        <form action="/teacher/handleVideo/<%= lec._id %>?page=1" method="post">
+                                            <article class="course ">
+                                                <div class="price-tag">
+                                                    <i class="fa-solid fa-tag"></i>
+                                                    <% if (lec.paymentStatus=="Pay") { %>
+                                                        <h3><%= lec.videoPrice %></h3>
+                                                    <% }else{ %>
+                                                        <h3>Free</h3>
+                                                    <% } %>
+                                                </div>
+                                                <div class="course__image">
+                                                    <img src="../images/dna.svg">
+                                                </div>
+                                                <div class="course__info">
+                                                    <h3><%= lec.videoTitle %></h3>
+                                                    <hr>
+                                                 <button class="btn btn-primary" >عرض التفاصيل او التعديل</button>
+                                                
+                                                </div>
+                                            </article>
+                                        </form>
+                                    </div>
+                                    <% }) %>
+
+                            </div>
+
+                        </div>
+
+                        <% } else if (videoData) {%>
+
+
+                        <div class="row courses" >
+                            <div class="row" >
+                                <div class="col-md-12">
+                                    <h2 > Total Views - <%=videoData.totalWatches %> <span><i class="fa-solid fa-eye"></i></span> </h2> 
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="student-table">
+                                        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Student Code">
+
+                                    <table id="studentTable" class="table-success" style="color: #fff;">
+                                        <thead>
+                                          <tr>
+                                            <th scope="col" >#</th>
+                                            <th scope="col">Student Name</th>
+                                            <th scope="col">Student Code</th>
+                                            <th scope="col">Number Of Watchs</th>
+                                            <th scope="col">Number Of views remaining</th>
+                                            <th scope="col"></th>
+                                            <th scope="col"></th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <% let counter = 1; %>
+                                            <% videoData['usersWatchedData'].forEach(user => { %>
+                                                <tr>
+                                                    <th scope="row"><%= counter %></th>
+                                                    <td><%= user.Username %></td>
+                                                    <td><%= user.Code %></td>
+                                                    <td><%= user['videosInfo'][0]['numberOfWatches'] %></td>
+                                                    <td><%= user['videosInfo'][0]['videoAllowedAttemps'] %></td>
+                                                    <form action="/teacher/addViewsToStudent/<%= user['videosInfo'][0]['_id'] %>?UserId=<%= user._id %>" method="post">
+                                                        <div class="text-center">
+                                                            <td><input type="number" name="NumberOfWatchesWillAdded" style="position:unset; width: 50%; height: 70%;" required></td>
+                                                            <td><button class="btn btn-outline-light" style="border-radius: 10px !important;">Add</button></td>
+                                                        </div>
+                                                    </form>
+                                                </tr>
+                                                <% counter++; %>
+                                            <% }) %>
+                                       
+                                       
+                                        </tbody>
+                                      </table>
+
+
+                                    </div>
+
+                                    <div class="pagination justify-content-between">
+                                        
+                                        <div>
+
+                                            <% if (nextPage !== null) { %>
+                                                <a href="/teacher/handleVideo/<%=  videoData['VideoID'] %>?page=<%= nextPage %>" > <button class="paginationBtns">Next</button> </a>
+                                            <% } %>
+                                        </div>
+                                        <div>
+                                            <form action="/teacher/convertToExcel/<%= videoData['VideoID'] %>" method="post">
+                                                <button class="paginationBtns">Convert To Excel</button> 
+                                            </form>
+                                  
+                                  
+                                        </div>
+                                        <div>
+                                            <% if (previousPage !== null) { %>
+                                                <a href="/teacher/handleVideo/<%= videoData['VideoID'] %>?page=<%= previousPage %>" >  <button class="paginationBtns"> Previous</button></a>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>  
+                 
+                        <div class="row addToChapterStructure">
+                            <h1>Edit In Videos </h1>
+
+                        <form action="/teacher/updateVideo" method="post">
+                            <div class="VideoData">
+                                <!-- <h1>Video 1</h1> -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                   
+                               <% if (videoData) { %>
+
+                                <%= videoData.videoTitle %>
+                                <div class="product-info">
+                                    <textarea name="videoTitle" cols="50" rows="3"   placeholder="عنوان الفيديو"  required><%= videoData.videoTitle %></textarea>
+                                </div>
+                                <div class="selction">
+                                    
+
+                                    <select name="paymentStatus" id="paymentStatus" class="Grade" required> 
+                                        <option  >حاله الفيديو</option>
+                                  <% if (videoData.paymentStatus=="Free") { %>
+                                    <option selected  value="Free">مجاني</option>
+                                    <option  value="Pay">مدفوع</option>
+
+                                  <% } else { %>
+                                    <option   value="Free">مجاني</option>
+                                    <option  selected value="Pay">مدفوع</option>
+                                    <% } %>
+                                
+    
+                                    </select>
+
+                                  
+                                    <select name="prerequisites" id="prerequisites" class="Grade" required> 
+                                        <option  >السماح بالدخول </option>
+                                        <% if (videoData.prerequisites=="WithExam") { %>
+                                            <option selected value="WithExam">بامتحان فقط</option>
+                                            <option  value="WithHw"> بواجب فقط</option>
+                                            <option  value="WithExamaAndHw"> بامتحان وواجب</option>
+                                            <option  value="WithOutExamAndHW">بدون امتحان و واجب</option>
+                                        <% } else if(videoData.prerequisites=="WithHw") {%>
+                                            <option  value="WithExam">بامتحان فقط</option>
+                                            <option selected value="WithHw"> بواجب فقط</option>
+                                            <option  value="WithExamaAndHw"> بامتحان وواجب</option>
+                                            <option  value="WithOutExamAndHW">بدون امتحان و واجب</option>
+                                        <% }else if (videoData.prerequisites=="WithExamaAndHw"){  %>
+                                            <option  value="WithExam">بامتحان فقط</option>
+                                            <option  value="WithHw"> بواجب فقط</option>
+                                            <option selected value="WithExamaAndHw"> بامتحان وواجب</option>
+                                            <option  value="WithOutExamAndHW">بدون امتحان و واجب</option>
+                                            <% }else{ %>
+                                                <option  value="WithExam">بامتحان فقط</option>
+                                                <option  value="WithHw"> بواجب فقط</option>
+                                                <option  value="WithExamaAndHw"> بامتحان وواجب</option>
+                                                <option selected value="WithOutExamAndHW">بدون امتحان و واجب</option>
+                                            <% } %>
+                                   
+                                    </select>
+
+                                    <select name="permissionToShow" id="permissionToShow" class="Grade"  required> 
+                                        <option  >حاله الفيديو للطلاب</option>
+                                                                        
+                                                <% if (videoData.permissionToShow=="apper") { %>
+                                                    <option  selected value="apper">ظهور الفيديو</option>
+                                                    <option  value="disapper">اخفاء الفيديو</option>
+
+                                                <% } else { %>
+                                                    <option   value="apper">ظهور الفيديو</option>
+                                                    <option selected value="disapper">اخفاء الفيديو</option>
+                                                    <% } %>
+                                                               
+                                    </select>
+                                    <% if (videoData.prerequisites=="WithExamaAndHw" || videoData.prerequisites=="WithHw") { %>
+
+                                    <select name="AccessibleAfterViewing" id="AccessibleAfterViewing" class="Grade"   required> 
+                                    <% }else {%>
+                                        <select name="AccessibleAfterViewing" id="AccessibleAfterViewing" class="Grade"  disabled required>     
+                                    <% } %>
+                                    <option  >يفتح  بعد </option>
+                                
+                                                                                   
+                                    <% chaptersData.forEach(chapter => { %>
+                                        <% chapter['chapterLectures'].forEach(lec => { %>
+                                            <% if (videoData['VideoID']!=lec._id) { %>
+                                                <% if (videoData['AccessibleAfterViewing']==lec._id) { %>
+                                                    <option selected value="<%= lec._id %>"><%= lec.videoTitle %></option>
+                                                <% }else { %>
+                                                    <option value="<%= lec._id %>"><%= lec.videoTitle %></option>
+
+                                                <% } %>
+
+                                            <% } %>
+                                    <% }) %>
+                                    <% }) %>
+                                </select>
+                                </div>
+    
+                                <div class="prodct-budjet">
+                                    <input type="number" name="videoAllowedAttemps" class="salary" value="<%= videoData.videoAllowedAttemps %>"  placeholder="عدد المشاهدات"  required>
+
+                                    <% if (videoData.paymentStatus=="Free") { %>
+                                        <input type="number" name="videoPrice" class="salary" value="<%= videoData.videoPrice %>" disabled id="videoPrice" placeholder="سعر الفيديو"  required>
+
+    
+                                      <% } else { %>
+                                        <input type="number" name="videoPrice" class="salary" value="<%= videoData.videoPrice %>"  id="videoPrice" placeholder="سعر الفيديو"  required>
+
+                                        <% } %>
+                                    <button type="submit" class="me-5 mt-4 Add_New_Chapter" id="Add_New_Chapter">تعديل
+                                        البيانات الجديدة</button>
+                                </div>
+                                  
+
+                               <% } %>
+
+        
+                                    </div>
+                                   
+                                </div>
+                              
+                            </div>
+                        </form>
+                        </div>
+
+
+                        <% } %>
+
+                    </main>
+                </div>
+
+            </div>
+        </div>
+        <script src="../assest/bootstrap.min.js"></script>
+        <script src="../assest/bootstrap.bundle.min.js"></script>
+
+        <script>
+   
+   const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+            const getAllChaptersInHandleForm = document.getElementById('getAllChaptersInHandle')
+            const chapterGrade = document.getElementById("chapterGrade")
+            chapterGrade.addEventListener('change', () => {
+                getAllChaptersInHandleForm.submit()
+            })
+
+            const getChapterDataToEdit = document.getElementById('getChapterDataToEdit')
+            const ChaptersNames = document.getElementById("ChaptersNames")
+            ChaptersNames.addEventListener('change', () => {
+                getChapterDataToEdit.submit()
+            })
+
+
+
+            const chapterAccessibility = document.getElementById('chapterAccessibility')
+            console.log(chapterAccessibility.value)
+            chapterAccessibility.addEventListener('change', () => {
+                if (chapterAccessibility.value === 'EnterInPay') {
+
+                    document.getElementById('ChapterPrice').removeAttribute('disabled')
+                } else {
+                    document.getElementById('ChapterPrice').setAttribute('disabled', true)
+                }
+            })
+
+
+            const paymentStatus = document.getElementById('paymentStatus')
+            paymentStatus.addEventListener('change', () => {
+                if (paymentStatus.value == "Pay") {
+
+                    document.getElementById('videoPrice').removeAttribute('disabled')
+
+                } else {
+                    document.getElementById('videoPrice').setAttribute('disabled', true)
+
+                }
+            })
+
+            const prerequisites = document.getElementById('prerequisites')
+            prerequisites.addEventListener('change', () => {
+                if (prerequisites.value == "WithHw" || prerequisites.value == "WithExamaAndHw") {
+                    document.getElementById('AccessibleAfterViewing').removeAttribute('disabled')
+                } else {
+                    document.getElementById('AccessibleAfterViewing').setAttribute('disabled', true)
+
+                }
+            })
+
+
+            function searchTable() {
+        // Declare variables
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("studentTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows, and hide those that don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // Index 2 corresponds to the Student Code column
+                console.log(td)
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+
+
+        </script>
+
+
+    </body>
+
+
+
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+  <!-- Modal -->
+
+            <div class="col-lg-10 ">
+                
+                 <main>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h1>متابعه الامتحانات </h1>
+                          
+                           
+                        </div>
+
+                        <div class=" col-md-6 ">
+                            <div class="left float-start ms-3" style="margin-top: 0.2rem;">
+                                <div class="top">
+                                    <button id="menu-btn">
+                                        <span class="material-icons-sharp">
+                                            menu
+                                        </span>
+                                    </button>
+                                    <div class="theme-toggler">
+                                        <span class="material-icons-sharp active">
+                                            light_mode
+                                        </span>
+                                        <span class="material-icons-sharp">
+                                            dark_mode
+                                        </span>
+                                    </div>
+                                    <div class="profile">
+                                        <div class="info">
+                                            <p>اهلا بك،<b id="userName"> </b></p>
+                                        </div>
+                                        <div class="profile-photo">
+                                            <img src="../images/profile-1.jpg" alt="profile photo">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- END OF TOP -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-1">
+                        <div class="col-md-6">
+                        <form  action="/teacher/getQuizzesNames" method="get" id="getQuizzesNames" >
+                            <select name="Grade" id="Grade" class="slections" required>
+                                <option>اختر الصف الدراسي</option>
+                     
+                                <option value="Grade1">الصف الاول الثانوي</option>
+                                <option value="Grade2"  >الصف الثاني الثانوي</option>
+                                <option value="Grade3">الصف الثالث الثانوي</option>   
+                    
+                             </select>
+
+
+                        </form>
+                        <form  action="/teacher/getStudentsDataOfQuiz" method="get" >
+                            <select name="quizID" class="slections" required>
+                                <option>اختر اسم الامتحان</option>
+                                <% if (quizzesNamesData) { %>
+                                    <% quizzesNamesData.forEach(quiz => { %>
+                                        <option value="<%= quiz._id %>"><%= quiz.quizName %></option>
+                                    <% }) %>
+                                <% } %>
+                             </select>
+
+                            <button class=" btnstartAddQuiz" type="submit" >جلب بيانات الطلاب </button>
+
+                        </form>
+                 
+                      
+                 
+                    </div>
+                        
+                    <div class="row">
+                        <div class="col-md-12  col-sm-12">
+                            <div class="student-table">
+                                <form action="/teacher/handleQuizzes/searchForUser" method="get">
+
+                                    <div class="row" style="margin-bottom: 0 !important;">
+                                        <div class="col-md-4">   
+                                            <select name="searchBy" id="searchBy"  class="Grade" style="margin-top: -1rem;" >
+
+                                                <option value="Username">الاسم</option>
+                                                <option value="Code" selected>كود الطالب </option>
+                                                <option value="phone" >رقم الهاتف</option>
+                                                <option value="WhatsApp"> whatsapp </option>
+                                                <option value="parentPhone"> رقم ولي الامر </option>
+                                                
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4"> 
+                                            <input type="text" class="mx-auto" name="searchInput" placeholder="بحث..">
+                                        </div>
+                                        <div class="col-md-4">  
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <button  type="submit" class="primary" ><i class="fa-solid fa-magnifying-glass"></i></button>
+
+                                                </div>
+                                                <% if (studetsData&&isSearching) { %>
+                                                <div class="col-md-1 d-flex justify-content-center align-items-center ">
+                                                    <button type="button"><a href="/teacher/getStudentsDataOfQuiz?quizID=<%= studetsData[0]['quizesInfo'][0]._id %>"  class="primary" style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;" ><i class="fa-solid fa-x"></i></a></button>
+                                                </div>  
+                                                 <% } %>
+                                            </div>
+                                          
+                                        </div>
+                                    </div>
+                              </form>
+                              
+                                <table id="myTable">
+                                    <thead>
+                                        <th style="padding: 10px;"># </th>
+                                        <th style="padding-left: 20px;">اسم الطالب</th>
+                                        <th style="padding-left: 20px;">كود الطالب</th>
+                                        <th style="padding-left: 20px;"> تاريخ الحل</th>
+                                        <th style="padding-left: 20px;">الدرجه النهائيه</th>
+                                        <th style="padding-left: 20px;"></th>
+                            
+                                    </thead>
+
+                                    <tbody >
+                                        <% let counter = 1 %>
+                             <% if (studetsData) { %>
+                                            <% studetsData.forEach(student => { %>
+                                                <tr>
+                                                <td><%= counter %></td>
+                                                <td><%=student.Username %></td>
+                                                <td><%=student.Code %></td>
+                                                <td><%=student['quizesInfo'][0].solvedAt ? new Date(student['quizesInfo'][0].solvedAt).toLocaleString() : ""%></td>
+                                                <td><%=student['quizesInfo'][0].questionsCount %> / <%=  student['quizesInfo'][0].Score %> </td>
+                                                <form action="/teacher/changeEnterToQuiz/<%= student['quizesInfo'][0]['_id'] %>?UserId=<%= student._id %>" method="post">
+                                                    <div class="text-center">
+                                                        <td><button class="btn btn-outline-light" style="border-radius: 10px !important;">فتح من جديد</button></td>
+                                                    </div>
+                                                </form>
+                                            </tr>
+                                            <% counter++; %>
+                                       <% }) %>
+                                      
+                                    </tbody>
+                                </table>
+
+                            </div>
+                          
+                            <% } %>
+                        </div>
+                    </div>
+            </main>
+
+            </div>
+
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+
+
+
+
+     <script>
+           
+    const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+        const getQuizzesNames = document.getElementById('getQuizzesNames')
+        document.getElementById('Grade').addEventListener('change',()=>{
+            getQuizzesNames.submit()
+        })
+      </script>
+
+
+
+</body>
+
+
+</html>

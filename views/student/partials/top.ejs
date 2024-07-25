@@ -1,0 +1,31 @@
+<div class="top">
+    <button id="menu-btn">
+      <span class="material-icons-sharp">menu</span>
+    </button>
+    <div class="theme-toggler">
+      <span class="material-icons-sharp active">light_mode</span
+      ><span class="material-icons-sharp">dark_mode</span>
+    </div>
+    <div class="profile">
+      <div class="profile-photo">
+        <img src="<%= userData.userPhoto %>" id="profile_photo" alt="profile photo" />
+      </div>
+      <div class="info">
+        <p>اهلا بك،<b id="username"><%= userData.Username %> </b></p>
+      </div>
+    </div>
+  </div>    
+  <script>
+    const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+
+  </script>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+            <div class="col-lg-10 ">
+
+                <main>
+                   
+                    <div class="row">
+                        <div class="col-md-6">
+           
+                        </div>
+                      
+                        <div class=" col-md-6 ">
+                            <div class="left" style="margin-top: 0.2rem;">
+                                <div class="top">
+                                    <button id="menu-btn">
+                                        <span class="material-icons-sharp">
+                                            menu
+                                        </span>
+                                    </button>
+                                    <div class="theme-toggler">
+                                        <span class="material-icons-sharp active">
+                                            light_mode
+                                        </span>
+                                        <span class="material-icons-sharp">
+                                            dark_mode
+                                        </span>
+                                    </div>
+                                    <div class="profile">
+                                        <div class="info">
+                                            <p>اهلا بك،<b id="userName"> </b></p>
+                                        </div>
+                                        <div class="profile-photo">
+                                            <img src="../images/profile-1.jpg" alt="profile photo">
+                                        </div>
+                                    </div>
+                                </div> 
+                            
+                             
+                          
+                     
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row chapter_Box"  >
+                    
+
+                        <div class="col-md-7">
+                            <h1>انشاء اكواد مخصصه </h1>
+                            <form action="/teacher/getChptersOrVideosData" method="get" >
+                        
+                                <div class="row">
+                                    <div class="col-md-3 ">
+                                        <select   class="Grade" name="Grade" id="Grade" >
+                                            <option  >اختر الصف الدراسي  </option>
+                                            <option value="Grade1" <%= Grade=="Grade1" ?"selected" : "" %> >الصف الاول الثانوي</option>
+                                            <option value="Grade2" <%= Grade=="Grade2" ?"selected" : "" %> >الصف الثاني الثانوي </option>
+                                            <option value="Grade3" <%= Grade=="Grade3" ?"selected" : "" %> >الصف الثالث الثانوي</option>
+                                        </select>
+                                    </div>
+                               
+                                        <div class="col-md-3 ">
+                                            <select   class="Grade" name="type"  id="type"  required>
+                                                <option  value="" >اختر النوع   </option>
+                                                <option value="Chapter" <%= type == "Chapter"? "selected":"" %> >Chapter</option>
+                                                <option value="Video" <%= type == "Video"? "selected":"" %>>Video</option>
+                                                <option value="Quiz" <%= type == "Quiz"? "selected":"" %>>Quiz</option>
+                                              
+                                            </select>
+                                        </div>
+                                     
+
+                                        <div class="col-md-3 ">
+                                            <button class="me-5 mt-4 Add_New_Chapter" id="GetData"   > Get Data </button>
+                                        </div>
+                                
+                                    </div>     
+                            </form>
+                        </div>
+                        <div class="col-md-7">
+                            <form action="/teacher/createSpecificCodes" method="post" >
+                        
+                                <div class="row mt-5">
+                                            <div class="col-md-4 " style="font-size: 1.3rem;"> 
+                                                <select   class="Grade" name="IDOfVideoOrChapter" required>
+                                                    <option  value="" >اختر الاسم    </option>
+                                                    <% if (data) { %>
+                                                        <% data.forEach(element => { %>
+                                                            <option value="<%= element._id %>"><%= element.Name %></option>
+                                                        <% }) %>
+                                                    <% } %>
+                                                
+                                                </select>
+                                            </div>
+                    
+                                            <div class="col-md-4 ">
+                                                <select   class="Grade" name="numberOfCodes" required style="font-size: 1.3rem;">
+                                                    <option  value="" >اختر عدد الاكواد   </option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                    <option value="200">200</option>
+                                                    <option value="300">300</option>
+                                                    <option value="400">400</option>
+                                                    <option value="500">500</option>
+                                                    <option value="600">600</option>
+                                                    <option value="700">700</option>
+                                                    <option value="800">800</option>
+                                                    <option value="900">900</option>
+                                                    <option value="1000">1000</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="col-md-4 ">
+                                                <button class="me-5 mt-4 Add_New_Chapter" id="Create_Codes"   > Create Codes </button>
+                                            </div>
+                                            <p class="warning mt-4 " style="display: none;" id="createCodeWarning">  يرجي عدم اعاده تحميل الصفحه يتم الان تجهيز الاكواد الخاصه بك انها تأخذ بعض الوقت <span id="numberOfCodesS"></span> / <span id="nCodesFinishedS"></span></p>
+                                </div>     
+                            </form>
+
+                        </div>
+
+                    </div>
+                    <div class="row chapter_Box w-50"  >
+                    
+
+                        <div class="col-md-7">
+                            <h1>انشاء اكواد عامه </h1>
+                        
+                                <form action="/teacher/createGeneralCodes" method="post" >
+                        
+                                    <div class="row">
+                                     
+                                                <div class="col-md-5 " style="font-size: 1.4rem;">
+                                                    <select   class="Grade" name="numberOfCodes" >
+                                                        <option  value="" >اختر عدد الاكواد   </option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                        <option value="200">200</option>
+                                                        <option value="300">300</option>
+                                                        <option value="400">400</option>
+                                                        <option value="500">500</option>
+                                                        <option value="600">600</option>
+                                                        <option value="700">700</option>
+                                                        <option value="800">800</option>
+                                                        <option value="900">900</option>
+                                                        <option value="1000">1000</option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-7 mt-2">
+                                                    <button class="me-5 mt-4 Add_New_Chapter" id="Create_GCodes"   > Create Codes </button>
+
+                                                </div>
+                                                <p class="warning my-3 " style="display: none;" id="createGCodeWarning"> يرجي عدم اعاده تحميل الصفحه يتم الان تجهيز الاكواد الخاصه بك انها تأخذ بعض الوقت <span id="numberOfCodesG"></span> / <span id="nCodesFinishedG"></span></p>
+
+                                    </div>     
+                                </form>
+
+                                    <p class="warning mt-5"> ملحوظه : الاكواد العامه لن تعمل مع الفيديوهات التي تم وضع اكواد خاصه لها </p>
+                    
+                        </div>
+                   
+                    </div>
+
+
+
+                   
+                </main>
+
+            </div>
+
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+           
+    const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+               const socket = io();
+        const Create_Codes= document.getElementById('Create_Codes')
+        Create_Codes.addEventListener('click',()=>{
+            document.getElementById('createCodeWarning').style.display="inline"
+
+        })
+        const Create_gCodes= document.getElementById('Create_GCodes')
+        Create_gCodes.addEventListener('click',()=>{
+            document.getElementById('createGCodeWarning').style.display="inline"
+
+        })
+
+        socket.on('creatingCodes', (data) => {
+            document.getElementById('createCodeWarning').style.display="inline"
+            console.log(data)
+                document.getElementById('nCodesFinishedS').innerHTML=data.nCodesFinished
+                document.getElementById('numberOfCodesS').innerHTML=data.numberOfCodes
+                document.getElementById('nCodesFinishedG').innerHTML=data.nCodesFinished
+                document.getElementById('numberOfCodesG').innerHTML=data.numberOfCodes
+        });
+
+ 
+    </script>
+</body>
+
+
+</html>

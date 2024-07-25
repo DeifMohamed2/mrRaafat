@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<%- include("./partials/head.ejs") %>
+
+
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-2">
+                    <%- include("./partials/nav.ejs") %>
+                </div>
+                <!--------------------END ASIDE  ------------------>
+                <!-- Modal -->
+
+
+
+                <!--  END Modal -->
+                <div class="col-lg-10 ">
+                    <main>
+                        <div class="row">
+                            <div class="col-md-6">
+
+                            </div>
+
+                            <div class=" col-md-6 ">
+                                <div class="left" style="margin-top: 0.2rem;">
+                                    <div class="top">
+                                        <button id="menu-btn">
+                                            <span class="material-icons-sharp">
+                                                menu
+                                            </span>
+                                        </button>
+                                        <div class="theme-toggler">
+                                            <span class="material-icons-sharp active">
+                                                light_mode
+                                            </span>
+                                            <span class="material-icons-sharp">
+                                                dark_mode
+                                            </span>
+                                        </div>
+                                        <div class="profile">
+                                            <div class="info">
+                                                <p>اهلا بك،<b id="Tname"> </b></p>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <table id="convetToexcel" style="display: none;">
+
+                        </table>
+                        <div class="row">
+                            <div class="col-md-12  col-sm-12">
+                                <h1>Videos Data</h1>
+                                <div class="student-table ">
+                                    <form action="/teacher/searchToGetOneUserAllData" method="get">
+
+                                    <div class="row" style="margin-bottom: 0 !important;">
+
+                                        <div class="col-md-4">
+                                                    <select name="searchBy" id="searchBy" class="Grade"
+                                                        style="margin-top: -1rem;">
+
+                                                        <option value="Username">الاسم</option>
+                                                        <option value="Code" selected>كود الطالب </option>
+                                                        <option value="phone">رقم الهاتف</option>
+                                                        <option value="WhatsApp"> whatsapp </option>
+                                                        <option value="parentPhone"> رقم ولي الامر </option>
+
+                                                    </select>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                                    <input type="text" class="mx-auto" name="searchInput" placeholder="بحث..">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <button class="primary"><i
+                                                                    class="fa-solid fa-magnifying-glass"></i></button>
+
+                                                        </div>
+
+                                                        <div class="col-md-1 d-flex justify-content-center align-items-center ">
+                                                            <button><a href="/teacher/myStudent" class="primary"
+                                                                    style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;"><i
+                                                                        class="fa-solid fa-x"></i></a></button>
+                                                        </div>
+
+
+                                                    </div>
+
+                                        </div>
+                                   
+                                    </div>
+                                </form>
+        
+                             
+                                    <table id="myTable">
+                                        <thead>
+                                            <th style="padding: 10px;"># </th>
+                                            <th style="padding-left: 20px;">اسم الفيديو</th>
+                                            <th style="padding-left: 20px;"> عدد مرات المشاهده </th>
+                                            <th style="padding-left: 20px;"> عدد المشاهدات المتبقيه  </th>
+                                            <th style="padding-left: 20px;">تاريخ اول مشاهده </th>
+                                            <th style="padding-left: 20px;">تاريخ اخر مشاهده </th>
+                                            <th style="padding-left: 20px;"> رفع الواجب </th>
+                                            <th style="padding-left: 20px;"> حل الامتحان </th>
+                                            <th style="padding-left: 20px;"> حاله الشراء  </th>
+                             
+                                            <th style="padding-left: 20px;"></th>
+                                            <th style="padding-left: 20px;"></th>
+                                        </thead>
+
+                                        <tbody>
+
+                                            <% if (userData ) { %>
+                                                <% let counter = 1; %>
+                                                    <% userData['videosInfo'].forEach(data => { %>
+                                                   
+                                                        <tr>
+                                                            <td> <%= counter %></td>
+                                                            <td  style="line-height: 20px;"><span ><i class="fa-solid "></i></span><%= data.videoName %></td>
+                                                            <td  ><%= data.numberOfWatches %></td>
+                                                            <td  ><%= data.videoAllowedAttemps %></td>
+                                                            <td><%= data.fristWatch ? new Date(data.fristWatch).toLocaleDateString() : "لم يشاهد بعد" %></td>
+                                                            <td><%= data.lastWatch ? new Date(data.lastWatch).toLocaleDateString() : "لم يشاهد بعد" %></td>
+                                                            
+                                                            <% if (data.prerequisites=="WithOutExamAndHW") { %>
+                                                                <td >لا يوجد </td>
+                                                                <td  >لا يوجد</td>
+                                                            <% } else if (data.prerequisites=="WithExamaAndHw")  { %>
+                                                                <td ><%= data.isHWIsUploaded ?"تم الرفع":"لم يُرفع" %></td>
+                                                                <td ><%= data.isUserEnterQuiz ?"تم الدخول":"لم يدخل" %></td>
+                                                   
+                                                            <% } else if(data.prerequisites=="WithHw"){ %>
+                                                            <td  ><%= data.isHWIsUploaded ?"تم الرفع":"لم يُرفع" %></td>
+                                                            <td  >لا يوجد</td>
+                                                            <% }else{ %> 
+                                                                <td  >لا يوجد</td>
+                                                                <td ><%= data.isUserEnterQuiz ?"تم الدخول":"لم يدخل" %></td>
+                                                            <% } %>    
+
+                                                            <% if (data.isVideoPrepaid) { %>
+                                                                <td><%= data.videoPurchaseStatus ? "تم الشراء" : "لم يتم الشراء" %></td>
+                                                            <% } else { %>
+                                                                <td>الفيديو مجاني </td>
+                                                            <% } %>     
+                                                        </tr>
+        
+                                                    <% counter++; %>
+        
+                                                    <% }) %>
+                                                        
+                                                <% } else { %>
+                                                    <tr style="text-align: center;">
+                                                        <td colspan="8">
+                                                            <h1></h1>
+                                                        </td>
+                                                    </tr>
+                                                <% } %>
+
+                                        </tbody>
+                                    </table>
+                             
+
+                                </div>
+                            </div>
+                            <div class="col-md-12  col-sm-12">
+                                <h1>Quizzes Data</h1>
+                                <div class="student-table ">
+
+                                
+
+                                    <table id="myTable">
+                                        <thead>
+                                            <th style="padding: 10px;"># </th>
+                                            <th style="padding-left: 20px;">اسم الامتحان</th>
+                        
+                                            <th style="padding-left: 20px;"> تاريخ الحل </th>
+                                            <th style="padding-left: 20px;"> مده الحل </th>
+                                            <th style="padding-left: 20px;">  درجه الامتحان </th>
+                                            
+                                            <th style="padding-left: 20px;"> حاله الشراء  </th>
+                                            
+                                            <th style="padding-left: 20px;"></th>
+                                            <th style="padding-left: 20px;"></th>
+                                        </thead>
+
+                                        <tbody>
+
+                                            <% if (userData ) { %>
+                                                <% let counter = 1; %>
+                                                    <% userData['quizesInfo'].forEach(data => { %>
+                                                   
+                                                        <tr>
+                                                            <td> <%= counter %></td>
+                                                            <td  style="line-height: 20px;"><span ><i class="fa-solid "></i></span><%= data.quizName %></td>
+                                                            <td  ><%= new Date(data.solvedAt).toLocaleDateString()||"لم يحل" %></td>
+                                                            <td  ><%= data.solveTime || "لم يحل"%></td>
+                                                            <td ><%= data.questionsCount%> / <%= data.Score%></td>
+                                                       
+                                                            <% if (data.isQuizPrepaid) { %>
+                                                                <td><%= data.quizPurchaseStatus ? "تم الشراء" : "لم يتم الشراء" %></td>
+                                                            <% } else { %>
+                                                                <td>الامتحان مجاني </td>
+                                                            <% } %>     
+                                                        </tr>
+        
+                                                    <% counter++; %>
+        
+                                                    <% }) %>
+                                                        
+                                                <% } else { %>
+                                                    <tr style="text-align: center;">
+                                                        <td colspan="8">
+                                                            <h1></h1>
+                                                        </td>
+                                                    </tr>
+                                                <% } %>
+
+                                        </tbody>
+
+                                    </table>
+                                 
+
+                                </div>
+                            </div>
+
+                            <div class="pagination justify-content-between mb-5">
+                             <% if (userData ) { %>
+                                <div class="mx-auto">
+                                    <form action="/teacher/myStudent/convertToExcelAllUserData/<%= userData.Code %>" method="post">
+                                        <button class="paginationBtns">Convert To Excel</button> 
+                                    </form>
+                                    <!-- <form action="/teacher/myStudent/convertToPDFAllUserData/<%= userData.Code %>" method="post">
+                                        <button class="paginationBtns">Convert To PDF</button> 
+                                    </form> -->
+                          
+                          
+                                </div>
+                              <%  }%>
+                            </div>
+                        </div>   
+                    </main>
+                </div>
+
+                <!-------------------- END OF MAIN --------------------->
+
+            </div>
+        </div>
+
+
+
+        <script src="/assest/bootstrap.bundle.min.js"></script>
+        <script src="/assest/bootstrap.min.js"></script>
+
+<script>
+       
+       const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+</script>
+    </body>
+
+
+</html>

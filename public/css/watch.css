@@ -1,0 +1,502 @@
+.container, .video-controls, .video-timer, .options{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .container{
+    width: 98%;
+    user-select: none;
+    overflow: hidden;
+    max-width: 900px;
+    border-radius: 5px;
+    background: #000;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  .container.fullscreen{
+    max-width: 100%;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0px;
+  }
+  .wrapper{
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    opacity: 0;
+    bottom: -15px;
+    transition: all 0.08s ease;
+  }
+  .container.show-controls .wrapper{
+    opacity: 1;
+    bottom: 0;
+    transition: all 0.13s ease;
+  }
+  .wrapper::before{
+    content: "";
+    bottom: 0;
+    width: 100%;
+    z-index: -1;
+    position: absolute;
+    height: calc(100% + 35px);
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  }
+  .video-timeline{
+    height: 7px;
+    width: 100%;
+    cursor: pointer;
+  }
+  .video-timeline .progress-area{
+    height: 3px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.6);
+  }
+  .progress-area span{
+    position: absolute;
+    left: 50%;
+    top: -25px;
+    font-size: 13px;
+    color: #fff;
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+  .progress-area .progress-bar{
+    width: 0%;
+    height: 100%;
+    position: relative;
+    background: #2289ff;
+  }
+  .progress-bar::before{
+    content: "";
+    right: 0;
+    top: 50%;
+    height: 13px;
+    width: 13px;
+    position: absolute;
+    border-radius: 50%;
+    background: #2289ff;
+    transform: translateY(-50%);
+  }
+  .progress-bar::before, .progress-area span{
+    display: none;
+  }
+  .video-timeline:hover .progress-bar::before,
+  .video-timeline:hover .progress-area span{
+    display: block;
+  }
+  .wrapper .video-controls{
+    padding: 5px 20px 10px;
+  }
+  .video-controls .options{
+    width: 100%;
+  }
+  .video-controls .options:first-child{
+    justify-content: flex-start;
+  }
+  .video-controls .options:last-child{
+    justify-content: flex-end;
+  }
+  .options button{
+    height: 40px;
+    width: 40px;
+    font-size: 19px;
+    border: none;
+    cursor: pointer;
+    background: none;
+    color: #efefef;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+  .options button :where(i, span) {
+    height: 100%;
+    width: 100%;
+    line-height: 40px;
+  }
+  .options button:hover :where(i, span){
+    color: #fff;
+  }
+  .options button:active :where(i, span){
+    transform: scale(0.9);
+  }
+  .options button span{
+    font-size: 23px;
+  }
+  .options input{
+    height: 4px;
+    margin-left: 3px;
+    max-width: 75px;
+    accent-color: #0078FF;
+  }
+  .options .video-timer{
+    color: #efefef;
+    margin-left: 15px;
+    font-size: 14px;
+  }
+  .video-timer .separator{
+    margin: 0 5px;
+    font-size: 16px;
+    font-family: "Open sans";
+  }
+  .playback-content{
+    display: flex;
+    position: relative;
+  }
+  .playback-content .speed-options{
+    position: absolute;
+    list-style: none;
+    left: -40px;
+    bottom: 40px;
+    width: 95px;
+    overflow: hidden;
+    opacity: 0;
+    border-radius: 4px;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.13s ease;
+  }
+  .playback-content .speed-options.show{
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .speed-options li{
+    cursor: pointer;
+    color: #000;
+    font-size: 14px;
+    margin: 2px 0;
+    padding: 5px 0 5px 15px;
+    transition: all 0.1s ease;
+  }
+  .speed-options li:where(:first-child, :last-child){
+    margin: 0px;
+  }
+  .speed-options li:hover{
+    background: #dfdfdf;
+  }
+  .speed-options li.active{
+    color: #fff;
+    background: #3e97fd;
+  }
+  .container video{
+    width: 100%;
+  }
+  .watermark {
+    position: absolute;
+    left: 3%; top: 3%;
+    color: rgba(227, 17, 17, 0.617);
+    animation: 50s moving-watermark infinite;
+}
+.restriction{
+  font-size: 2rem;
+  margin: 10rem 10rem;
+}
+
+.listbtn{
+  border-bottom: 2px solid rgb(245, 211, 15);
+  padding: 1rem;
+  margin: 0 4rem;
+  color: #fff;
+  transition: all 0.5s ease;
+  margin-bottom: 1rem;
+}
+.listbtn:hover{
+  border-bottom: 2px solid white !important;
+  transform: scale(1.1);
+  color: rgb(245, 211, 15) !important;
+}
+
+.quiz-info{
+  padding: 1rem;
+  border: 1px dashed #fff;
+  border-radius: 1rem;
+}
+.time{
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid rgb(245, 211, 15);
+  width: 20%;
+  border-radius: 2rem;
+}
+.questionsLeft{
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid rgb(245, 211, 15);
+  width: 20%;
+  border-radius: 2rem;
+}
+.questionSec{
+  background-color: rgb(80, 80, 80);
+  padding: 0.8rem;
+  border-radius: 1rem;
+  word-wrap:break-word ;
+}
+input[type="radio"] {
+  display: none;  
+
+}
+input[type="radio"] + label {
+  font-size: 20px;
+  line-height: 25px;
+  background-color: var(--color-info-dark);  
+  border-radius: var(--border-radius-1);
+  padding: 0.8rem;
+  margin: 0.6rem 0;
+  transition: all 0.5s ease;
+  width: 100%;
+  line-height: 1.9rem;
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;
+  cursor: pointer;
+}
+input[type="radio"]:checked + label  {
+  background-color:#f75742f3;  
+  color: rgb(226, 226, 226);
+}
+input[type="radio"]:hover + label  {
+  background-color:#f75742f3;  
+  color: rgb(226, 226, 226);
+}
+.quiz-info .prev{
+  float: left;
+}
+.next{
+  float: right;
+}
+
+.modal-content{
+  border-radius: 2rem !important;
+  background-color: #fff!important;
+}
+.modal-header {
+  border-bottom: none;
+}
+#copyCode:hover{
+  background-color: transparent;
+  color: #f75842;
+  border: 1px solid #f75842;
+}
+#finish:disabled{
+  opacity: 0.7;
+}
+.wrong-animation i{
+    font-size: 6rem;
+    color: rgb(227, 5, 5);
+}
+.rest-icon {
+  justify-content: center;
+  text-align: center;
+}
+.rest-icon i{
+  font-size: 4rem;
+  color: #a49b92;
+  margin-bottom: 0rem;
+
+}
+
+/* Success Animation */
+/* success button */
+.success-animation { margin:13px auto;}
+
+.checkmark {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 4;
+    stroke: #4bb71b;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #4bb71b;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+    position:relative;
+    top: 5px;
+    right: 5px;
+    margin: 0 auto;
+}
+.checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 7;
+    stroke-miterlimit: 10;
+    stroke: #4bb71b;
+    fill: #fff;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+ 
+}
+
+.checkmark__check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+@keyframes fill {
+    100% {
+        box-shadow: inset 0px 0px 0px 30px #4bb71b;
+    }
+}
+
+
+/* END Success Animation */
+
+
+
+
+/* Upload Animation */
+
+.file-uploader{
+  box-shadow: 0px 0px 6px rgb(60, 60, 60);
+  text-align: center;
+  background-color: #2B2C3E;
+  width: 270px;
+  padding: 2rem;
+  border-radius: 8px;
+  margin: auto;
+}
+.file-select-button{
+  padding: .8rem;
+  line-height: 24px;
+  background-color: transparent;
+  width: 80%;
+  border: 1px dashed #fff ;
+  border-radius: 1rem;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+.file-select-button:hover{
+  box-shadow: 0px 0px 6px rgb(60, 60, 60);
+  padding: .8rem;
+  line-height: 24px;
+  border-color: transparent;
+  background-color: #7e7e7ef3;
+  width: 80%;
+  border-radius: 1rem;
+}
+
+.file-name{
+  padding: 0.5rem;
+  margin: 0.4rem 0;
+  background-color: rgba(154, 154, 154, 0.556);
+  border-radius: 1rem;
+  word-wrap: break-word;
+}
+
+.UploadBtn{
+  margin:1.2rem ;
+  padding: 2rem;
+  display: none;
+  border-radius: 1rem;
+  border: 1px dashed #fff;
+  color: #fff;
+  transition: all 0.7s ease;
+}
+div[aria-label="Pop-out"] {
+  display: none;
+}
+div[aria-label="toolbar"] {
+  width: 52px;
+}
+.UploadBtn:disabled{
+  opacity: 0.3;
+}
+.UploadBtn:hover{
+  box-shadow: 0px 0px 6px rgb(60, 60, 60);
+  border-color: transparent;
+  background-color: #7e7e7ef3;
+  border-radius: 1rem;
+}
+.UploadBtn i{
+  font-size: 2rem;
+}
+/*END Upload Animation */
+
+
+
+@keyframes moving-watermark {
+    0%   {left: 5%; top: 3%;}
+    25% {left: 85%; top: 30%;}
+    50% {left: 40%; top: 90%;}
+    75% {left: 20%; top: 50%;}
+    100% {left: 6%; top: 3%;}
+}
+
+@media screen and (max-width: 390px) {
+  .listbtn{
+    border-bottom: 2px solid rgb(245, 211, 15);
+    padding: 1rem;
+    margin: 0 1rem;
+    color: #fff;
+    transition: all 0.5s ease;
+    margin-bottom: 1rem;
+  }
+}
+  @media screen and (max-width: 540px) {
+    
+.listbtn{
+  border-bottom: 2px solid rgb(245, 211, 15);
+  padding: 1rem;
+  margin: 0 2rem;
+  color: #fff;
+  transition: all 0.5s ease;
+  margin-bottom: 1rem;
+}
+    .wrapper .video-controls{
+      padding: 3px 10px 7px;
+    }
+    .options input, .progress-area span{
+      display: none!important;
+    }
+    .options button{
+      height: 30px;
+      width: 30px;
+      font-size: 17px;
+    }
+    .options .video-timer{
+      margin-left: 5px;
+    }
+    .video-timer .separator{
+      font-size: 14px;
+      margin: 0 2px;
+    }
+    .options button :where(i, span) {
+      line-height: 30px;
+    }
+    .options button span{
+      font-size: 21px;
+    }
+    .options .video-timer, .progress-area span, .speed-options li{
+      font-size: 12px;
+    }
+    .playback-content .speed-options{
+      width: 75px;
+      left: -30px;
+      bottom: 30px;
+    }
+    .speed-options li{
+      margin: 1px 0;
+      padding: 3px 0 3px 10px;
+    }
+    .right .pic-in-pic{
+      display: none;
+    }
+  }

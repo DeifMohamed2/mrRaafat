@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+   <!-- Modal -->
+
+ <% if (modalData) { %>
+                
+   
+   <div class="modal fade show" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel"> Update Data</h2>
+                <i class="fa-solid fa-xmark close-modal" data-bs-dismiss="modal" aria-label="Close"></i>
+            </div>
+            <form action="/teacher/updateUserData/<%= modalData._id %>" method="post">
+
+            <div class="modal-body">
+
+                <!-- Your modal HTML -->
+                    <label for="ModalUserName">اسم الطالب : </label> 
+                    <input type="text" id="ModalUserName" class="modal-input" name="Username" value="<%= modalData.Username %>"> <br>
+                    
+                 
+                    <label for="ModalUserphone">رقم هاتف الطالب : </label> 
+                    <input type="tel" id="ModalUserphone" class="modal-input"name="phone" value="<%= modalData.phone %>"> <br>
+                    
+                    <label for="ModalUserPassword">  باسورد الطالب : </label> 
+                    <h3 id="ModalUserPassword" ><%= modalData.PasswordNotHashed %></h3>
+                    
+                    <label for="ModalParentUserphone">رقم هاتف ولي امر الطالب : </label> 
+                    <input type="tel" id="ModalParentUserphone" class="modal-input" name="parentPhone" value="<%= modalData.parentPhone %>"> <br>
+                    
+
+                    <label for="ModalUserGov">محافظه الطالب : </label> 
+                    <input type="text" id="ModalUserGov" class="modal-input" name="gov" value="<%= modalData.gov %>"> <br>
+                    
+                    <label for="ModalUserMarkez">المركز التابع له الطالب : </label> 
+                    <input type="text" id="ModalUserMarkez" class="modal-input" name="Markez" value="<%= modalData.Markez %>"> <br>
+                    
+         
+                    <label for="statusOfSubscripe">حالة الاشتراك : </label>
+                    <select name="subscribe" id="statusOfSubscripe" class="modal-input">
+                        <option value="true" <% if (modalData.subscribe) { %> selected <% } %>>مفعل</option>
+                        <option value="false" <% if (!modalData.subscribe ) { %> selected <% } %>>غير مفعل</option>
+                    </select>
+      
+              
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" window.location.herf="/teacher/studentsRequests">Close</button>
+                <button type="submit"  class="btn btn-primary" data-bs-dismiss="modal">Update </button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+
+<% } %>
+
+<% if (modalDelete) { %>
+    <div class="modal fade show" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel2"> مسح طالب</h2>
+                    <i class="fa-solid fa-xmark close-modal" data-bs-dismiss="modal" aria-label="Close"></i>
+                </div>
+                <form action="/teacher/studentsRequests/delete/<%= modalDelete %>" method="post">
+    
+                <div class="modal-body">
+                  <h2>  هل تريد مسح الطالب نهائياً ؟</h2>
+                  
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" window.location.herf="/teacher/studentsRequests">Close</button>
+                    <button type="submit"  class="btn btn-primary" data-bs-dismiss="modal">Yes </button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+
+
+<% } %>
+
+<!--  END Modal -->
+            <div class="col-lg-10 ">
+                <main>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form action="/teacher/studentsRequests" method="get">
+                             
+                                    <select name="Grade" class="Grade">
+                                        <% if (Grade=="Grade1") { %>
+                                            <option selected value="Grade1">الصف الاول الثانوي</option>
+                                            <option value="Grade2">الصف الثاني الثانوي </option>
+                                            <option value="Grade3">الصف الثالث الثانوي</option>
+                                        <% } else if(Grade=="Grade2"){ %>
+                                            <option  value="Grade1">الصف الاول الثانوي</option>
+                                            <option  selected value="Grade2">الصف الثاني الثانوي </option>
+                                            <option  value="Grade3">الصف الثالث الثانوي</option>
+                                        <% } else {%>
+                                            <option  value="Grade1">الصف الاول الثانوي</option>
+                                            <option  value="Grade2">الصف الثاني الثانوي </option>
+                                            <option  selected value="Grade3">الصف الثالث الثانوي</option>
+                                        <% } %>        
+                                 
+                                    </select>
+                                    <select name="studentPlace" class="Grade">
+                                  
+                                    <% if (studentPlace=="All") { %>
+                                     
+                                      
+                                        <option  selected value="All">الكل</option>
+                                        <option  value="online">اونلاين</option>
+                                        <option  value="center">سنتر</option>
+                                        <option  value="hosting">استضافه</option>
+                                    <% } else if (studentPlace=="online") { %>
+                                        <option  value="All">الكل</option>
+                                        <option  selected value="online">اونلاين</option>
+                                        <option  value="center">سنتر</option>
+                                        <option  value="hosting">استضافه</option>
+                                    <% } else if(studentPlace=="center"){ %>
+                                        <option  value="All">الكل</option>
+                                        <option  value="online">اونلاين</option>
+                                        <option  selected value="center">سنتر</option>
+                                        <option  value="hosting">استضافه</option>
+                                    <% }else{ %>
+                                        <option  value="All">الكل</option>
+                                        <option  value="online">اونلاين</option>
+                                        <option  value="center">سنتر</option>
+                                        <option  selected value="hosting">استضافه</option>
+                                    <%}  %>
+                                    </select>
+
+                                    <button class="btn btn-outline-warning me-5 mt-4" >Get Data</button>
+                         
+                            </form>
+                        </div>
+        
+                        <div class=" col-md-6 ">
+                            <div class="left" style="margin-top: 0.2rem;">
+                                <%- include("./partials/top.ejs") %> 
+
+                            </div>
+                        </div>
+                    </div>
+                    <table id="convetToexcel" style="display: none;">
+                        
+                    </table>
+                    <div class="row">
+                        <div class="col-md-12  col-sm-12">
+                            <div class="student-table">
+                                <form action="/teacher/searchForUser" method="post">
+
+                                    <div class="row" style="margin-bottom: 0 !important;">
+                                        <div class="col-md-4">   
+                                            <select name="searchBy" id="searchBy"  class="Grade" style="margin-top: -1rem;" >
+
+                                                <option value="Username">الاسم</option>
+                                                <option value="Code" selected>كود الطالب </option>
+                                                <option value="phone" >رقم الهاتف</option>
+                                                <option value="WhatsApp"> whatsapp </option>
+                                                <option value="parentPhone"> رقم ولي الامر </option>
+                                                
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4"> 
+                                            <input type="text" class="mx-auto" name="searchInput" placeholder="بحث..">
+
+                                        </div>
+                                        <div class="col-md-4">  
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <button  class="primary" ><i class="fa-solid fa-magnifying-glass"></i></button>
+
+                                                </div>
+                                                <% if (isSearching) { %>
+
+                                                <div class="col-md-1 d-flex justify-content-center align-items-center ">
+                                                    <button><a href="/teacher/studentsRequests"  class="primary" style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;" ><i class="fa-solid fa-x"></i></a></button>
+                                                </div>
+
+                                                <% } %>
+                                            </div>
+                                          
+                                        </div>
+                                    </div>
+                                
+                                   
+
+                               
+                              </form>
+                                <table id="myTable">
+                                    <thead>
+                                        <th style="padding: 10px;"># </th>
+                                        <th style="padding-left: 20px;">اسم الطالب</th>
+                                        <th style="padding-left: 20px;">كود الطالب</th>
+                                        <th style="padding-left: 20px;"> تاريخ الانشاء </th>
+                                        <th style="padding-left: 20px;"> تاريخ اخر تعديل </th>
+                                        <th style="padding-left: 20px;">حالة الحساب</th>
+                                        <th style="padding-left: 20px;"></th>
+                                        <th style="padding-left: 20px;"></th>
+                                    </thead>
+
+                                    <tbody >
+                                     <% if (studentsRequests && studentsRequests.length>0) { %>
+                                        <% let counter = 1; %>
+                                            <% studentsRequests.forEach(student => { %>
+                                           
+                                                <tr>
+                                                    <td><%= counter %></td>
+                                                    <td  style="line-height: 20px;"><span ><i class="fa-solid "></i></span><%= student.Username %></td>
+                                                    <td id="code" ><%= student.Code %></td>
+                                                    <td id="code" ><%= student.createdAt.toLocaleDateString() %></td>
+                                                    <td id="code" ><%= student.updatedAt.toLocaleDateString() %></td>
+                                           
+                                                    <td>
+                                                        <h2 <%= student.subscribe ? 'class=success' : 'class=danger' %>>
+                                                            <%= student.subscribe ? "مفعل" : "غير مفعل" %>
+                                                        </h2>
+                                                    </td>
+
+                                                     <td class="enter">
+                                                        <button  ><a href="/teacher/studentsRequests/<%=student._id  %>" class="primary" >View Data<i class="fa-solid fa-pen-to-square me-3"></i></a> </button> 
+                                                    </td>
+                                                     <td class="enter">
+                                                        <button ><a href="/teacher/studentsRequests/delete/<%=student._id  %>" class="btn btn-outline-danger" style="color: rgb(255, 255, 255); border: 2px solid rgb(211, 0, 0); border-radius: 30px; padding: .7rem;" >Delete Account<i class="fa-solid fa-trash me-3" ></i></a> </button> 
+                                                    </td>
+                                                </tr>
+
+                                            <% counter++; %>
+
+                                            <% }) %>
+                                   
+                                        <% } else { %>
+                                            <tr style="text-align: center;">
+                                                <td colspan="8">
+                                                    <h1>لا يوجد .. يمكنك التأكد من البحث مجددا </h1>
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <div class="pagination justify-content-between">
+                                        
+                                <div>
+                                    <% if (nextPage !== null) { %>
+                                        <a href="/teacher/studentsRequests?page=<%= nextPage %>" > <button class="paginationBtns">Next</button> </a>
+                                    <% } %>
+                                </div>
+
+                                <div>
+                                    <form action="/teacher/converStudentRequestsToExcel" method="post">
+                                        <button class="paginationBtns">Convert To Excel</button> 
+                                    </form>
+                        
+                                </div>
+                                <div>
+                                    <% if (previousPage !== null) { %>
+                                        <a href="/teacher/studentsRequests?page=<%= previousPage %>" >  <button class="paginationBtns"> Previous</button></a>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                      
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="/assest/bootstrap.bundle.min.js"></script>
+    <script src="/assest/bootstrap.min.js"></script>
+   <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Find the modal element
+            const deleteModal = <%- JSON.stringify(modalDelete) %>;
+            const DataModal = <%- JSON.stringify(modalData) %>;
+
+            if (deleteModal) {
+                var modal2 = document.getElementById('exampleModal2');
+                // Show the modal
+                var modalBootstrap2 = new bootstrap.Modal(modal2);
+                modalBootstrap2.show();
+            }else{
+                var modal = document.getElementById('exampleModal');
+                // Show the modal
+                var modalBootstrap = new bootstrap.Modal(modal);
+                modalBootstrap.show();
+            
+            }
+          
+      
+        });
+    </script>
+
+</body>
+
+
+</html>

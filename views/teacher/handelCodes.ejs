@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+            <div class="col-lg-10 ">
+
+                <main>
+                   
+                    <div class="row">
+                        <div class="col-md-6">
+           
+                        </div>
+                      
+                        <div class=" col-md-6 ">
+                            <div class="left" style="margin-top: 0.2rem;">
+                                <div class="top">
+                                    <button id="menu-btn">
+                                        <span class="material-icons-sharp">
+                                            menu
+                                        </span>
+                                    </button>
+                                    <div class="theme-toggler">
+                                        <span class="material-icons-sharp active">
+                                            light_mode
+                                        </span>
+                                        <span class="material-icons-sharp">
+                                            dark_mode
+                                        </span>
+                                    </div>
+                                    <div class="profile">
+                                        <div class="info">
+                                            <p>اهلا بك،<b id="userName"> </b></p>
+                                        </div>
+                                        <div class="profile-photo">
+                                            <img src="../images/profile-1.jpg" alt="profile photo">
+                                        </div>
+                                    </div>
+                                </div> 
+                            
+                             
+                          
+                     
+
+                            </div>
+                        </div>
+                    </div>
+
+    
+
+                    <div class="row">
+                        <div class="col-md-11  col-sm-12">
+                    
+                            <div class="row chapter_Box"  >
+                    
+
+                                <div class="col-md-12">
+                                    <h1>حدد نوع الاكواد التي تريدها </h1>
+                                    <form action="/teacher/handelCodes" method="get" >
+                                
+                                        <div class="row">
+                                       
+                                            <div class="col-md-3 ">
+                                                <select   class="Grade" name="type"  id="type"  required>
+                                                    <option  value="" >اختر النوع   </option>
+                                                    <option value="Chapter" <%= type == "Chapter"? "selected":"" %> >Chapter</option>
+                                                    <option value="Video" <%= type == "Video"? "selected":"" %>>Video</option>
+                                                    <option value="General" >General</option>
+                                                
+                                                </select>
+                                            </div>
+                                        
+                                            <div class="col-md-3 ">
+                                                <select   class="Grade" name="Grade" id="Grade"  >
+                                                    <option   value="">اختر الصف الدراسي  </option>
+                                                    <option value="Grade1" <%= Grade=="Grade1" ?"selected" : "" %> >الصف الاول الثانوي</option>
+                                                    <option value="Grade2" <%= Grade=="Grade2" ?"selected" : "" %> >الصف الثاني الثانوي </option>
+                                                    <option value="Grade3" <%= Grade=="Grade3" ?"selected" : "" %> >الصف الثالث الثانوي</option>
+                                                </select>
+                                            </div>
+                                                 
+                                         
+                
+                                                <div class="col-md-3 ">
+                                                    <button class="me-5 mt-4 Add_New_Chapter" id="GetData"   > Get Data </button>
+                                                </div>
+                                        </div>     
+                                    </form>
+                                </div>
+                                <div class="col-md-12 mt-4">
+                                    <% if (namesData) { %>
+                                        <h1> يرجي اختيار الاسم</h1>
+                                        <form action="/teacher/handelCodes" method="get" >
+                                    
+                                            <div class="row">
+                                           
+                                                    <div class="col-md-3 ">
+                                                        <select   class="Grade" name="name"    required>
+                                                            <option  value="" >اختر النوع   </option>
+                                                       
+                                                                <% namesData.forEach(element => { %>
+                                                                    <option value="<%= element._id %>"><%= element.Name %></option>
+                                                                <% }) %>
+                                                      
+                                                        </select>
+                                                    </div>
+                                                 
+                    
+                                                    <div class="col-md-3 ">
+                                                        <button class="me-5 mt-4 Add_New_Chapter" id="GetData"   > Get Data </button>
+                                                    </div>
+                                            </div>     
+                                        </form>
+                                    <% } %>
+                                
+                                </div>
+
+                            </div>
+
+
+
+
+                            <div class="student-table" style="height: 35rem !important;">
+
+                                <form action="/teacher/searchToGetCode" method="get">
+
+                                    <div class="row" style="margin-bottom: 0 !important;">
+                                   
+                                      
+                                        <div class="col-md-6">  
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <button  type="submit" class="primary" ><i class="fa-solid fa-magnifying-glass"></i></button>
+
+                                                </div>
+                                               
+                                                <div class="col-md-1 d-flex justify-content-center align-items-center ">
+                                                    <% if (type) { %>
+                                                        <button type="button"><a href="/teacher/handelCodes?type=<%=type  %>&Grade=<%= Grade %>" class="primary" style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;" ><i class="fa-solid fa-x"></i></a></button>
+
+                                                    <% }else{ %>
+                                                        <button type="button"><a href="/teacher/handelCodes?name=<%=name  %>" class="primary" style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;" ><i class="fa-solid fa-x"></i></a></button>
+
+                                                    <% } %>
+                                                </div>  
+                                          
+                                            </div>
+                                          
+                                        </div>
+
+                                        <div class="col-md-6"> 
+                                            <input type="text" class="mx-auto" name="searchInput" placeholder="بحث..">
+                                        </div>
+                                    </div>
+                                </form>
+                        
+                                <table id="myTable2">
+                                    <thead id="thead2">
+                                        <th style="padding: 10px;"># </th>
+                                        <th style="padding-left: 20px;"> الكود </th>
+                                        <th style="padding-left: 20px;"> حاله الاستخدام</th>
+                                        <th style="padding-left: 20px;"> كود المستخدم </th>
+                                        <th style="padding-left: 20px;">استخدم في  </th>
+                                        <th style="padding-left: 20px;">تاريخ الاستخدام </th>
+                                    </thead>
+                                    <tbody id="tbody2">
+                                        <% if (CodesData) { %>
+                                            <% let c = 0 %>
+                                            <% CodesData.forEach(code => { %>
+                                             <tr>
+                                                <td><%= ++c %></td>
+                                                <td><%= code.Code  %></td>
+                                                <td><%= code.isUsed ? "مستخدم" :"غير مستخدم" %></td>
+                                                <td><%= code.usedBy || "غير مستخدم"%></td>
+                                                <td><%= code.usedIn || "------------------"%></td>
+
+                                                <td>
+                                                <%= new Date(code.createdAt).getTime() === new Date(code.updatedAt).getTime() ? "غير مستخدم" : new Date(code.updatedAt).toLocaleDateString() %>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination justify-content-between">
+                                        
+                                <div>
+
+                                    <% if (nextPage !== null) { %>
+
+                                                        <% if (type) { %>
+                                                        <a  href="/teacher/handelCodes?type=<%=type  %>&Grade=<%= Grade %>&page=<%= nextPage %>" > <button class="paginationBtns">Next</button> </a>
+
+                                                    <% }else{ %>
+                                                        <a  href="/teacher/handelCodes?name=<%= name %>&page=<%= nextPage %>" > <button class="paginationBtns">Next</button> </a>
+
+
+                                                    <% } %>
+
+                                    <% } %>
+                                </div>
+                             
+                                <div>
+
+                                    <% if (CodesData) { %>
+
+                                     <% if (type) { %>
+                                        <a  href="/teacher/handelCodes?type=<%=type  %>&Grade=<%= Grade %>&page=<%= currentPage %>&excel=download" > <button class="paginationBtns">Convert To Excel</button> </a>
+
+                                    <% }else{ %>
+                                        <a  href="/teacher/handelCodes?name=<%= name %>&page=<%= currentPage %>&excel=download" > <button class="paginationBtns">Convert To Excel</button> </a>
+                                    <% } %>
+
+                              <% } %>
+                                </div>
+                             
+                                <div>
+                                    <% if (previousPage !== null) { %>
+
+
+                                        <% if (type) { %>
+                                            <a  href="/teacher/handelCodes?type=<%=type  %>&Grade=<%= Grade %>&page=<%= previousPage %>" > <button class="paginationBtns">Pervious</button> </a>
+
+                                        <% }else{ %>
+                                            <a  href="/teacher/handelCodes?name=<%= name %>&page=<%= previousPage %>" > <button class="paginationBtns">Pervious</button> </a>
+                                        <% } %>       
+
+                                    <% } %>
+                                </div>
+                            </div>
+
+                        </div>
+                     
+                    </div>
+                   
+                </main>
+
+            </div>
+
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+           
+    const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+        const Create_Codes= document.getElementById('Create_Codes')
+        Create_Codes.addEventListener('click',()=>{
+            document.getElementById('createCodeWarning').style.display="inline"
+
+        })
+        const Create_gCodes= document.getElementById('Create_GCodes')
+        Create_gCodes.addEventListener('click',()=>{
+            document.getElementById('createGCodeWarning').style.display="inline"
+
+        })
+        document.getElementById('type').addEventListener('change',()=>{
+            console.log('sff')
+            if ( document.getElementById('type').value=="Video" ||document.getElementById('type').value=="Chapter" ) {
+                document.getElementById('Grade').style.display = "inline"
+            }   else{
+                document.getElementById('Grade').style.display = "none"
+            }
+        })
+ 
+    </script>
+</body>
+
+
+</html>

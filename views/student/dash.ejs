@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <%- include("./partials/head.ejs") %>
+  <body>
+    <%- include("./partials/preloader.ejs") %>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-2">
+
+            <%- include("./partials/aside.ejs") %>
+        </div>
+        
+        <div class="col-lg-10">
+          <main>
+
+            <div class="row">
+              <div class="col-lg-8">
+                <div class="insights">
+                  <div class="sales">
+                    <span class="material-icons-sharp">analytics</span>
+                    <div class="middle">
+                      <div class="right">
+                        <h3>مجموع الامتحانات التي قمت بالدخول اليها</h3>
+                        <h1 id="examsEnterd"><%=userData.examsEnterd %></h1>
+                      </div>
+                    </div>
+                    <small class="text-muted">last 24 hours</small>
+                  </div>
+                  <div class="expenses">
+                    <span class="material-icons-sharp">bar_chart</span>
+                    <div class="middle">
+                      <div class="right">
+                        <h3>عدد الاسئله التي تعرضت لها حتي الان</h3>
+                        <h1 ><%= userData.totalQuestions %></h1>
+                      </div>
+                    </div>
+                    <small class="text-muted">last 24 hours</small>
+                  </div>
+                  <div class="income">
+                    <span class="material-icons-sharp">stacked_line_chart</span>
+                    <div class="middle">
+                      <div class="right">
+                        <h3>الفيدوهات المشترك بها</h3>
+                        <h1 id="videosSubscripe"><%= userData.totalSubscribed %></h1>
+                      </div>
+                    </div>
+                    <small class="text-muted">last 24 hours</small>
+                  </div>
+                </div>
+                <div class="col-12 float-end">
+                  <div class="recent-orders">
+                    <h2 style="margin: 1.5rem">رسم يوضح المستوي</h2>
+                    <div class="chart">
+                      <canvas id="myChart" height="200"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="left">
+                  <%- include("./partials/top.ejs") %>
+                  
+                  <div class="recent-updates" onclick='window.location.href="/student/ranking"'>
+                    <h2></h2>
+                    <div class="updates">
+                      <div class="third">
+                        <div class="profile-photo">
+                          
+                          <% if (rankedUsers[2] && rankedUsers[2].userPhoto) { %>
+                            <img src="<%= rankedUsers[2].userPhoto %>" id="second" alt="profile photo" />
+                        <% } else { %>
+                          <img src="" id="second" alt="profile photo" />
+
+                        <% } %>
+                        </div>
+                        <div class="text">
+                       
+                          <h3 style="color: #000000; ">3<span style="color: #000000; ">ST</span></h3>
+                        </div>
+                      </div>
+                      <div class="first">
+                        <i class="fa-solid fa-crown"></i>
+                        <div class="profile-photo">
+                          <% if (rankedUsers[0] && rankedUsers[0].userPhoto) { %>
+                            <img src="<%= rankedUsers[0].userPhoto %>" id="second" alt="profile photo" />
+                        <% } else { %>
+
+                          <img src="" id="second" alt="profile photo" />
+
+                        <% } %>
+                     
+                        </div>
+                        <div class="text">
+                          <h3>1<span>ST</span></h3>
+                        </div>
+                      </div>
+                      <div class="second">
+                        <div class="profile-photo">
+                          <% if (rankedUsers[1] && rankedUsers[1].userPhoto) { %>
+                            <img src="<%= rankedUsers[1].userPhoto %>" id="second" alt="profile photo" />
+                        <% } else { %>
+                          <img src="" id="second" alt="profile photo" />
+
+                        <% } %>
+              
+                        </div>
+                        <div class="text">
+                     
+                          <h3 style="color: #000000; ">2<span style="color: #000000; ">ST</span></h3>
+                        </div>
+                      </div>
+                    
+                    </div>
+                  </div>
+
+
+                  <div class="sales-analytics">
+                    <h2>قريبا سيتم فتح قسم المسابقات تأهبو !</h2>
+                    <div class="item online">
+                      <div class="icon">
+                        <span class="material-symbols-sharp"
+                          >military_tech</span
+                        >
+                      </div>
+                      <div class="left">
+                        <div class="info">
+                          <h2>عدد مرات الفوز</h2>
+                          <small class="text-muted">last 24 Hours</small>
+                        </div>
+                        <!-- <h4 class="success">+39%</h4> -->
+                        <h3>0</h3>
+                      </div>
+                    </div>
+                    <div class="item offline">
+                      <div class="icon">
+                        <span class="material-symbols-sharp">quiz</span>
+                      </div>
+                      <div class="left">
+                        <div class="info">
+                          <h2>عدد المسابقات</h2>
+                          <small class="text-muted">last 24 Hours</small>
+                        </div>
+                        <h3>0</h3>
+                      </div>
+                    </div>
+                    <div class="item add-product">
+                      <div>
+                        <span class="material-symbols-sharp">swords</span>
+                        <h2>دخول المسابقه</h2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script src="assest/bootstrap.bundle.min.js"></script>
+    <script src="assest/bootstrap.min.js"></script>
+
+  
+
+  </body>
+</html>

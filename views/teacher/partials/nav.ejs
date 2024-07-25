@@ -1,0 +1,66 @@
+<aside>
+    <div class="top">
+        <div class="logo">
+            <img src="../images/logo.png" alt="logo">
+        </div>
+        <div class="close" id="close-btn">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+    </div>
+    <div class="sidebar">
+        <a href="/teacher/dash" class="<%= path === '/dash' ? 'active' : '' %>" >
+            <i class="fa-solid fa-gauge"></i>
+            <h3>لوحه تحكمي</h3>
+        </a>
+        <a href="/teacher/addQuiz" class="<%= path === '/addQuiz' ? 'active' : '' %>"  >
+            <span class="material-icons-sharp">
+                quiz
+                </span>
+            <h3>اضافه امتحان</h3>
+        </a>
+        <a href="/teacher/handleQuizzes" class="<%= path === '/handleQuizzes' ? 'active' : '' %>"  >
+            <span class="material-icons-sharp">
+                quiz
+                </span>
+            <h3> متابعه الامتحانات</h3>
+        </a>
+
+        <a href="/teacher/addVideo" class="<%= path === '/addVideo' ? 'active' : '' %>" >
+            <i class="fa-solid fa-photo-film"></i>
+            <h3>اضف فيديو</h3>
+        </a> 
+        <a href="/teacher/handleVideos" class="<%= path === '/handleVideos' ? 'active' : '' %>" >
+            <i class="fa-solid fa-photo-film"></i>
+            <h3> متابعه الفيديوهات</h3>
+        </a> 
+
+        
+                <a href="/teacher/Codes" class="<%= path === '/Codes' ? 'active' : '' %>" >
+                    <i class="fa-solid fa-table"></i>
+                    <h3>  اضف اكواد </h3>
+                </a> 
+        <a href="/teacher/handelCodes" class="<%= path === '/handelCodes' ? 'active' : '' %>"  >
+                    <i class="fa-solid fa-table"></i>
+                    <h3> متابعه الاكواد </h3>
+                </a> 
+        <a href="/teacher/myStudent"  class="<%= path === '/myStudent' ? 'active' : '' %>" >
+            <i class="fa-solid fa-graduation-cap"></i>
+            <h3>متابعة الطالب </h3>
+        </a>
+        <a href="/teacher/studentsRequests" class="<%= path === '/studentsRequests' ? 'active' : '' %>" >
+            <i class="fa-solid fa-user-plus"></i>
+            <h3>طلبات التسجيل </h3>
+        </a> 
+        <a href="/teacher/homeWork"  class="<%= path === '/homeWork' ? 'active' : '' %>" >
+            <i class="fa-solid fa-list-check"></i>
+            <h3>مراجعة الواجب</h3>
+        </a>
+  
+        <a href="/teacher/logOut" >
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <h3>تسجيل الخروج</h3>
+        </a>
+    </div>
+</aside>
+
+

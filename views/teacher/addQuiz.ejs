@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">هل انت متأكد من انك تريد حذف الامتحان ؟</h1>
+        </div>
+        <% if (getQuizAllData) { %>
+         
+    
+            <div class="modal-body">
+            <h2>اسم الامتحان : <span><%= getQuizAllData.quizName %></span> </h2>
+            
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-outline-success ms-5" data-bs-dismiss="modal">لا  </button>
+            <a href="/teacher/deleteQuiz/<%= getQuizAllData._id %>"  class="btn btn-outline-danger">نعم</a> 
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+            <div class="col-lg-10 ">
+                
+                 <main>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h1>اضف امتحان</h1>
+                          
+                           
+                        </div>
+
+                        <div class=" col-md-6 ">
+                            <div class="left float-start ms-3" style="margin-top: 0.2rem;">
+                                <div class="top">
+                                    <button id="menu-btn">
+                                        <span class="material-icons-sharp">
+                                            menu
+                                        </span>
+                                    </button>
+                                    <div class="theme-toggler">
+                                        <span class="material-icons-sharp active">
+                                            light_mode
+                                        </span>
+                                        <span class="material-icons-sharp">
+                                            dark_mode
+                                        </span>
+                                    </div>
+                                    <div class="profile">
+                                        <div class="info">
+                                            <p>اهلا بك،<b id="userName"> </b></p>
+                                        </div>
+                                        <div class="profile-photo">
+                                            <img src="../images/profile-1.jpg" alt="profile photo">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- END OF TOP -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-1">
+                        <div class="col-md-6">
+                        <form  action="/teacher/addQuiz" method="get" id="getVideosToQuiz" >
+                            <select name="Grade" id="Grade" class="slections" required>
+                                <option value="">اختر الصف الدراسي</option>
+                        <% if (Grade) { %>
+                                <option value="Grade1" <%= Grade === 'Grade1' ? 'selected' : '' %>>الصف الاول الثانوي</option>
+                                <option value="Grade2" <%= Grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                                <option value="Grade3" <%= Grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+                      
+                        <% } else{ %>
+                            <option value="Grade1">الصف الاول الثانوي</option>
+                            <option value="Grade2"  >الصف الثاني الثانوي</option>
+                            <option value="Grade3">الصف الثالث الثانوي</option>
+                  
+                            <% } %>
+
+                    </select>
+                            <button class=" btnstartAddQuiz" type="submit" >جلب البيانات   </button>
+
+                        </form>
+                        <h1>اضافه امتحان</h1>
+                        <form  action="/teacher/QuizSubmit" method="post" class="addQuizNameForm">
+
+                            <select name="Grade" id="Grade" class="slections" required>
+                                <option class="shape"  value="">اختر الصف الدراسي</option>
+                                <option value="Grade1">الصف الاول الثانوي</option>
+                                <option value="Grade2">الصف الثاني الثانوي </option>
+                                <option value="Grade3">الصف الثالث الثانوي</option>
+                            </select>
+                        <select id="videosName" name="videoWillbeOpen"  class="slections" >
+                            <option value="">اختر اسم الفيديو الذي سيفتح </option>
+                            <% if (videoData) { %>
+                                <% videoData.forEach(chapter => { %>
+                                    <% chapter['chapterLectures'].forEach(lec => { %>
+                                        <option value="<%= lec._id %>"><%= lec.videoTitle %></option>
+                                    <% }) %>
+                                <% }) %>
+                            <% } %>
+                        
+                        </select>
+
+                        <input type="number" class="timeofquiz" name="timeOfQuiz" id="timeofquiz" placeholder="وقت الامتحان" required/>
+                        <input type='text' name='quizName'  class="timeofquiz" id='nameOfNewQuiz' placeholder="اسم الامتحان" required/>
+                        
+                        <select name="prepaidStatus"  class="slections" required>
+                            <option selected value="Free">مجاني</option>
+                            <option  value="Pay">مدفوع</option>
+                        </select>
+
+                        <button class=" btnstartAddQuiz" type="submit" > رفع جميع البيانات</button>
+                        <h2 style="color: rgb(229, 23, 23);">
+                            <% if (typeof errors !== 'undefined'  ) { %>
+                                <ul class="errors">
+                                <% for (const key in errors) { %>
+                                    <li class="erorr"><%= errors[key] %></li>
+                                <% } %>
+                            
+                                </ul>
+                            <% } %>
+                        </h2>
+                        </form>
+                      
+                        </div>
+                        <div class="col-md-6">
+                            <form action="/teacher/getQuizAlldata" method="get">
+
+                                <select id="sel" name="quizId" required>
+                                    <option value="">اختر الامتحان</option>
+                                    <% if (quizData) { %>
+                                        <% quizData.forEach(quiz => { %>
+                                                <option value="<%= quiz._id %>"><%= quiz.quizName %></option>
+                                        <% }) %>
+                                    <% } %>
+                                </select>
+
+                                <button id="collectData" type="submit"  >جمع البيانات <i class="fa-solid fa-database"></i></button>
+                            </form>
+
+                            <% if (getQuizAllData) { %>
+                            <form action="/teacher/updateQuiz/<%= getQuizAllData._id %>" method="post">
+
+                                <div class="more-options ">
+                                    <h2>خيارات اضافيه : </h2>
+                            
+                                   <div class="row">
+                                    <div class="col-md-4">
+                                        <input type='text' name='quizName'  class="timeofquiz w-100" id='nameOfNewQuiz' value="<%= getQuizAllData.quizName %>"  placeholder="اسم الامتحان" required/>
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" class="timeofquiz w-100" name="timeOfQuiz" id="timeofquiz" value="<%= getQuizAllData.timeOfQuiz %>" placeholder="وقت الامتحان" required/>
+
+                                    </div>
+                                    <div class="col-md-4">
+
+                                        <select name="quizStatus" class="w-100" id="quizStatus" required>
+                                            <option value="">حاله الامتحان</option>
+                                            <option value="Active" <%= getQuizAllData.isQuizActive  ? 'selected' : '' %> >تفعيل الامتحان واخفاء الاجابات </option>
+                                            <option value="disActive" <%= !getQuizAllData.isQuizActive  ? 'selected' : '' %>>ايقاف الامتحان واظهار الاجابات</option>
+                                        </select> 
+
+                                    </div>
+                                
+                                    <div class="col-md-4 mt-3">  
+                                        <select name="permissionToShow" class="w-100" id="quizStatus" required>
+                                        <option value="">حاله الامتحان</option>
+                                        <option  value="apper" <%= getQuizAllData.permissionToShow  ? 'selected' : '' %>>اظهار الامتحان</option>
+                                        <option  value="disApper"  <%=  !getQuizAllData.permissionToShow  ? 'selected' : '' %>>اخفاء الامتحان</option>
+                                        </select> 
+                                </div>
+                                    <div class="col-md-4 mt-3">
+                                             <button type="button" class="btn btn-outline-danger me-2 w-100" data-bs-toggle="modal" data-bs-target="#exampleModal">حذف الامتحان <i class="fa-solid fa-trash"></i></button>
+
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                            <button type="submit"  class="w-100 btn btn-outline-warning" >حفظ التغيرات</button>
+
+                                    </div>
+                                   </div>
+
+                                
+                                  
+                                
+                              
+                                </div> 
+                            </form>
+                            <% } %>
+                          </div>
+                    </div>
+                        
+                    <div class="row">
+                    
+                        <div class="col-md-6">
+                            
+                            <div class="form-question">
+                            
+                                <form action="/teacher/addQuestion" method="post" id="addQuestionForm" >
+                                    <div class="box box1"> 
+                                        <img id="questionimg" >  
+                                    </div>
+                                    <input type="file"  id="selQuestionPhotoBtn" class="Qcount" placeholder="اختر صوره">
+                                    <button id="progress-bar" name="Progress" class="Qcount"></button>
+                                    <input type="text" name="questionPhoto" id="questionPhoto" value="" class="d-none">
+                                    <textarea class="form-control answer" name="Qtitle"  cols="30" rows="2"
+                                        placeholder="عنوان السؤال" required></textarea>
+                                    <textarea class="form-control answer" name="answer1"  cols="30" rows="2"
+                                        placeholder="الاجابه الاولي" required></textarea>
+                                    <textarea class="form-control answer" name="answer2"  cols="30" rows="2"
+                                        placeholder="الاجابه الثانيه" required></textarea>
+                                    <textarea class="form-control answer" name="answer3"  cols="30" rows="2"
+                                        placeholder="الاجابه الثالثه" required></textarea>
+                                    <textarea class="form-control answer" name="answer4"  cols="30" rows="2"
+                                        placeholder="الاجابه الرابعه" required></textarea>
+                                    <input type="number" name="ranswer" id="ranswer" required placeholder="رقم الاجابه الصحيحه"> 
+                            
+                                    <div class="form-buttons">
+                                        <button type="submit" id="add" class="add"><i class="fa-solid fa-plus"></i></button>
+                                    </div>
+                                </form>
+
+
+                            </div>
+
+                        </div>
+                
+                        <div class="col-md-6">
+                        
+                            <div id="show-data-Added">
+
+                                <% questions.forEach((question, index) => { %>
+                            
+                                    <form action="/teacher/updateQuestion/<%= question.code %>"  method="post"   class="form-question-added">
+                                        <% if (question.questionPhoto!="") { %>
+                                            <div class="box box1"> 
+                                                <img  src="<%= question.questionPhoto %>" >  
+                                            </div>
+                                        <% } %>
+                                         <input type="text" class="d-none" name="questionPhoto" value="<%= question.questionPhoto||"" %>">
+                                        <textarea class="form-control answer" disabled name="Qtitle" id="Qtitle_<%= question.code %>" cols="30" rows="2"><%= question.title %> </textarea>
+                                        <textarea class="form-control answer" disabled name="answer1" id="answer1_<%= question.code %>" cols="30" rows="2"><%= question.answer1 %> </textarea>
+                                        <textarea class="form-control answer" disabled name="answer2" id="answer2_<%= question.code %>" cols="30" rows="2"><%= question.answer2 %> </textarea>
+                                        <textarea class="form-control answer" disabled name="answer3" id="answer3_<%= question.code %>" cols="30" rows="2"><%= question.answer3 %> </textarea>
+                                        <textarea class="form-control answer" disabled name="answer4" id="answer4_<%= question.code %>" cols="30" rows="2"><%= question.answer4 %> </textarea>
+                                        <input type="number" name="ranswer" id="ranswer_<%= question.code %>" disabled value=<%= question.ranswer %>   class="rightanswer">
+                                        <input type="number" name="code"   style="display: none;" value=<%= question.code  %>   class="rightanswer">
+                                        <div class="form-buttons">
+                                        <a href="/teacher/deleteQuestion/<%= question.code %>"  class="deleteBTN"  > <i class="fa-solid fa-trash"></i></a>
+                                        <button  type="button" class="update" onclick="openToUpdate(this.id)" id="U_<%= question.code   %>" ><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button type="submit" class="update" > Edit </button>
+                                        </div>
+                                    </form>
+                                <% }); %>
+
+                            </div>
+
+                        </div>
+                    </div>
+            </main>
+
+            </div>
+
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+
+
+
+
+     <script>
+
+    
+   
+    const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+
+        const addQuestionForm = document.getElementById('addQuestionForm');
+        const message = document.getElementById('message');
+        const showDataAdded = document.getElementById('show-data-Added');
+        const getVideosToQuiz = document.getElementById('getVideosToQuiz')
+        
+
+  
+
+
+        function openToUpdate(id){
+            console.log(id)
+            let newId = id.slice(2)
+            document.getElementById(`Qtitle_${newId}`).removeAttribute('disabled')
+            document.getElementById(`answer1_${newId}`).removeAttribute('disabled')
+            document.getElementById(`answer2_${newId}`).removeAttribute('disabled')
+            document.getElementById(`answer3_${newId}`).removeAttribute('disabled')
+            document.getElementById(`answer4_${newId}`).removeAttribute('disabled')
+            document.getElementById(`ranswer_${newId}`).removeAttribute('disabled')
+        }
+
+      </script>
+
+<script type="module" >
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
+      import {
+          getDatabase,
+          ref,
+          set,
+          onValue,
+          child,
+          get,
+          update,
+          remove,
+          push,
+      } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-database.js";
+      import {
+          getAuth,
+          createUserWithEmailAndPassword,
+          signInWithEmailAndPassword,
+          signOut,
+          GoogleAuthProvider,
+          signInWithPopup,
+          signInWithRedirect,
+          FacebookAuthProvider,
+          onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js";
+     
+      import {
+          getStorage,
+          ref as sRef,
+          uploadBytesResumable,
+          getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-storage.js";
+
+      // Your web app's Firebase configuration
+      const dbfirebaseConfig = {
+          apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
+          authDomain: "allasharaf.firebaseapp.com",
+          databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
+          projectId: "allasharaf",
+          storageBucket: "allasharaf.appspot.com",
+          messagingSenderId: "638342504235",
+          appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
+      };
+      const storageConfig = {
+          apiKey: "AIzaSyC0VUgV2B_ClqKImLQAafbklwKZRabod0A",
+          authDomain: "biodiva-fa1b0.firebaseapp.com",
+          databaseURL: "https://biodiva-fa1b0-default-rtdb.firebaseio.com",
+          projectId: "biodiva-fa1b0",
+          storageBucket: "biodiva-fa1b0.appspot.com",
+          messagingSenderId: "262124821606",
+          appId: "1:262124821606:web:09311e0be3fc9b7634a1a7"
+      };
+      const storageApp = initializeApp(storageConfig, "storage");
+      const dbApp = initializeApp(dbfirebaseConfig, "db");
+      const db = getDatabase(dbApp);
+      const authConfig = {
+          apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
+          authDomain: "allasharaf.firebaseapp.com",
+          databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
+          projectId: "allasharaf",
+          storageBucket: "allasharaf.appspot.com",
+          messagingSenderId: "638342504235",
+          appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
+      };
+      const authApp = initializeApp(authConfig, "auth");
+      const auth = getAuth(authApp);
+      const dbRef = ref(db);
+
+
+
+
+
+let files = []
+let reader = new FileReader();
+let imgUrl 
+
+
+document.getElementById("selQuestionPhotoBtn").onchange = (e)=>{
+
+             files = e.target.files;
+            reader.readAsDataURL(files[0]);
+            reader.onload =  ()=> {
+            questionimg.src = reader.result
+            }
+            UploadProcess() 
+}
+
+
+
+
+const newUserName = document.getElementById('newUserName')
+const studentPhone = document.getElementById('studentPhone')
+const parentPhone = document.getElementById('parentPhone')
+const WhatsApp = document.getElementById('WhatsApp')
+const Government = document.getElementById('government')
+const markez = document.getElementById('government')
+const schoolName = document.getElementById('schoolName')
+const ID = document.getElementById('ID')
+
+async function UploadProcess() {
+document.getElementById("progress-bar").innerHTML = "برجاء الانتظار يتم رفع الصوره"  
+var ImgToUpload = files[0];
+const metaData = {
+      contentType: ImgToUpload.type
+}
+  const storage = getStorage(storageApp);
+  const stroageRef = sRef(storage, "BioDiva/"+ "profilePhotos/"+  files[0].name);
+  const UploadTask = uploadBytesResumable(stroageRef, ImgToUpload, metaData);
+  UploadTask.on('state-changed', (snapshot) => {
+      var progess = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      
+      document.getElementById("progress-bar").innerHTML =progess.toFixed(2) + "%"
+      document.getElementById("progress-bar").style.width = progess.toFixed(2) + "%" 
+  },
+  (error) => {
+          alert("error")
+      },
+      () => {
+          getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
+          imgUrl = downloadURL
+          document.getElementById("questionPhoto").value = imgUrl
+          document.getElementById("progress-bar").innerHTML = "Done"   
+          })
+      }
+  );
+
+}
+
+
+
+
+</script>
+
+</body>
+
+
+</html>

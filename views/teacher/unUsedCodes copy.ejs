@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+            <div class="col-lg-10 ">
+
+                <main>
+                   
+                    <div class="row">
+                        <div class="col-md-6">
+           
+                        </div>
+                      
+                        <div class=" col-md-6 ">
+                            <div class="left" style="margin-top: 0.2rem;">
+                                <div class="top">
+                                    <button id="menu-btn">
+                                        <span class="material-icons-sharp">
+                                            menu
+                                        </span>
+                                    </button>
+                                    <div class="theme-toggler">
+                                        <span class="material-icons-sharp active">
+                                            light_mode
+                                        </span>
+                                        <span class="material-icons-sharp">
+                                            dark_mode
+                                        </span>
+                                    </div>
+                                    <div class="profile">
+                                        <div class="info">
+                                            <p>اهلا بك،<b id="userName"> </b></p>
+                                        </div>
+                                        <div class="profile-photo">
+                                            <img src="../images/profile-1.jpg" alt="profile photo">
+                                        </div>
+                                    </div>
+                                </div> 
+                            
+                             
+                          
+                     
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-11  col-sm-12">
+                            <h2>الاكواد التي لم تستدخم</h2>
+                        <div class="student-table">
+                            <input type="text" class="mx-auto" id="searchBar" placeholder="بحث.." >
+
+                            <button class="disActiveAll" id="toExcel" >convertToExcel</button>
+                            <table id="convetToexcel" style="display: none;">
+
+                            </table>
+
+                            <table id="myTable">
+                                <thead id="thead">
+                                    <th style="padding: 10px;"># </th>
+                                    <th style="padding-left: 20px;">الكود </th>
+                                    <th style="padding-left: 20px;"></th>
+                                </thead>
+                                <tbody id="tbody">
+                             
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                     
+                    </div>
+                   
+                </main>
+
+            </div>
+
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+    <script>
+           
+    const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+    </script>
+</body>
+
+
+</html>

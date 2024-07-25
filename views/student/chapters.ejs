@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <%- include("./partials/head.ejs") %>
+  <body>
+
+    <%- include("./partials/preloader.ejs") %>
+      
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-2">
+          <%- include("./partials/aside.ejs") %>
+        </div>
+        <div class="col-lg-10">
+          <main>
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="left float-start">
+                  <%- include("./partials/top.ejs") %>
+                
+
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+              
+                <div class="alert alert-danger" id="alert" style="display: none;">
+                  <h1>الكود خاطئ</h1>
+                  <h2>الأسباب ممكن تكون: </h2>
+                  <ol type="a">
+                    <li><h2>الكود مستخدم من قبل</h2></li>
+                    <li><h2>الكود مش بتاع الحصة أو الباب ده</h2></li>
+                    <li><h2>الكود مكتوب غلط</h2></li>
+                  </ol>
+                </div>
+          
+                <div class="row courses" id="Videos">
+                    <% if (chapters) { %>
+                     <% chapters.forEach(chapter => { %>
+                      <div class="col-md-4">
+                        <article class="course " >
+                            <div class="price-tag">
+                                <i class="fa-solid fa-tag"></i>
+                              
+                                <% if (chapter.chapterAccessibility === "EnterInPay") { %>
+                                  <span>L.E</span> <h3><%=chapter.chapterPrice  %></h3>
+                                <% } else { %>
+                                  <h3>الدخول مجاني</h3>
+                                <% } %>
+                       
+                            </div>
+  
+                            <div class="course__info " style="margin-top:3.8rem !important;">
+                                <h3><%= chapter.chapterName %></h3>
+                                <hr>
+                                <% if (chapter.chapterAccessibility === "EnterInPay") { %> 
+                                    
+                                    <% if (!chapter.isPaid) { %>
+                                      <form action="/student/buyChapter/<%= chapter._id %>" method="post">
+
+                                        <input type="text"  name="code" placeholder="ادخل الكود" required>
+                                        <button type="submit" class="btn btn-primary" >استخدام الكود</button> 
+                                      </form>
+                                    <% } else{ %>
+                                      <a href="/student/videos/lecture/<%= chapter._id %>">  <button  class="btn btn-primary" >دخول</button></a>
+
+                                    <% } %>
+                              
+                                <% } else { %>
+                            <a href="/student/videos/lecture/<%= chapter._id %>">  <button  class="btn btn-primary" >دخول</button></a>
+                                <% } %>
+                            </div>
+
+
+                        </article>
+                    </div>  
+    
+                     <% }) %>
+                    <% } %> 
+
+
+              
+
+
+   
+                
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="/assest/bootstrap.min.js"></script>
+    <script src="/assest/bootstrap.bundle.min.js"></script>
+    
+    <script>
+      // Check if the URL contains the error parameter
+const urlParams = new URLSearchParams(window.location.search);
+const isError = urlParams.get('error');
+
+  if (isError) {
+    document.getElementById('alert').style.display = 'block';
+    setTimeout(()=> {
+      document.getElementById('alert').style.display = 'none';
+    }, 20000); // Set the timeout to 5000 milliseconds (5 seconds)
+  } else {
+    document.getElementById('alert').style.display = 'none';
+  }
+    </script>
+  </body>
+</html>

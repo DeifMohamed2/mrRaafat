@@ -1,0 +1,347 @@
+
+
+.contact__container {
+  background: var(--color-bg1);
+  display: grid;
+  height: 67rem;
+  margin: 7rem auto;
+  border-radius: 1rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  height: auto;
+  padding: 1.5rem;
+
+}
+
+input{
+  padding: 1rem !important;
+  
+  background: var(--color-bg);
+  color: var(--color-white);
+  border-radius: 10px;
+  border: 2px solid transparent ; 
+  transition: all 0.5s ease;
+  text-align: center;
+}
+
+input:focus{
+  border: 2px solid #fee000;
+}
+
+/* =================== ASIDE ================ */
+
+.contact__aside {
+  background: var(--color-primary);
+  border-radius: 1rem;
+  position: relative;
+  color: black;
+  width: auto;
+  padding: 1.5rem;
+  bottom: 0;
+}
+
+.aside__image {
+  width: 12rem;
+  margin-bottom: 2rem;
+}
+.left{
+  text-align: center;
+  justify-content: center;
+  margin: 0  auto;
+}
+.left img{
+  width: 50%;
+  margin: auto;
+}
+.contact__aside h2 {
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.contact__aside p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+:placeholder-shown{
+  font-size: 1rem;
+}
+.contact__details li {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.contact__socials {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 3rem;
+}
+/* #Email{
+  width: 50% !important;
+  font-size: 1.1rem;
+}
+#Password{
+  width: 50% !important;
+  font-size: 1.1rem;
+} */
+/* .regSel{
+  width: 32% !important;
+  font-size: 1.1rem;
+  text-align: center;
+} */
+/* #place{
+  width: 32% !important;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 0 auto;
+} */
+/* #id_gov{
+  width: 50% !important;
+  font-size: 1.1rem;
+  text-align: center;
+} */
+.contact__socials a {
+  background: var(--color-bg2);
+  padding: 0.5rem;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.contact__socials a:hover {
+  background: transparent;
+}
+
+/* =================== FORM ================ */
+/* .contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin: 0 1.5rem 3rem; 
+ 
+  
+} */
+
+.col {
+  display: flex;
+  gap: 1.2rem;
+  
+}
+
+.contact__form input,select {
+  width: 50%;
+  font-size: large;
+  border: 1px solid #ffffffd7;
+  margin: 0.7rem 0;
+}
+.contact__form input:focus,select:focus {
+  /* width: 50%; */
+  font-size: large;
+  border: 1px solid var(--color-primary);
+}
+
+
+
+.student{
+  background-color: #fff;
+  color: black;
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin-left: 13px;
+}
+.teacher{
+  background-color: #fff;
+  color: black;
+  padding: 10px 20px;
+  border-radius: 13px;
+}
+select,
+textarea {
+  padding: 1rem;
+  background: var(--color-bg);
+  color: var(--color-white);
+  border-radius: 10px;
+  transition: all 0.5s ease;
+}
+
+
+input[type="radio"] {
+  margin-left: 5px;
+
+}
+.contact__form .btn {
+  width: max-content !important;
+  margin-top: 1rem !important;
+  cursor: pointer !important;
+  
+  font-size: 20px !important;
+}
+
+/* =================== MEDIA QUERIES (TABLETS) ================ */
+@media screen and (max-width: 1024px) {
+  .contact__form input,select {
+    width: 100%;
+    font-size: large;
+    border: 1px solid #ffffffd7;
+    margin: 0.7rem 0;
+  }
+  .contact {
+    padding-bottom: 0;
+  }
+  /* #Email{
+    width: 100% !important;
+    font-size: 1.1rem;
+  }
+  #Password{
+    width: 100% !important;
+    font-size: 1.1rem;
+  }
+  .regSel{
+    margin: 0 auto;
+  }
+  .radio{
+    width: 100%;
+    margin: 0 auto;
+  } */
+ 
+ 
+  .contact__container {
+    gap: 1.5rem;
+    margin-top: 3rem;
+    height: auto;
+    padding: 1.5rem;
+  }
+
+  .contact__aside {
+    width: auto;
+    padding: 1.5rem;
+    bottom: 0;
+  }
+
+  .contact__form {
+    align-self: center;
+    margin-right: 1.5rem;
+  }
+}
+.errors{
+  font-size: 1.4rem;
+  font-weight: bolder;
+  color: #dac404f1;
+  text-align: center;
+}
+/* =================== MEDIA QUERIES (PHONES) ================ */
+@media screen and (max-width: 980px) {
+  .contact__container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    margin-top: 0;
+    padding: 0;
+  }
+  /* #Email{
+    width: 100% !important;
+    font-size: 1.1rem;
+  }
+  #Password{
+    width: 100% !important;
+    font-size: 1.1rem;
+  }
+  .regSel{
+    width: 70% !important;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  #place{
+    width: 70% !important;
+    font-size: 1.1rem;
+    text-align: center;
+  } */
+  .contact__form {
+    margin: 0 1.5rem 3rem;
+  }
+
+  .col {
+    flex-direction: column;
+  }
+
+  /* .col input[type="text"] {
+    width: 100%;
+  }
+  .contact__form select {
+    width: 100%;
+     font-size: large;
+   } */
+}
+
+.modal-content{
+  border-radius: 2rem !important;
+}
+.modal-header {
+  border-bottom: none;
+}
+#copyCode:hover{
+  background-color: transparent;
+  color: #f75842;
+  border: 1px solid #f75842;
+}
+
+/* success button */
+.success-animation { margin:13px auto;}
+
+.checkmark {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 4;
+    stroke: #4bb71b;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #4bb71b;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+    position:relative;
+    top: 5px;
+    right: 5px;
+   margin: 0 auto;
+}
+.checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 10;
+    stroke-miterlimit: 10;
+    stroke: #4bb71b;
+    fill: #fff;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+ 
+}
+
+.checkmark__check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+@keyframes fill {
+    100% {
+        box-shadow: inset 0px 0px 0px 30px #4bb71b;
+    }
+}
+
+

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+
+            <div class="col-lg-10 ">
+                <main>       
+                    <select name="Grde" id="Grade" class="Grade">
+                        <option selected value="Grade1">الصف الاول الثانوي</option>
+                        <option value="Grade2">الصف الثاني الثانوي </option>
+                        <option value="Grade3">الصف الثالث الثانوي</option>
+                    </select>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="insights">
+                                <div class="sales">
+                                    <span class="material-icons-sharp">
+                                        analytics
+                                    </span>
+                                    <div class="middle">
+                                        <div class="right">
+                                            <h3>مجموع الامتحانات</h3>
+                                            <h1 id="numberOfExams"></h1>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">last 24 hours</small>
+                                </div>
+                                <!---------------- end OF sales ---------------->
+                                <div class="expenses">
+                                    <span class="material-icons-sharp">
+                                        bar_chart
+                                    </span>
+                                    <div class="middle">
+                                        <div class="right">
+                                            <h3>الطلبات علي الفيديوهات</h3>
+                                            <h1>20</h1>
+                                        </div>
+                                    
+                                    </div>
+                                    <small class="text-muted">last 24 hours</small>
+                                </div>
+                                <!---------------- end OF expenes ---------------->
+                                <div class="income">
+                                        <span class="material-icons-sharp">
+                                            school
+                                            </span>
+                                    
+                                    <div class="middle">
+                                        <div class="right">
+                                            <h3>الطلاب المفعل اشتراكهم</h3>
+                                            <h1 id="subscripeTrue"></h1>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">last 24 hours</small>
+                                </div>
+                                <!---------------- end OF INCOME ---------------->
+                                <div class="expenses">
+                                    <span class="material-icons-sharp">
+                                        analytics
+                                    </span>
+                                    <div class="middle">
+                                        <div class="right">
+                                            <h3>عدد الطلاب الغير مشتركين</h3>
+                                            <h1  id="subscripeFalse">0</h1>
+                                        </div>
+                                     
+                                    </div>
+                                    <small class="text-muted">last 24 hours</small>
+                                </div>
+                                <!---------------- end OF sales ---------------->
+                                <div class="expenses">
+                                    <span class="material-icons-sharp">
+                                        bar_chart
+                                    </span>
+                                    <div class="middle">
+                                        <div class="right">
+                                            <h3>الدخل الكامل من الفيديوهات</h3>
+                                            <h1>400LE</h1>
+                                        </div>
+                                    
+                                    </div>
+                                    <small class="text-muted">last 24 hours</small>
+                                </div>
+                                <!---------------- end OF expenes ---------------->
+                                <div class="income">
+                                    <span class="material-icons-sharp">
+                                        stacked_line_chart
+                                    </span>
+                                    <div class="middle">
+                                        <div class="right">
+                                            <h3>الدخل الكامل من اشتراكات الطلاب</h3>
+                                            <h1>2400LE</h1>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">last 24 hours</small>
+                                </div>
+                                <!---------------- end OF INCOME ---------------->
+                            </div>
+                            <div class="col-12  float-end">
+                                <div class="recent-orders ">
+                                    <h2 style="margin: 1.5rem;">رسم يوضح متوسط درجات الطلاب في الامتحانات</h2>
+                                    <div class="chart">
+                                        <canvas id="myChart" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!------------------- END OF INSGIHTS ---------------->
+                        <div class="col-lg-4 ">
+                            <div class="left">
+                                <div class="top">
+                                    <button id="menu-btn">
+                                        <span class="material-icons-sharp">
+                                            menu
+                                        </span>
+                                    </button>
+                                    <div class="theme-toggler">
+                                        <span class="material-icons-sharp active">
+                                            light_mode
+                                        </span>
+                                        <span class="material-icons-sharp">
+                                            dark_mode
+                                        </span>
+                                    </div>
+                                    <div class="profile">
+                                        <div class="info">
+                                            <p>اهلا بك،<b id="userName"> </b></p>
+                                        </div>
+                                        <div class="profile-photo">
+                                            <a href="settings.html"><img id="profile_photo" alt="profile photo"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- END OF TOP -->
+                                <div class="recent-updates " onclick="window.location.href = 'ranking.html'">
+                                    <h2></h2>
+                                    <div class="updates">
+                                        <div class="third">
+                                            <div class="profile-photo">
+                                                <img src="" id="third" alt="profile photo">
+                                            </div>
+                                            <div class="text">
+                                                <h3>3<span>ST</span> </h3>
+                                            </div>
+                                        </div>
+                                        <div class="first">
+                                            <i class="fa-solid fa-crown"></i>
+                                            <div class="profile-photo">
+                                                <img src="" id="first" alt="profile photo">
+            
+                                            </div>
+                                            <div class="text">
+                                                <h3>1<span>ST</span> </h3>
+                                            </div>
+                                        </div>
+                                        <div class="second">
+                                            <div class="profile-photo">
+                                                <img src="" id="second" alt="profile photo">
+                                            </div>
+                                            <div class="text">
+                                                <h3>2<span>ST</span> </h3>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+       
+       const sdieMenu = document.querySelector("aside");
+    const menuBtn = document.querySelector("#menu-btn");
+    const closeBtn = document.querySelector("#close-btn");
+  
+    menuBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "block";
+    });
+  
+    closeBtn.addEventListener("click", () => {
+      sdieMenu.style.display = "none";
+    });
+</script>
+</body>
+
+
+</html>

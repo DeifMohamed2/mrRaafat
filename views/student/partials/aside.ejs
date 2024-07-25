@@ -1,0 +1,54 @@
+
+
+<aside>
+  <div class="top">
+    <div class="logo">
+      <img src="/images/logo.png" alt="logo" />
+    </div>
+    <div class="close" id="close-btn">
+      <i class="fa-solid fa-xmark"></i>
+    </div>
+  </div>
+  <div class="sidebar">
+    <p class="me-3 Name">اهلا بك،<b class="UserName">
+       <%= userData.Username %>
+      </b></p>
+    <a href=""><i class="fa-solid fa-brain"><span class="ms-2" style="font-size: 1.3rem">
+          <%= userData.totalScore %>
+        </span></i></a><a href="/student/dash" class="<%= path === '/dash' ? 'active' : '' %>"><i class="fa-solid fa-gauge"></i>
+      <h3>لوحه تحكمي</h3>
+    </a><a href="/student/exams" class="<%= path === '/exams' ? 'active' : '' %>"><span class="material-icons-sharp">quiz</span>
+      <h3>الامتحانات</h3>
+    </a><a href="/student/ranking" class="<%= path === '/ranking' ? 'active' : '' %>"><i class="fa-solid fa-graduation-cap"></i>
+      <h3>ترتيب الطلاب</h3>
+    </a><a href="/student/chapters" class="<%= path === '/chapters' ? 'active' : '' %>"  ><i class="fa-solid fa-box"></i>
+      <h3>الفيدوهات</h3>
+      </a>
+      
+
+
+
+    </a><a href="/student/settings" class="<%= path === '/settings' ? 'active' : '' %>"  ><i class="fa-solid fa-gear"></i>
+      <h3>الاعدادات</h3>
+    </a>
+    <a href="/student/logOut">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <h3>تسجيل الخروج</h3>
+    </a>
+  </div>
+</aside>
+
+<script>
+  
+  // Get the current URL
+const currentUrl = window.location.href;
+
+// Split the URL by '/'
+const urlParts = currentUrl.split('/');
+
+// Get the last part of the URL, which should be the video ID
+const videoId = urlParts[urlParts.length - 1];
+
+console.log(videoId); // This will log '65c7f4fc56be0128b8b18361'
+
+</script>

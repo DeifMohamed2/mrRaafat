@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <%- include("./partials/head.ejs") %>
+
+<style>
+  .video-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* This is for 16:9 aspect ratio, adjust as needed */
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+</style>
+  <body id="body">
+    <%- include("./partials/preloader.ejs") %>
+    <div class="container-fluid">
+      <div class="row">
+    
+        <!-- Modal -->
+
+
+  <div class="modal fade" id="HomeWorkSubmit" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="success-animation ">
+            <svg class="checkmark"  viewBox="0 0 52 52"><circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" /><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" /></svg>
+          </div>
+        </div>
+        <div class="modal-body text-center " style="color: black;">
+          <h1>تم رفع الملفات بنجاح ! </h1>  
+          <h2>  سيتم مراجعتها اولا وفي حال قبولها سيتم فتح الفيديو القادم لك .  </h2>
+        </div>
+        <div class="modal-footer mx-auto">
+          <button type="button" class="btn btn-primary"  data-bs-dismiss="modal" id="copyCode" > حسنا </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="TakeRest" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header mx-auto">
+          <div class="rest-icon ">
+            <i class="fa-solid fa-mug-hot"></i>         
+          </div>
+        </div>
+        <div class="modal-body text-center " style="color: black; margin-top: 0;">
+          <h1> لقد احسنت ! </h1>  
+          <h2> لقد تخطيت نصف الفيديو بإمكانك الان اخذ قسط من الراحه ومن ثم التكمله  </h2>
+        </div>
+        <div class="modal-footer mx-auto">
+          <button type="button" class="btn btn-primary"  data-bs-dismiss="modal" id="copyCode" > حسنا </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button type="button"  style="display:none;" id="HomeWorkSubmitbtn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#HomeWorkSubmit">
+    Launch demo modal
+  </button>
+  <button type="button"  style="display:none;" id="TakeRestbtn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#TakeRest">
+    Launch demo modal
+  </button>
+  <!-- End Modal -->
+<!-- 
+  <div class="context-menu">
+    <ul>
+      <li class="menu-item">Option 1</li>
+      <li class="menu-item">Option 2</li>
+      <li class="menu-item">Option 3</li>
+    </ul>
+  </div> -->
+
+        <!--------------------END ASIDE  ------------------>
+        <div class="col-lg-12">
+          <main style="margin-top: 0">
+            <div class="row">
+              <div class="col-lg-12">
+             
+                <div class="left float-start ms-5">
+                  <%- include("./partials/top.ejs") %>
+                </div>
+              </div>
+            </div>
+ 
+           
+            <hr />
+            <div class="row">
+              <div class="col-lg-9 mx-auto">
+                <div class="video">
+                  <div class="container show-controls" dir="ltr" id="VideoEm">
+                    <div class="video-container">
+
+
+
+                <% if (video.videoURL.length>100) { %>
+                  <%-video.videoURL%>
+
+                  <% }else{%>
+                      <iframe src="<%=video.videoURL%>" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+               <% } %>
+                 
+
+
+                    </div>
+                </div>
+                
+                  <i class="watermark " id="watermark"></i>
+                  <hr />
+                  <div class="video-info">
+                    <h2 id="Title"><%= video.videoTitle %></h2>
+                
+                  </div>
+                </div>
+                <hr />
+                <ul class="list-group list-group-horizontal mx-auto">
+                  <li>
+                    <form action="" method="post">
+
+                      
+                      <button type="submit" class="listbtn btn btn-outline-warning" id="UploadHomeWorkBtn">
+                        رفع الواجب
+                      </button>
+
+                  </form>
+
+                  </li>
+                </ul>
+              </div>
+
+
+            <div class="col-md-6 mx-auto mb-5" style="display: none;" id="ShowUploadSec">
+                <div class="text-center">
+                    <div id="file-uploader" class="mt-5 file-uploader">
+                        <form>
+                        <div class="file-select  pt-1">
+                            <input type="file" id="file-input" multiple style="display: none;">
+                            <div class="file-select-button mx-auto" id="file-select-button">Select Files</div>
+                        </div>
+                        </form>
+                        <div id="file-list"></div>
+                        <button class="UploadBtn" id="UploadBtn"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+                    </div>
+                </div>
+            </div>
+
+              </div>
+            </div>
+          </main>
+        </div>
+
+        <!-------------------- END OF MAIN --------------------->
+      </div>
+    </div>
+    <script src="https://fast.wistia.com/embed/medias/ljv40v3eoa.jsonp" async></script>
+    <script src="https://fast.wistia.com/assets/external/E-v1.js" async></script>
+    
+    <script src="/assest/bootstrap.bundle.min.js"></script>
+    <script src="/assest/bootstrap.min.js"></script>
+
+    <!-- <script src="https://player.vimeo.com/api/player.js"></script> -->
+
+
+  
+
+    <script>
+      module = {};
+    </script>
+    <script type="module" src="./js/watch.js"></script>
+
+
+
+  </body>
+</html>
