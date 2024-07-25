@@ -20,7 +20,7 @@ const { v4: uuidv4 } = require('uuid')
 const dash_get = async (req, res) => {
   try {
 
-      const rankedUsers = await User.find({},{Username:1,userPhoto:1}).sort({ totalscore: -1 }).limit(3);
+      const rankedUsers = await User.find({},{Username:1,userPhoto:1}).sort({ totalScore: -1 }).limit(3);
       console.log(rankedUsers[0]);
     res.render("student/dash", { title: "DashBoard", path: req.path, userData: req.userData ,rankedUsers :rankedUsers });
   } catch (error) {
