@@ -552,44 +552,32 @@ await User.find({ Grade: req.userData.Grade }, { Username: 1, Code: 1, totalScor
 
 const exams_get = async (req, res) => {
   try {
-    // Get the top 3 ranked users by total score
-    const rankedUsers = await User.find({ Grade: req.userData.Grade }, { Username: 1, userPhoto: 1 })
-      .sort({ totalScore: -1 })
-      .limit(3);
 
-    // Get all exams for the user's grade
-    const exams = await Quiz.find({ Grade: req.userData.Grade }).sort({ createdAt: 1 });
+    const rankedUsers = await User.find({Grade:req.userData.Grade},{Username:1,userPhoto:1}).sort({ totalScore: -1 }).limit(3);
 
-    // Map through the exams and add additional information
-    const paidExams = await Promise.all(exams.map(async (exam) => {
+    const exams = await Quiz.find({ "Grade": req.userData.Grade  }).sort({ createdAt: 1 });
+ 
+    const paidExams = exams.map(exam => {
       const isPaid = req.userData.examsPaid.includes(exam._id);
       const quizUser = req.userData.quizesInfo.find(quiz => quiz._id.toString() === exam._id.toString());
-
-      // Get all user scores for the current quiz
-      const userScores = await QuizResult.find({ quizId: exam._id })
-        .sort({ score: -1 })
-        .select({ userId: 1, score: 1 });
-      
-      // Find the rank of the current user
-      const userRank = userScores.findIndex(result => result.userId.toString() === req.userData._id.toString()) + 1;
-
-      const quizInfo = quizUser ? {
+      const quizInfo = quizUser ? { 
         isEnterd: quizUser.isEnterd,
         inProgress: quizUser.inProgress,
         Score: quizUser.Score,
         answers: quizUser.answers,
-        rank: userRank,  // Add user rank here
         // Add other properties you want to include
       } : null;
+  
+      return { ...exam.toObject(), isPaid ,quizUser:quizInfo };
+    });
+    // console.log(paidExams);
 
-      return { ...exam.toObject(), isPaid, quizUser: quizInfo };
-    }));
-
-    res.render("student/exams", { title: "Exams", path: req.path, userData: req.userData, rankedUsers, exams: paidExams });
+    res.render("student/exams", { title: "Exams", path: req.path,userData: req.userData,rankedUsers :rankedUsers, exams: paidExams});
   } catch (error) {
     res.send(error.message);
   }
-};
+  
+}
 
 
 
