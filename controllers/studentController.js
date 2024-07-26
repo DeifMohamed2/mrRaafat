@@ -550,6 +550,7 @@ await User.find({ Grade: req.userData.Grade }, { Username: 1, Code: 1, totalScor
 
 // ================== Exams  ====================== //
 const exams_get = async (req, res) => {
+  
   try {
     // Get the top 3 ranked users by total score
     const rankedUsers = await User.find({ Grade: req.userData.Grade }, { Username: 1, userPhoto: 1 })
