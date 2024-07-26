@@ -57,6 +57,7 @@
                       <th style="padding-left: 20px">عدد الاسئله</th>
                       <th style="padding-left: 20px">مده الامتحان</th>
                       <th style="padding-left: 20px">درجه الامتحان</th>
+                      <th style="padding-left: 20px">ترتيبك </th>
                       <th style="padding-left: 20px"></th>
                       <th style="padding-left: 20px"></th>
                     </thead>
@@ -69,7 +70,7 @@
                               <td style="padding-left: 20px"><%= exam.quizName %></td>
                               <td style="padding-left: 20px"><%= exam.questionsCount %></td>
                               <td style="padding-left: 20px"><%= exam.timeOfQuiz %> دقيقه</td>
-
+                              <td style="padding-left: 20px"><%= exam['quizUser']['rank'] %> </td>   
 
                               <% if (exam["quizUser"]["isEnterd"]) { %>
                                 <td style="padding-left: 20px"><%= exam["quizUser"]["Score"] %> </td>
