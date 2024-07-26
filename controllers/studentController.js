@@ -549,35 +549,55 @@ await User.find({ Grade: req.userData.Grade }, { Username: 1, Code: 1, totalScor
 
 
 // ================== Exams  ====================== //
-
 const exams_get = async (req, res) => {
   try {
+    // Get the top 3 ranked users by total score
+    const rankedUsers = await User.find({ Grade: req.userData.Grade }, { Username: 1, userPhoto: 1 })
+      .sort({ totalScore: -1 })
+      .limit(3);
 
-    const rankedUsers = await User.find({Grade:req.userData.Grade},{Username:1,userPhoto:1}).sort({ totalScore: -1 }).limit(3);
+    // Get all exams for the user's grade
+    const exams = await Quiz.find({ Grade: req.userData.Grade }).sort({ createdAt: 1 });
 
-    const exams = await Quiz.find({ "Grade": req.userData.Grade  }).sort({ createdAt: 1 });
- 
-    const paidExams = exams.map(exam => {
+    // Map through the exams and add additional information
+    const paidExams = await Promise.all(exams.map(async (exam) => {
       const isPaid = req.userData.examsPaid.includes(exam._id);
       const quizUser = req.userData.quizesInfo.find(quiz => quiz._id.toString() === exam._id.toString());
-      const quizInfo = quizUser ? { 
+
+    // Get all user scores for the current quiz
+      const users = await User.find({ Grade: req.userData.Grade, 'quizesInfo._id': exam._id })
+      .select('quizesInfo.$');
+
+    // Extract and sort the scores
+      const userScores = users
+        .map(user => ({
+          userId: user._id,
+          score: user.quizesInfo[0].Score
+        }))
+        .sort((a, b) => b.score - a.score);
+
+
+      // Find the rank of the current user
+      const userRank = userScores.findIndex(result => result.userId.toString() === req.userData._id.toString()) + 1;
+
+      const quizInfo = quizUser ? {
         isEnterd: quizUser.isEnterd,
         inProgress: quizUser.inProgress,
         Score: quizUser.Score,
         answers: quizUser.answers,
+        rank: userRank,  // Add user rank here
+        lengthOfUsersTakesQuiz  : userScores.length,  // Add total number of users who took the quiz
         // Add other properties you want to include
       } : null;
-  
-      return { ...exam.toObject(), isPaid ,quizUser:quizInfo };
-    });
-    // console.log(paidExams);
 
-    res.render("student/exams", { title: "Exams", path: req.path,userData: req.userData,rankedUsers :rankedUsers, exams: paidExams});
+      return { ...exam.toObject(), isPaid, quizUser: quizInfo };
+    }));
+
+    res.render("student/exams", { title: "Exams", path: req.path, userData: req.userData, rankedUsers, exams: paidExams });
   } catch (error) {
     res.send(error.message);
   }
-  
-}
+};
 
 
 
