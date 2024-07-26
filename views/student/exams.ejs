@@ -74,11 +74,15 @@
 
                               <% if (exam["quizUser"]["isEnterd"]) { %>
                                 <td style="padding-left: 20px"><%= exam["quizUser"]["Score"] %> </td>
+                                <td style="padding-left: 20px"> <%= exam["quizUser"]['lengthOfUsersTakesQuiz']%> / <%= exam["quizUser"]['rank'] %> </td>
 
                               <% } else {  %>
                                 <td style="padding-left: 20px">لم يتم الدخول</td>
+                                <td style="padding-left: 20px">#</td>
+
                               <% } %>  
-                              <td style="padding-left: 20px"> <%= exam["quizUser"]['lengthOfUsersTakesQuiz']%> / <%= exam["quizUser"]['rank'] %> </td>
+
+
 
 
 
