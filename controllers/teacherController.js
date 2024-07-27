@@ -863,7 +863,7 @@ const DeleteStudent = async (req, res) => {
     if (!studentID) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    if(studentID =="668138aeebc1138a4277c47a" || studentID =='668138edebc1138a4277c47c' || studentID =='66813909ebc1138a4277c47e'){
+    if(studentID =="669fc1ebb4e7b69af7c0d718" || studentID =='669fc22aed72d356013e93bc' || studentID =='669fc245d543f4c4cd430046'){
       return res.status(400).json({ error: 'You can not delete this user' });
       
     }
