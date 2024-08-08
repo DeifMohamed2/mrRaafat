@@ -718,8 +718,8 @@ const searchForUser = async (req, res) => {
             modalData: null,
             modalDelete :null,
             studentsRequests: result,
-            studentPlace: 'All',
-            Grade: "Grade1",
+            studentPlace: query.place || 'All',
+            Grade: query.Grade,
             isSearching: true,
             nextPage: null,
             previousPage: null // Calculate previous page
@@ -788,8 +788,8 @@ const getSingleUserAllData = async (req, res) => {
             modalData: result,
             modalDelete:null,
             studentsRequests: null,
-            studentPlace: 'All',
-            Grade: "Grade1",
+            studentPlace: query.place || 'All',
+            Grade: query.Grade,
             isSearching: false,
             nextPage: null,
             previousPage: null // Calculate previous page
@@ -823,7 +823,7 @@ const updateUserData = async (req, res) => {
     }
 
     // Redirect to the desired page after successful update
-    res.status(201).redirect('/teacher/studentsRequests');
+    res.status(201).redirect(`/teacher/studentsRequests?Grade=${query.Grade}&studentPlace=All`);
   } catch (error) {
     // Handle errors appropriately
     console.error(error);
@@ -842,8 +842,8 @@ const confirmDeleteStudent = async (req, res) => {
         modalData: null,
         modalDelete:studentID ,
         studentsRequests: null,
-        studentPlace: 'All',
-        Grade: "Grade1",
+        studentPlace: query.place || 'All',
+        Grade: query.Grade,
         isSearching: false,
         nextPage: null,
         previousPage: null // Calculate previous page
@@ -863,18 +863,20 @@ const DeleteStudent = async (req, res) => {
     if (!studentID) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    if(studentID =="669fc1ebb4e7b69af7c0d718" || studentID =='669fc22aed72d356013e93bc' || studentID =='669fc245d543f4c4cd430046'){
+    if(studentID =="668138aeebc1138a4277c47a" || studentID =='668138edebc1138a4277c47c' || studentID =='66813909ebc1138a4277c47e'){
       return res.status(400).json({ error: 'You can not delete this user' });
       
     }
     await User.findByIdAndDelete(studentID).then((result) => {
-      res.status(200).redirect('/teacher/studentsRequests');
+      res.status(200).redirect(`/teacher/studentsRequests?Grade=${query.Grade}&studentPlace=All`);
     })
   } catch (error) {
     console.log(error)
   }
 }
+
 // =================================================== END Student Requests ================================================ // 
+
 
 
 
