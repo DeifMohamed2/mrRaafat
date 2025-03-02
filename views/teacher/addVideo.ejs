@@ -136,7 +136,8 @@
                         </div>
 
                         <div class="row addToChapterStructure">
-                            <h1>Add To Chapter</h1>
+                          <!-- <h1>Add To Chapter - > عدد الفيديوهات : <span id="mediaCount"></span></h1> -->
+
 
                             <h2 id="waiting" style="display: none;">wait please ...</h2>
 
@@ -212,8 +213,7 @@
                                                     </div>
                                                     <div class="selction">
 
-                                                        <input type="text" name="videoURL" style="width: 1px !important; background: transparent;" id="videoURL"
-                                                            value="">
+                                                      
                                                         <input type="text" name="imgURL" class="d-none" id="imgURL"
                                                             value="">
                                                         <select name="paymentStatus" id="paymentStatus" class="Grade"
@@ -229,10 +229,10 @@
                                                         <select name="prerequisites" id="prerequisites" class="Grade"
                                                             required>
                                                             <option value="">السماح بالدخول </option>
-                                                            <option value="WithExam">بامتحان فقط</option>
-                                                            <option value="WithHw"> بواجب فقط</option>
-                                                            <option value="WithExamaAndHw"> بامتحان وواجب</option>
-                                                            <option selected value="WithOutExamAndHW">بدون امتحان و واجب
+                                                            <option value="WithExam">بامتحان </option>
+                                                            <!-- <option value="WithHw"> بواجب فقط</option> -->
+                                                            <!-- <option value="WithExamaAndHw"> بامتحان وواجب</option> -->
+                                                            <option selected value="WithOutExamAndHW">بدون امتحان 
                                                             </option>
                                                         </select>
                                                         <select name="permissionToShow" id="permissionToShow"
@@ -241,6 +241,18 @@
                                                             <option selected value="apper">ظهور الفيديو</option>
                                                             <option value="disapper">اخفاء الفيديو</option>
                                                         </select>
+                                                        <select name="accessibleAfterPassExam" id="accessibleAfterPassExam" class="Grade" disabled required>
+                                                                <option >اختر اسم الامتحان</option> 
+                                                                <% if (quizzes) { %>
+                                                                    <% quizzes.forEach(quiz=> { %>
+                                                                        <option value="<%= quiz._id %>">
+                                                                            <%= quiz.quizName %>
+                                                                        </option>
+                                                                        <% }) %>
+                                                                <% } %>
+                                                                
+                                                        </select>
+
 
                                                         <select name="AccessibleAfterViewing"
                                                             id="AccessibleAfterViewing" class="Grade" disabled required>
@@ -263,7 +275,7 @@
 
                                                     <div class="prodct-budjet">
                                                         <input type="number" name="videoAllowedAttemps" class="salary"
-                                                            value="100" placeholder="عدد المشاهدات" required>
+                                                            value="10" placeholder="عدد المشاهدات" required>
 
                                                         <input type="number" name="videoPrice" class="salary" disabled
                                                             id="videoPrice" placeholder="سعر الفيديو" >
@@ -281,6 +293,9 @@
 
 
                                     </div>
+
+                                    
+                                    <input type="text" name="videoURL" style="background-color: transparent; border: 1px solid #fff; color: #fff; border-radius: 10px; width: 272px !important; text-align: center;height: 30px;" id="videoURL" value="" placeholder="اضف لينك Embded هنا" required>
 
 
                                     <div class="col-md-3 mt-2 mx-auto">
@@ -307,7 +322,7 @@
                                 </div>
 
                             </div>
-                            <div class="col-6">
+                            <!-- <div class="col-6">
                                 <div class="video-uploder">
                                     <div class="upload">
                                         <button class="warning BTN_Upload" type="button" id="BtnVideoUpload"
@@ -319,7 +334,7 @@
                                     </div>
                                 </div>
 
-                            </div>
+                            </div> -->
 
 
                             <!-- <div class="col-6">
@@ -388,20 +403,21 @@ const sdieMenu = document.querySelector("aside");
         console.error('Socket.IO connection error:', error);
     });
 
-    // Listen for the 'videoLink' event from the server
-    socket.on('videoLink', (data) => {
-        console.log('Received video link:', data);
-        const videoURLInput = document.getElementById('videoURL');
-        if (videoURLInput) {
+    // // Listen for the 'videoLink' event from the server
+    // socket.on('videoLink', (data) => {
+    //     console.log('Received video link:', data);
+    //     const videoURLInput = document.getElementById('videoURL');
+    //     if (videoURLInput) {
        
-            videoURLInput.setAttribute('value', data.videoLink)
-            document.getElementById('generate_Video_Box_Btn').disabled = false;
-            console.log('Video URL set successfully:', data.videoLink);
-        } else {
-            console.error('Element with id "videoURL" not found in the DOM.');
-        }
-    });
-const getQueryStringParameter = (name) => {
+    //         videoURLInput.setAttribute('value', data.videoLink)
+    //         document.getElementById('generate_Video_Box_Btn').disabled = false;
+    //         console.log('Video URL set successfully:', data.videoLink);
+    //     } else {
+    //         console.error('Element with id "videoURL" not found in the DOM.');
+    //     }
+    // });
+
+    const getQueryStringParameter = (name) => {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
           };
@@ -462,10 +478,12 @@ const getQueryStringParameter = (name) => {
 
             const prerequisites = document.getElementById('prerequisites')
             prerequisites.addEventListener('change', () => {
-                if (prerequisites.value == "WithHw" || prerequisites.value == "WithExamaAndHw") {
-                    document.getElementById('AccessibleAfterViewing').removeAttribute('disabled')
+                if (prerequisites.value == "WithExam") {
+                    // document.getElementById('AccessibleAfterViewing').removeAttribute('disabled')
+                    document.getElementById('accessibleAfterPassExam').removeAttribute('disabled')
                 } else {
-                    document.getElementById('AccessibleAfterViewing').setAttribute('disabled', true)
+                    // document.getElementById('AccessibleAfterViewing').setAttribute('disabled', true)
+                    document.getElementById('accessibleAfterPassExam').setAttribute('disabled', true)
 
                 }
             })
@@ -477,60 +495,77 @@ const getQueryStringParameter = (name) => {
 <script >
     const BTNvideoUpload = document.getElementById("BtnVideoUpload");
 
-const apiKey = 'af6b71d0598bba49524f977b8cc195a771b9325186d25c280df546fed83696ac';
-const projectId = '3bhhb1wybm'; 
+const apiKey = '3f0935f58dfacc2603bce1da33605cd6cb27b3f80c9cfb4e365246107f19e428';
+const projectId = 'v1hmxwnv7u'; 
 let embded 
 
+const options = {
+  method: 'GET',
+  headers: {
+    accept: 'application/json',
+    authorization: `Bearer ${apiKey}`
+  }
+};
 
-function uploadVideo() {
-    BTNvideoUpload.setAttribute("disabled",true)
-    const fileInput = document.getElementById('selbtnVideo');
-    // const statusDiv = document.getElementById('status');
-    
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        // statusDiv.textContent = 'Please select a file to upload.';
-        return;
-    }
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('project_id', projectId);
-  
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://upload.wistia.com', true);
-      xhr.timeout = 6993130000; // Set the timeout to 60 seconds (adjust as needed)
+// fetch('https://api.wistia.com/v1/projects', options)
+//   .then(response => response.json())
+//   .then(response => {
+//     const mediaCount  = document.getElementById('mediaCount')
+//     mediaCount.innerHTML = response[0].mediaCount
+//   })
+//   .catch(err => console.error(err));
 
-      xhr.setRequestHeader('Authorization', `Bearer ${apiKey}`);
+
+
+// function uploadVideo() {
+//     BTNvideoUpload.setAttribute("disabled",true)
+//     const fileInput = document.getElementById('selbtnVideo');
+//     // const statusDiv = document.getElementById('status');
+    
+//     const file = fileInput.files[0];
+    
+//     if (!file) {
+//         // statusDiv.textContent = 'Please select a file to upload.';
+//         return;
+//     }
+//       const formData = new FormData();
+//       formData.append('file', file);
+//       formData.append('project_id', projectId);
   
-      xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
+//       const xhr = new XMLHttpRequest();
+//       xhr.open('POST', 'https://upload.wistia.com', true);
+//       xhr.timeout = 6993130000; // Set the timeout to 60 seconds (adjust as needed)
+
+//       xhr.setRequestHeader('Authorization', `Bearer ${apiKey}`);
+  
+//       xhr.upload.addEventListener('progress', (e) => {
+//           if (e.lengthComputable) {
             
-              const percentComplete = (e.loaded / e.total) * 100;
-              BTNvideoUpload.innerHTML = percentComplete.toFixed(2)+"%";
-          }
-      });
+//               const percentComplete = (e.loaded / e.total) * 100;
+//               BTNvideoUpload.innerHTML = percentComplete.toFixed(2)+"%";
+//           }
+//       });
   
-      xhr.onreadystatechange = () => {
-          if (xhr.readyState === 4) {
-              if ( xhr.status >= 200) {
-                  const responseData = JSON.parse(xhr.responseText);
-                  console.log(`Video uploaded successfully! Video ID: ${responseData.hashed_id}`) ;
-                   embded = `<div class="wistia_responsive_wrapper" style="height:100%;left:0;position:absolute;top:0;width:100%;"><div class="wistia_embed wistia_async_${responseData.hashed_id} seo=true videoFoam=true" style="height:100%;position:relative;width:100%"><div class="wistia_swatch" style="height:100%;left:0;opacity:0;overflow:hidden;position:absolute;top:0;transition:opacity 200ms;width:100%;"><img src="https://fast.wistia.com/embed/medias/${responseData.hashed_id}/swatch" style="filter:blur(5px);height:100%;object-fit:contain;width:100%;" alt="" aria-hidden="true" onload="this.parentNode.style.opacity=1;" /></div></div></div>`
-                   console.log(embded)
-                   document.getElementById('videoURL').setAttribute('value', embded)
-                   BTNvideoUpload.innerHTML = "تم الرفع"
-                //    uploadAllDataBtn.removeAttribute("disabled")
-              } else {
-                alert(`Error uploading video. Status: ${xhr.status}`) 
-              }
-          }
-      };
+//       xhr.onreadystatechange = () => {
+//           if (xhr.readyState === 4) {
+//               if ( xhr.status >= 200) {
+//                   const responseData = JSON.parse(xhr.responseText);
+//                   console.log(`Video uploaded successfully! Video ID: ${responseData.hashed_id}`) ;
+//                    embded = `<div class="wistia_responsive_wrapper" style="height:100%;left:0;position:absolute;top:0;width:100%;"><div class="wistia_embed wistia_async_${responseData.hashed_id} seo=true videoFoam=true" style="height:100%;position:relative;width:100%"><div class="wistia_swatch" style="height:100%;left:0;opacity:0;overflow:hidden;position:absolute;top:0;transition:opacity 200ms;width:100%;"><img src="https://fast.wistia.com/embed/medias/${responseData.hashed_id}/swatch" style="filter:blur(5px);height:100%;object-fit:contain;width:100%;" alt="" aria-hidden="true" onload="this.parentNode.style.opacity=1;" /></div></div></div>`
+//                    console.log(embded)
+//                    document.getElementById('videoURL').setAttribute('value', embded)
+//                    BTNvideoUpload.innerHTML = "تم الرفع"
+//                 //    uploadAllDataBtn.removeAttribute("disabled")
+//               } else {
+//                 alert(`Error uploading video. Status: ${xhr.status}`) 
+//               }
+//           }
+//       };
   
-      xhr.send(formData);
+//       xhr.send(formData);
     
 
-}
+// }
 
 
 </script>
@@ -617,22 +652,22 @@ Dropzone.options.myDropzone = {
 
             // Your web app's Firebase configuration
             const dbfirebaseConfig = {
-                apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
-                authDomain: "allasharaf.firebaseapp.com",
-                databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
-                projectId: "allasharaf",
-                storageBucket: "allasharaf.appspot.com",
-                messagingSenderId: "638342504235",
-                appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
+                 apiKey: "AIzaSyBTQxsd7Rp3BHB6vdoV8qA3gkkk0I9LTy4",
+                 authDomain: "momken-12.firebaseapp.com",
+                 databaseURL: "https://momken-12-default-rtdb.firebaseio.com",
+                 projectId: "momken-12",
+                 storageBucket: "momken-12.appspot.com",
+                 messagingSenderId: "659291993085",
+                 appId: "1:659291993085:web:aa6669fa7322c390149f94"
             };
             const storageConfig = {
-                apiKey: "AIzaSyC0VUgV2B_ClqKImLQAafbklwKZRabod0A",
-                authDomain: "biodiva-fa1b0.firebaseapp.com",
-                databaseURL: "https://biodiva-fa1b0-default-rtdb.firebaseio.com",
-                projectId: "biodiva-fa1b0",
-                storageBucket: "biodiva-fa1b0.appspot.com",
-                messagingSenderId: "262124821606",
-                appId: "1:262124821606:web:09311e0be3fc9b7634a1a7"
+               apiKey: "AIzaSyBTQxsd7Rp3BHB6vdoV8qA3gkkk0I9LTy4",
+               authDomain: "momken-12.firebaseapp.com",
+               databaseURL: "https://momken-12-default-rtdb.firebaseio.com",
+               projectId: "momken-12",
+               storageBucket: "momken-12.appspot.com",
+               messagingSenderId: "659291993085",
+               appId: "1:659291993085:web:aa6669fa7322c390149f94"
             };
             const storageApp = initializeApp(storageConfig, "storage");
             const dbApp = initializeApp(dbfirebaseConfig, "db");
@@ -712,15 +747,15 @@ Dropzone.options.myDropzone = {
                             document.getElementById('imgURL').setAttribute('value', imgUrl)
                             document.getElementById('BtnPhotoUpload').innerHTML = "تم الرفع"
 
-                            document.getElementById('BtnVideoUpload').removeAttribute('disabled')
+                            // document.getElementById('BtnVideoUpload').removeAttribute('disabled')
                         });
                     }
                 );
             }
 
-            document.getElementById('BtnVideoUpload').addEventListener('click',()=>{
-                document.getElementById('BtnVideoUpload').innerHTML = "يتم التجهيز للرفع برجاء عدم اغلاق الصفحه نهائيا"
-            })
+            // document.getElementById('BtnVideoUpload').addEventListener('click',()=>{
+            //     document.getElementById('BtnVideoUpload').innerHTML = "يتم التجهيز للرفع برجاء عدم اغلاق الصفحه نهائيا"
+            // })
 
    
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <%- include("./partials/head.ejs") %>
-
+    <link rel="stylesheet" href="/css/watch.css">
 <style>
   .video-container {
     position: relative;
@@ -17,6 +17,26 @@
     width: 100%;
     height: 100%;
 }
+#progress-container p {
+  font-size: 14px;
+  color: #333;
+  margin-top: 5px;
+}
+#progress-container {
+  display: none;
+  margin-top: 10px;
+}
+#progress-container .progress-bar {
+  background-color: #007bff;
+  height: 5px;
+  width: 0;
+  margin-top: 5px;
+  transition: width 0.3s;
+}
+#file-list {
+  margin-top: 10px;
+}
+
 
 </style>
   <body id="body">
@@ -37,7 +57,7 @@
         </div>
         <div class="modal-body text-center " style="color: black;">
           <h1>تم رفع الملفات بنجاح ! </h1>  
-          <h2>  سيتم مراجعتها اولا وفي حال قبولها سيتم فتح الفيديو القادم لك .  </h2>
+         
         </div>
         <div class="modal-footer mx-auto">
           <button type="button" class="btn btn-primary"  data-bs-dismiss="modal" id="copyCode" > حسنا </button>
@@ -99,20 +119,14 @@
               <div class="col-lg-9 mx-auto">
                 <div class="video">
                   <div class="container show-controls" dir="ltr" id="VideoEm">
-                    <div class="video-container">
+                   <div class="video-container">
+                    <% if (video.videoURL.startsWith('<iframe')||video.videoURL.startsWith('<div') ) { %>
+                      <%- video.videoURL %>
+                    <% }else { %>
+                    <iframe src="<%= video.videoURL %>" width="640" height="360" frameborder="0" allowfullscreen></iframe>
+                    <% } %>
+                  </div>
 
-
-
-                <% if (video.videoURL.length>100) { %>
-                  <%-video.videoURL%>
-
-                  <% }else{%>
-                      <iframe src="<%=video.videoURL%>" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
-               <% } %>
-                 
-
-
-                    </div>
                 </div>
                 
                   <i class="watermark " id="watermark"></i>
@@ -128,32 +142,42 @@
                     <form action="" method="post">
 
                       
-                      <button type="submit" class="listbtn btn btn-outline-warning" id="UploadHomeWorkBtn">
+                      <button type="button" class="listbtn btn btn-outline-warning" id="UploadHomeWorkBtn">
                         رفع الواجب
                       </button>
 
                   </form>
 
                   </li>
+               
+                    <% if (userData.Grade=="Grade1") { %>
+                         <li class="me-3">
+                       <a href="https://drive.google.com/drive/folders/1aRQO-tQIYPBD7uzSoyw_QSMxqft1QiwU?usp=sharing"> <button class="listbtn btn btn-outline-warning" >
+                     Download PDFs
+
+                    </button>
+                    </a>
+                  </li>
+                    <% } %>
+                   
                 </ul>
               </div>
 
 
-            <div class="col-md-6 mx-auto mb-5" style="display: none;" id="ShowUploadSec">
-                <div class="text-center">
-                    <div id="file-uploader" class="mt-5 file-uploader">
-                        <form>
-                        <div class="file-select  pt-1">
-                            <input type="file" id="file-input" multiple style="display: none;">
-                            <div class="file-select-button mx-auto" id="file-select-button">Select Files</div>
-                        </div>
-                        </form>
-                        <div id="file-list"></div>
-                        <button class="UploadBtn" id="UploadBtn"><i class="fa-solid fa-cloud-arrow-up"></i></button>
-                    </div>
-                </div>
-            </div>
-
+           <div class="col-md-6 mx-auto mb-5" style="display: none;" id="ShowUploadSec">
+              <div class="text-center">
+                  <div id="file-uploader" class="mt-5 file-uploader">
+                      <form>
+                          <div class="file-select pt-1">
+                              <input type="file" id="file-input" multiple style="display: none;" accept="image/*">
+                              <div class="file-select-button mx-auto" id="file-select-button">Select Photos</div>
+                          </div>
+                      </form>
+                      <div id="file-list"></div>
+                      <button class="UploadBtn" id="UploadBtn"><i class="fa-solid fa-cloud-arrow-up"></i></button>
+                  </div>
+              </div>
+          </div>
               </div>
             </div>
           </main>
@@ -170,13 +194,144 @@
 
     <!-- <script src="https://player.vimeo.com/api/player.js"></script> -->
 
+    <script type="module">
+            // Import the functions you need from the SDKs you need
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
+ import {
+  getStorage,
+  ref as sRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/9.9.3/firebase-storage.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAWMeg2H_9xfHQEynB5G8ZuBhoGQuyUCKM",
+  authDomain: "biodiva-eebd2.firebaseapp.com",
+  projectId: "biodiva-eebd2",
+  storageBucket: "biodiva-eebd2.appspot.com",
+  messagingSenderId: "859594822962",
+  appId: "1:859594822962:web:9c27c84c22ff197db9332b"
+};
+
+initializeApp(firebaseConfig);
+
+
+
+document.getElementById("UploadHomeWorkBtn").addEventListener('click',()=>{
+  document.getElementById("ShowUploadSec").style.display="inline"
+  document.getElementById("ShowUploadSec").scrollIntoView({ behavior: 'smooth' })
+})
+
+const fileInput = document.querySelector("#file-input");
+const fileSelectButton = document.querySelector("#file-select-button");
+const fileList = document.querySelector("#file-list");
+
+fileInput.addEventListener("change", function() {
+  const files = fileInput.files;
+  document.getElementById("UploadBtn").style.display="inline"
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    fileList.innerHTML +=`
+     <div class="file-name" >  ${file.name} </div>
+     <div class="progress">
+        <div class="progress-bar" id="progress-bar${i}" role="progressbar" style="width: 0% ;   background-color:#4BB543!important;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
+    `
+  }
+});
+
+fileSelectButton.addEventListener("click", function() {
+  fileInput.click();
+});
+let HomeWorkPhotos= new Array();
+async function uploFilesHomeWork() {
+  const files = fileInput.files;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    let upprogresstext = document.getElementById(`progress-bar${i}`);
+
+    const metaData = {
+      contentType: file.type,
+    };
   
+    const storage = getStorage();
+    const stroageRef = sRef(
+      storage,
+      "BioDiva/" + "HomeWorks/" + file.name
+    );
+    const UploadTask = uploadBytesResumable(stroageRef, file, metaData);
+    UploadTask.on(
+      "state-changed",
+      (snapshot) => {
+        var progess = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        upprogresstext.innerHTML = progess.toFixed(2) + "%";
+        upprogresstext.style.width = progess.toFixed(2) + "%"
+      },
+      (error) => {Z
+        alert("error");
+        return;
+      },
+      () => {
+        getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
+          HomeWorkPhotos.push(downloadURL);
+          if (HomeWorkPhotos.length == files.length&& HomeWorkPhotos.length!=0) {
+            document.getElementById("ShowUploadSec").style.display = "none";
+
+            fetch("", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                HomeWorkPhotos ,
+              }),
+            }).then(()=>{
+              document.getElementById("HomeWorkSubmitbtn").click()
+            }).catch((error)=>{
+              alert("يجب رفع الملفات مره اخري")
+            })
+
+          }else{
+            alert("يجب رفع الملفات مره اخري")
+            return;
+          }
+        });
+       
+      }
+    );
+  }
+
+}
+module.uploFilesHomeWork = uploFilesHomeWork;
+document.getElementById("UploadBtn").addEventListener('click',uploFilesHomeWork)
+
+    </script>
+  
+
+
 
     <script>
       module = {};
     </script>
-    <script type="module" src="./js/watch.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+
+
+
+   <!-- <script>
+    const videoURL = <%- JSON.stringify(video.videoURL) %>;
+    const hls = new Hls();
+hls.loadSource(videoURL);
+hls.attachMedia(videoURL);
+
+hls.on(Hls.Events.ERROR, function(event, data) {
+  if (data.type === Hls.ErrorTypes.NETWORK_ERROR && data.details === Hls.ErrorDetails.KEY_LOAD_ERROR) {
+    console.warn('Key load error, attempting reload...');
+    hls.startLoad();  // Retry loading
+  }
+});
+
+   </script> -->
 
 
 

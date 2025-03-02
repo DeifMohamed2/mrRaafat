@@ -361,82 +361,76 @@ async function updateWatchInUser (req,res,videoId,chapterID){
 
 
 }
-async function getVideoWatch(req,res){
-  const videoType = req.params.videoType;
-  const chapterID = req.params.chapterID;
-  const VideoId = req.params.VideoId;
+async function getVideoWatch(req, res) {
+  const { videoType, chapterID, VideoId } = req.params;
+  const chapter = await Chapter.findById(chapterID, {
+    chapterLectures: 1,
+    chapterSummaries: 1,
+    chapterSolvings: 1,
+  });
 
+  const videoCollections = {
+    lecture: chapter.chapterLectures,
+    summaries: chapter.chapterSummaries,
+    Solving: chapter.chapterSolvings,
+  };
 
-  const chapter = await Chapter.findById(chapterID, { chapterLectures: 1  , chapterSummaries: 1 , chapterSolvings: 1});
-  if (videoType=="lecture") {
-    const video = chapter.chapterLectures.find(video => video._id == VideoId);
-    const isPaid = req.userData.videosPaid.includes(VideoId);
-    if (video.paymentStatus=="Pay") {
-      if (isPaid) {
-
-        updateWatchInUser(req,res,VideoId,chapterID).then((result)=>{
-          res.render("student/watch", { title: "Watch", path: req.path, video: video, userData: req.userData });
-        })
-
-      } else {
-        res.redirect('/student/videos/lecture/'+chapterID);
-      }
-    }else{
-
-      updateWatchInUser(req,res,VideoId,chapterID).then((result)=>{
-        res.render("student/watch", { title: "Watch", path: req.path, video: video, userData: req.userData });
-      })
-      
-    }
-   
-    
-  }else if (videoType=="summaries") {
-    const video = chapter.chapterSummaries.find(video => video._id == VideoId);
-    const isPaid = req.userData.videosPaid.includes(VideoId);
-    if (video.paymentStatus=="Pay") {
-      if (isPaid) {
-
-        updateWatchInUser(req,res,VideoId,chapterID).then((result)=>{
-          res.render("student/watch", { title: "Watch", path: req.path, video: video, userData: req.userData });
-        })
-
-      } else {
-        res.redirect('/student/videos/summaries/'+chapterID);
-      }
-    }else{
-      updateWatchInUser(req,res,VideoId,chapterID).then((result)=>{
-        res.render("student/watch", { title: "Watch", path: req.path, video: video, userData: req.userData });
-      })
-    }
-
-  }else if (videoType=="Solving") {
-    const video = chapter.chapterSolvings.find(video => video._id == VideoId);
-    const isPaid = req.userData.videosPaid.includes(VideoId);
-    if (video.paymentStatus=="Pay") {
-      if (isPaid) {
-        updateWatchInUser(req,res,VideoId,chapterID).then((result)=>{
-          res.render("student/watch", { title: "Watch", path: req.path, video: video, userData: req.userData });
-        })
-      } else {
-        res.redirect('/student/videos/Solving/'+chapterID);
-      }
-    }else{
-      updateWatchInUser(req,res,VideoId,chapterID).then((result)=>{
-        res.render("student/watch", { title: "Watch", path: req.path, video: video, userData: req.userData });
-      })
-    }  
+  const video = videoCollections[videoType]?.find((vid) => vid._id == VideoId);
+  if (!video) {
+    return res.redirect('/error'); // Redirect if video not found
   }
+
+  const isPaid = req.userData.videosPaid.includes(VideoId);
+  const requiresPayment = video.paymentStatus === 'Pay';
+
+  if (requiresPayment && !isPaid) {
+    return res.redirect(`/student/videos/${videoType}/${chapterID}`);
+  }
+
+  // Update user watch history and render video with tokenized link
+  await updateWatchInUser(req, res, VideoId, chapterID);
+
+  // Define video path and other parameters for Bunny.net token
+  const videoId = video.videoURL; // Example video ID as token ID
+  // const tokenSecurityKey = '3c13c271-d42b-4ca6-8967-45c515bd0f67'; // Replace with actual Bunny.net secret key
+  // const expirationInSeconds = 50;
+  // const expirationTimestamp =
+  //   Math.floor(Date.now() / 1000) + expirationInSeconds;
+
+  // const token = generateBunnyToken(
+  //   tokenSecurityKey,
+  //   videoId,
+  //   expirationTimestamp
+  // );
+
+  // Construct the tokenized URL
+  let tokenizedURL = `https://iframe.mediadelivery.net/embed/337128/${videoId}`;
+  if (
+    video.videoURL.startsWith('<iframe') ||
+    video.videoURL.startsWith('<div')
+  ) {
+    tokenizedURL = video.videoURL;
+  }
+  res.render('student/watch', {
+    title: 'Watch',
+    path: req.path,
+    video: {
+      ...video,
+      videoURL: tokenizedURL,
+    },
+    userData: req.userData,
+  });
 }
+
+
 
 
 const watch_get = async (req, res) => {
   try {
-    
-  await getVideoWatch(req,res)
+    await getVideoWatch(req, res);
   } catch (error) {
     res.send(error.message);
   }
-
 };
 
 const uploadHW = async (req, res) => {

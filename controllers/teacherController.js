@@ -126,10 +126,10 @@ const addVideo_post = async (req, res) => {
       permissionToShow,
       AccessibleAfterViewing,
       videoAllowedAttemps,
+      accessibleAfterPassExam,
       videoPrice,
       imgURL,
       videoURL,
-
     } = req.body;
 
     // Validate input data
@@ -137,7 +137,7 @@ const addVideo_post = async (req, res) => {
       throw new Error('Missing required fields');
     }
 
-    if(imgURL=="" || videoURL==""){
+    if (imgURL == '' || videoURL == '') {
       throw new Error('Missing required fields');
     }
     // Generate unique ID for video object
@@ -147,102 +147,97 @@ const addVideo_post = async (req, res) => {
     // Create video object
     const VideoObject = {
       _id: videoId,
-      videoTitle: videoTitle || "",
-      paymentStatus: paymentStatus || "",
-      prerequisites: prerequisites || "",
-      permissionToShow: permissionToShow || "",
-      AccessibleAfterViewing: AccessibleAfterViewing || "",
+      videoTitle: videoTitle || '',
+      paymentStatus: paymentStatus || '',
+      prerequisites: prerequisites || '',
+      permissionToShow: permissionToShow || '',
+      AccessibleAfterViewing: AccessibleAfterViewing || '',
       videoAllowedAttemps: +videoAllowedAttemps || 0,
       videoPrice: videoPrice || 0,
-      videoURL: videoURL || "",
-      imgURL: imgURL || ""
+      videoURL: videoURL || '',
+      imgURL: imgURL || '',
+      accessibleAfterPassExam : accessibleAfterPassExam || '',
     };
 
-    const videosInfo = {}
-    videosInfo['_id'] = videoId
-    videosInfo['prerequisites'] = prerequisites
-    videosInfo['createdAt'] = currentDate
-    videosInfo['updatedAt'] = currentDate
-    videosInfo['fristWatch'] = null
-    videosInfo['lastWatch'] = null
-    videosInfo['videoName'] = videoTitle
+    const videosInfo = {};
+    videosInfo['_id'] = videoId;
+    videosInfo['prerequisites'] = prerequisites;
+    videosInfo['createdAt'] = currentDate;
+    videosInfo['updatedAt'] = currentDate;
+    videosInfo['fristWatch'] = null;
+    videosInfo['lastWatch'] = null;
+    videosInfo['videoName'] = videoTitle;
 
-
-    if (paymentStatus == "Pay") {
-      videosInfo['videoPurchaseStatus'] = false
-      videosInfo['isVideoPrepaid'] = true
+    if (paymentStatus == 'Pay') {
+      videosInfo['videoPurchaseStatus'] = false;
+      videosInfo['isVideoPrepaid'] = true;
     } else {
-      videosInfo['videoPurchaseStatus'] = true
-      videosInfo['isVideoPrepaid'] = false
+      videosInfo['videoPurchaseStatus'] = true;
+      videosInfo['isVideoPrepaid'] = false;
     }
-    if (prerequisites == "WithHw") {
-      videosInfo['isUploadedHWApproved'] = false
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps
-      videosInfo['numberOfWatches'] = 0
-      videosInfo['isUserUploadPerviousHWAndApproved'] = false
-      videosInfo['isHWIsUploaded'] = false
-      videosInfo['isUserEnterQuiz'] = true
-      videosInfo['accessibleAfterViewing'] = AccessibleAfterViewing
-    } else if (prerequisites == "WithExam") {
-      videosInfo['isUploadedHWApproved'] = false
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps
-      videosInfo['numberOfWatches'] = 0
-      videosInfo['isUserUploadPerviousHWAndApproved'] = true
-      videosInfo['isHWIsUploaded'] = false
-      videosInfo['isUserEnterQuiz'] = false
-      videosInfo['accessibleAfterViewing'] = ''
-    } else if (prerequisites == "WithExamaAndHw") {
-      videosInfo['isUploadedHWApproved'] = false
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps
-      videosInfo['numberOfWatches'] = 0
-      videosInfo['isUserUploadPerviousHWAndApproved'] = false
-      videosInfo['isHWIsUploaded'] = false
-      videosInfo['isUserEnterQuiz'] = false
-      videosInfo['accessibleAfterViewing'] = AccessibleAfterViewing
+    if (prerequisites == 'WithHw') {
+      videosInfo['isUploadedHWApproved'] = false;
+      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
+      videosInfo['numberOfWatches'] = 0;
+      videosInfo['isUserUploadPerviousHWAndApproved'] = false;
+      videosInfo['isHWIsUploaded'] = false;
+      videosInfo['isUserEnterQuiz'] = true;
+      videosInfo['accessibleAfterViewing'] = AccessibleAfterViewing;
+    } else if (prerequisites == 'WithExam') {
+      videosInfo['isUploadedHWApproved'] = false;
+      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
+      videosInfo['numberOfWatches'] = 0;
+      videosInfo['isUserUploadPerviousHWAndApproved'] = true;
+      videosInfo['isHWIsUploaded'] = false;
+      videosInfo['isUserEnterQuiz'] = false;
+      videosInfo['accessibleAfterViewing'] = '';
+    } else if (prerequisites == 'WithExamaAndHw') {
+      videosInfo['isUploadedHWApproved'] = false;
+      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
+      videosInfo['numberOfWatches'] = 0;
+      videosInfo['isUserUploadPerviousHWAndApproved'] = false;
+      videosInfo['isHWIsUploaded'] = false;
+      videosInfo['isUserEnterQuiz'] = false;
+      videosInfo['accessibleAfterViewing'] = AccessibleAfterViewing;
     } else {
-      videosInfo['isUploadedHWApproved'] = false
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps
-      videosInfo['numberOfWatches'] = 0
-      videosInfo['isUserUploadPerviousHWAndApproved'] = true
-      videosInfo['isHWIsUploaded'] = false
-      videosInfo['isUserEnterQuiz'] = true
-      videosInfo['accessibleAfterViewing'] = ''
-
+      videosInfo['isUploadedHWApproved'] = false;
+      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
+      videosInfo['numberOfWatches'] = 0;
+      videosInfo['isUserUploadPerviousHWAndApproved'] = true;
+      videosInfo['isHWIsUploaded'] = false;
+      videosInfo['isUserEnterQuiz'] = true;
+      videosInfo['accessibleAfterViewing'] = '';
     }
-
-
 
     // Update chapter with video object
     await Chapter.findOneAndUpdate(
       { _id: ChaptersIds },
       { $push: { [`${VideoType}`]: VideoObject } }
     ).then((resultChapter) => {
-      User.updateMany({ Grade: resultChapter.chapterGrade },
+      User.updateMany(
+        { Grade: resultChapter.chapterGrade },
         {
           $push: {
-            videosInfo: videosInfo
-          }
+            videosInfo: videosInfo,
+          },
         },
         {
-          upsert: true
+          upsert: true,
         }
-      ).then((result) => {
-
-        res.status(201).redirect('/teacher/addVideo');
-      }).catch((error) => {
-        res.send("error can you refresh and try again")
-      })
-    })
-
-
+      )
+        .then((result) => {
+          res.status(201).redirect('/teacher/addVideo');
+        })
+        .catch((error) => {
+          res.send('error can you refresh and try again');
+        });
+    });
   } catch (error) {
     // Handle errors
     console.error('Error adding video:', error.message);
     res.status(500).redirect('/teacher/addVideo?error=true');
   }
-
-
-}
+};
 
 
 // =================================================== END ADD Videos ================================================ // 
