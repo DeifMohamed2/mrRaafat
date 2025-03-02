@@ -242,14 +242,8 @@
                                                             <option value="disapper">اخفاء الفيديو</option>
                                                         </select>
                                                         <select name="accessibleAfterPassExam" id="accessibleAfterPassExam" class="Grade" disabled required>
-                                                                <option >اختر اسم الامتحان</option> 
-                                                                <% if (quizzes) { %>
-                                                                    <% quizzes.forEach(quiz=> { %>
-                                                                        <option value="<%= quiz._id %>">
-                                                                            <%= quiz.quizName %>
-                                                                        </option>
-                                                                        <% }) %>
-                                                                <% } %>
+                                                                <option value="" >اختر اسم الامتحان</option> 
+                                                                
                                                                 
                                                         </select>
 
