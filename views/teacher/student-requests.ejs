@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title">طلبات تسجيل الطلاب</h1>
+          <div class="page-actions">
+            <a href="/teacher/students" class="btn btn-outline">
+              <i class="fas fa-users"></i>
+              قائمة الطلاب
+            </a>
+          </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-container">
+          <form action="/teacher/students/requests" method="GET" class="filters-form">
+            <div class="filter-group">
+              <label for="grade">الصف</label>
+              <select name="grade" id="grade" class="form-select">
+                <option value="">الكل</option>
+                <option value="Grade1" <%= filters.grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                <option value="Grade2" <%= filters.grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                <option value="Grade3" <%= filters.grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="search">بحث</label>
+              <input type="text" name="search" id="search" class="form-input" value="<%= filters.search || '' %>" placeholder="اسم أو كود الطالب...">
+            </div>
+            
+            <div class="filter-actions">
+              <button type="submit" class="btn btn-primary">تطبيق</button>
+              <a href="/teacher/students/requests" class="btn btn-outline">إعادة ضبط</a>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Requests Table -->
+        <div class="teacher-table-container">
+          <table class="teacher-table">
+            <thead>
+              <tr>
+                <th>الطالب</th>
+                <th>الكود</th>
+                <th>الصف</th>
+                <th>المحافظة</th>
+                <th>رقم الهاتف</th>
+                <th>تاريخ التسجيل</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (students && students.length > 0) { %>
+                <% students.forEach(student => { %>
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                          <%= student.Username ? student.Username.charAt(0).toUpperCase() : 'S' %>
+                        </div>
+                        <div>
+                          <div style="font-weight: 600; color: var(--text-primary);"><%= student.Username %></div>
+                          <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= student.gov || 'غير محدد' %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= student.Code %></td>
+                    <td>
+                      <% let gradeName = ''; %>
+                      <% if (student.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+                      <% if (student.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+                      <% if (student.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+                      <%= gradeName %>
+                    </td>
+                    <td><%= student.gov || 'غير محدد' %></td>
+                    <td><%= student.phone || 'غير محدد' %></td>
+                    <td><%= new Date(student.createdAt).toLocaleString('ar-EG') %></td>
+                    <td>
+                      <div class="table-actions">
+                        <button class="btn btn-sm btn-success approve-btn" data-id="<%= student._id %>">
+                          <i class="fas fa-check"></i> 
+                          <span>قبول</span>
+                        </button>
+                        <button class="btn btn-sm btn-danger reject-btn" data-id="<%= student._id %>">
+                          <i class="fas fa-times"></i> 
+                          <span>رفض</span>
+                        </button>
+                        <a href="/teacher/students/<%= student._id %>" class="btn btn-sm btn-info">
+                          <i class="fas fa-eye"></i> 
+                          <span>عرض</span>
+                        </a>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="<%= student._id %>" data-name="<%= student.Username %>">
+                          <i class="fas fa-trash"></i>
+                          <span>حذف</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" class="empty-table">
+                    <div class="empty-state">
+                      <i class="fas fa-user-check"></i>
+                      <p>لا توجد طلبات تسجيل جديدة</p>
+                    </div>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div class="pagination">
+            <% if (currentPage > 1) { %>
+              <a href="/teacher/students/requests?page=<%= currentPage - 1 %>&grade=<%= filters.grade || '' %>&search=<%= filters.search || '' %>" class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            <% } %>
+            
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a href="/teacher/students/requests?page=<%= i %>&grade=<%= filters.grade || '' %>&search=<%= filters.search || '' %>" 
+                 class="pagination-item <%= i === currentPage ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            <% } %>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="/teacher/students/requests?page=<%= currentPage + 1 %>&grade=<%= filters.grade || '' %>&search=<%= filters.search || '' %>" class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الحذف</h3>
+        <button class="modal-close" id="closeDeleteModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+          <p id="deleteConfirmText">هل أنت متأكد من حذف هذا الطالب؟</p>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">لا يمكن التراجع عن هذا الإجراء</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelDelete">إلغاء</button>
+        <button class="btn btn-danger" id="confirmDelete" data-id="">حذف</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Approve Confirmation Modal -->
+  <div class="modal-overlay" id="approveModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تفعيل حساب الطالب</h3>
+        <button class="modal-close" id="closeApproveModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success-color); margin-bottom: 1rem;"></i>
+          <p id="approveConfirmText">هل أنت متأكد من تفعيل حساب هذا الطالب؟</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelApprove">إلغاء</button>
+        <button class="btn btn-success" id="confirmApprove" data-id="">تفعيل</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Reject Confirmation Modal -->
+  <div class="modal-overlay" id="rejectModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">رفض طلب الطالب</h3>
+        <button class="modal-close" id="closeRejectModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-times-circle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+          <p id="rejectConfirmText">هل أنت متأكد من رفض طلب هذا الطالب؟</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelReject">إلغاء</button>
+        <button class="btn btn-danger" id="confirmReject" data-id="">رفض</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Search functionality
+    document.getElementById('search').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.querySelector('.filters-form').submit();
+      }
+    });
+
+    // Modal references
+    const approveModal = document.getElementById('approveModal');
+    const rejectModal = document.getElementById('rejectModal');
+    const deleteModal = document.getElementById('deleteModal');
+    
+    // Approve student
+    document.querySelectorAll('.approve-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        document.getElementById('confirmApprove').setAttribute('data-id', studentId);
+        approveModal.classList.add('show');
+      });
+    });
+    
+    document.getElementById('closeApproveModal').addEventListener('click', function() {
+      approveModal.classList.remove('show');
+    });
+    
+    document.getElementById('cancelApprove').addEventListener('click', function() {
+      approveModal.classList.remove('show');
+    });
+    
+    document.getElementById('confirmApprove').addEventListener('click', function() {
+      const studentId = this.getAttribute('data-id');
+      approveModal.classList.remove('show');
+      
+      fetch(`/teacher/students/${studentId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          alert('تم قبول الطالب بنجاح');
+          location.reload();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء قبول الطالب');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء قبول الطالب');
+      });
+    });
+
+    // Reject student
+    document.querySelectorAll('.reject-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        document.getElementById('confirmReject').setAttribute('data-id', studentId);
+        rejectModal.classList.add('show');
+      });
+    });
+    
+    document.getElementById('closeRejectModal').addEventListener('click', function() {
+      rejectModal.classList.remove('show');
+    });
+    
+    document.getElementById('cancelReject').addEventListener('click', function() {
+      rejectModal.classList.remove('show');
+    });
+    
+    document.getElementById('confirmReject').addEventListener('click', function() {
+      const studentId = this.getAttribute('data-id');
+      rejectModal.classList.remove('show');
+      
+      fetch(`/teacher/students/${studentId}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          alert('تم رفض الطالب بنجاح');
+          location.reload();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء رفض الطالب');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء رفض الطالب');
+      });
+    });
+    
+    // Delete student
+    document.querySelectorAll('.delete-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        const studentName = this.getAttribute('data-name');
+        
+        document.getElementById('deleteConfirmText').textContent = `هل أنت متأكد من حذف الطالب "${studentName}"؟ هذا الإجراء لا يمكن التراجع عنه.`;
+        document.getElementById('confirmDelete').setAttribute('data-id', studentId);
+        deleteModal.classList.add('show');
+      });
+    });
+    
+    document.getElementById('closeDeleteModal').addEventListener('click', function() {
+      deleteModal.classList.remove('show');
+    });
+    
+    document.getElementById('cancelDelete').addEventListener('click', function() {
+      deleteModal.classList.remove('show');
+    });
+    
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+      const studentId = this.getAttribute('data-id');
+      deleteModal.classList.remove('show');
+      
+      fetch(`/teacher/students/${studentId}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          alert('تم حذف الطالب بنجاح');
+          location.reload();
+        } else {
+          alert(data.message || 'حدث خطأ أثناء حذف الطالب');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء حذف الطالب');
+      });
+    });
+  </script>
+</body>
+</html> 

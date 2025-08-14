@@ -1,0 +1,476 @@
+/* Header styling */
+header {
+  width: 100%;
+  height: 80px;
+  position: sticky;
+  top: 0;
+  background-color: var(--body-color);
+  z-index: 3000;
+  border-bottom: 3px solid transparent;
+  transition: var(--main-transition), border-bottom 0.3s ease-in-out;
+}
+.removeBorder {
+  border-bottom: 3px solid #f8e2b1;
+}
+header .sign-form {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: calc(100% + 20px);
+  width: 270px;
+  right: 0px;
+  gap: 10px;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: var(--body-color);
+  transform: scale(0);
+  transform-origin: top right;
+  transition: transform 0.3s ease-in-out;
+  z-index: 2000;
+  box-shadow: -5px -5px 8px rgba(8, 12, 20, 0.25),
+    5px 5px 8px rgba(70, 81, 101, 0.25);
+}
+.sign-in-active,
+.sign-up-active {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 15px;
+  padding: 5px;
+  width: 100%;
+  color: var(--tags-color);
+  border-radius: 0.5rem;
+  transition: var(--main-transition), var(--secoundery-transition);
+}
+.sign-in-active span,
+.sign-up-active span {
+  color: white;
+}
+.sign-in-active:hover,
+.sign-up-active:hover {
+  background-color: transparent;
+}
+.sign-in-active:active,
+.sign-up-active:active {
+  background-color: transparent;
+}
+.sign-in-active:hover i,
+.sign-in-active:hover span {
+  color: var(--secoundery-color);
+}
+.sign-up-active:hover i,
+.sign-up-active:hover span {
+  color: var(--danger--color);
+}
+.sign-in-active:active i,
+.sign-in-active:active span {
+  color: var(--secoundery-color);
+}
+.sign-up-active:active i,
+.sign-up-active:active span {
+  color: var(--danger--color);
+}
+
+.sign-in-active {
+  border: 2px solid var(--secoundery-color);
+  background-color: var(--secoundery-color);
+}
+.sign-up-active {
+  border: 2px solid var(--danger--color);
+  background-color: var(--danger--color);
+}
+.sign-in-active i,
+.sign-up-active i {
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  margin-left: 0.75rem;
+}
+header .sign-form.active {
+  transform: scale(1);
+}
+/* Styling for the scroll progress bar */
+.scroll-progress {
+  z-index: 1500;
+  width: 0;
+  background-color: var(--secoundery-color);
+  height: 3px;
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  transition: width 0.1s ease-in-out;
+}
+
+header .container {
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Left section in the layout */
+.Section__right {
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.Section__right #toggle-btn,
+.Section__right #user-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: var(--tags-color);
+  background-color: var(--light-bg);
+  border-radius: 0.5rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  cursor: pointer;
+  text-align: center;
+}
+.Section__right #toggle-btn {
+  margin-right: 1rem;
+}
+.Section__right #user-btn {
+  display: none;
+}
+/* Navbar section */
+.navbar-logo {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.navbar-logo i {
+  color: var(--primary-color);
+  font-size: 40px;
+}
+
+.navbar__signin {
+  height: 3rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sign-in button styling */
+.navbar__signin-btn,
+.navbar__signup-btn {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--tags-color);
+  border-radius: 0.5rem;
+  transition: var(--main-transition), var(--secoundery-transition),
+    box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out,
+    border 0.3s ease-in-out;
+  z-index: 1000;
+}
+.navbar__signin-btn:hover {
+  transform: scale(1.02);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+.navbar__signin-btn:active {
+  transform: scale(1.02);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+.navbar__signin-btn span,
+.navbar__signup-btn span {
+  font-size: 14px;
+}
+.navbar__signup-btn span {
+  color: white;
+  transition: var(--secoundery-transition);
+}
+.navbar__signup-btn:hover span {
+  color: var(--danger--color);
+}
+.navbar__signup-btn:active span {
+  color: var(--danger--color);
+}
+.navbar__signin-btn {
+  border: 2px solid transparent;
+  height: 2.5rem;
+  width: 140px;
+  background-color: transparent;
+}
+.active-btn:hover {
+  border: 2px solid var(--secoundery-color);
+}
+.active-btn:active {
+  border: 2px solid var(--secoundery-color);
+}
+.navbar__signin-btn-colored {
+  color: var(--secoundery-color);
+}
+.navbar__signup-btn {
+  height: 3rem;
+  border: 2px solid var(--danger--color);
+  width: 170px;
+  background-color: var(--danger--color);
+}
+
+/* Icon transition for sign-in button */
+.navbar__signin-btn i,
+.navbar__signup-btn i {
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  margin-left: 0.75rem;
+}
+.navbar__signin-btn i {
+  color: var(--secoundery-color);
+}
+.navbar__signup-btn i {
+  color: #111827;
+  transition: var(--secoundery-transition);
+}
+
+.navbar__signup-btn:hover {
+  background-color: transparent;
+  color: var(--danger--color);
+}
+.navbar__signup-btn:hover i {
+  color: var(--danger--color);
+}
+
+.navbar__signup-btn:active {
+  background-color: transparent;
+  color: var(--danger--color);
+}
+.navbar__signup-btn:active i {
+  color: var(--danger--color);
+}
+@media (max-width: 768px) {
+  header .container {
+    gap: 0;
+  }
+  .container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .navbar-logo {
+    gap: 5px;
+  }
+
+  .hidden {
+    display: none;
+  }
+  .navbar__signin {
+    gap: 0;
+  }
+  .Section__right #toggle-btn {
+    margin-right: 0.5rem;
+  }
+}
+
+/* LANDING SECTION */
+
+.Landing-page .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.Landing-page_right {
+  width: 45%;
+  position: relative;
+  z-index: 6;
+  height: 110%;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  text-align: right;
+  font-weight: bold;
+}
+.Landing-page_right h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+.line-between {
+  width: 250px;
+  margin: 20px 0;
+  background-color: var(--primary-color);
+  height: 4px;
+}
+.Landing-page_right h2 span {
+  color: var(--primary-color);
+}
+.Landing-page_right p {
+  opacity: 1;
+  line-height: 1.7;
+  max-width: 500px;
+  font-size: 1.25rem;
+}
+
+.Landing-page_left {
+
+  width: 28%;
+
+}
+.Landing-page_left img {
+  width: 100%;
+  object-fit: cover;
+  max-width: 100%;
+  border-bottom-right-radius: 40%;
+  border-bottom-left-radius: 30%;
+
+}
+.Landing-page_right .Landing-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.Landing-page .Landing-btns button {
+  border: none;
+  font-size: 1.125rem;
+  padding: 10px 25px;
+  border-radius: 0.75rem;
+  cursor: pointer;
+}
+.Landing-page .Landing-btns .Landing-btn-book {
+  border: 2px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: #111827;
+  transform: perspective(1px) translateZ(0);
+  transition-duration: 0.3s;
+  transition-property: transform;
+}
+.Landing-page .Landing-btns .Landing-btn-book:hover {
+  transform: scale(1.15);
+}
+.Landing-page .Landing-btns .Landing-btn-book:active {
+  transform: scale(1.15);
+}
+.Landing-page .Landing-btns .Landing-btn-book span {
+  color: white;
+}
+
+.Landing-page .Landing-btns .Landing-btn-enroll {
+  border: 2px solid var(--danger--color);
+  background-color: var(--danger--color);
+  transition: var(--main-transition), var(--secoundery-transition);
+  color: white;
+}
+.Landing-page .Landing-btns .Landing-btn-enroll:hover {
+  background-color: transparent;
+  color: var(--danger--color);
+}
+.Landing-page .Landing-btns .Landing-btn-enroll:active {
+  background-color: transparent;
+  color: var(--danger--color);
+}
+.Landing-btns .line-btween {
+  height: 2px;
+  margin: 10px;
+  width: 50px;
+  background-color: var(--tags-color);
+  transition: var(--main-transition);
+}
+@media (max-width: 1222px) {
+  .Landing-page {
+    height: auto;
+  }
+   .Landing-page .container {
+    padding: 50px 0 0;
+  }
+  .Landing-page_right h2 {
+    font-size: 3.25rem;
+  }
+  .Landing-page_right p {
+    font-size: 1.125rem;
+  }
+  .Landing-page .Landing-btns button {
+    font-size: 0.875rem;
+    padding: 8px 20px;
+  }
+}
+@media (max-width: 992px) {
+  .Landing-page {
+    height: auto;
+  }
+  .Landing-page .container {
+    padding-top: var(--section-inner-space);
+  }
+  .Landing-page_left {
+    width: 50%;
+  }
+
+  .Landing-page_right {
+    width: 100%;
+  }
+  .Landing-page_right {
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+  .Landing-page .container {
+    padding-top: 50px;
+    gap: 50px;
+    flex-direction: column-reverse;
+  }
+  .Landing-page_right .Landing-btns {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .Landing-page_right h2 {
+    font-size: 3.5rem;
+  }
+  .Landing-page_right p {
+    font-size: 1rem;
+  }
+  .Landing-page .Landing-btns button {
+    font-size: 1.125rem;
+    padding: 10px 25px;
+  }
+
+  .navbar__signin-btn,
+  .navbar__signup-btn {
+    display: none;
+  }
+  .Section__right #user-btn {
+    display: flex;
+    position: relative;
+  }
+}
+
+@media (max-width: 576px) {
+  
+  /* .Landing-page {
+    height: calc(100vh - 130px);
+  } */
+  .Landing-page_right {
+    justify-content: flex-start;
+  }
+  .Landing-page_right h2 {
+    font-size: clamp(1rem, 11.5vw, 3rem);
+    max-width: 100%;
+  }
+  .Landing-page .container {
+    gap: 0px;
+    padding: 50px 0 0;
+  }
+  /* .Landing-page_left {
+    width: 65%;
+    margin-top: 10px;
+  } */
+}
+
+@media (max-width: 376px) {
+  .Landing-page_left {
+    width: 50%;
+  }
+}

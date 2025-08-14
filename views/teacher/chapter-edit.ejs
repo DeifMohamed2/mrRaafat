@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعديل الفصل - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <header class="teacher-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">تعديل الفصل</h1>
+        </div>
+        
+        <div class="header-right">
+          <a href="/teacher/chapters" class="btn btn-outline">
+            <i class="fas fa-arrow-right"></i>
+            العودة للفصول
+          </a>
+        </div>
+      </header>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <% if (error === 'missing_fields') { %>
+              يرجى ملء جميع الحقول المطلوبة
+            <% } else if (error === 'update_failed') { %>
+              حدث خطأ أثناء تحديث الفصل
+            <% } else { %>
+              <%= error %>
+            <% } %>
+          </div>
+        <% } %>
+        
+        <form id="chapterEditForm" action="/teacher/chapters/<%= chapter._id %>/edit" method="POST" class="needs-validation" novalidate>
+          <div class="form-grid">
+            <!-- Basic Information -->
+            <div class="form-section">
+              <h3 class="section-title">المعلومات الأساسية</h3>
+              
+              <div class="form-group">
+                <label class="form-label">اسم الفصل <span style="color: var(--danger-color)">*</span></label>
+                <input type="text" class="form-input" id="chapterName" name="chapterName" value="<%= chapter.chapterName %>" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">الصف الدراسي <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="chapterGrade" name="chapterGrade" required>
+                  <option value="" disabled>اختر الصف</option>
+                  <option value="1" <%= chapter.chapterGrade === '1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                  <option value="2" <%= chapter.chapterGrade === '2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                  <option value="3" <%= chapter.chapterGrade === '3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">اللغة <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="ARorEN" name="ARorEN" required>
+                  <option value="" disabled>اختر اللغة</option>
+                  <option value="AR" <%= chapter.ARorEN === 'AR' ? 'selected' : '' %>>العربية</option>
+                  <option value="EN" <%= chapter.ARorEN === 'EN' ? 'selected' : '' %>>الإنجليزية</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">وصف الفصل</label>
+                <textarea class="form-input" id="chapterDescription" name="chapterDescription" rows="4"><%= chapter.chapterDescription || '' %></textarea>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">أضف وصفًا مختصرًا للفصل</small>
+              </div>
+            </div>
+            
+            <!-- Access & Pricing -->
+            <div class="form-section">
+              <h3 class="section-title">الوصول والتسعير</h3>
+              
+              <div class="form-group">
+                <label class="form-label">إمكانية الوصول <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="chapterAccessibility" name="chapterAccessibility" required>
+                  <option value="" disabled>اختر نوع الوصول</option>
+                  <option value="EnterInFree" <%= chapter.chapterAccessibility === 'EnterInFree' ? 'selected' : '' %>>دخول مجاني</option>
+                  <option value="EnterInPaid" <%= chapter.chapterAccessibility === 'EnterInPaid' ? 'selected' : '' %>>دخول مدفوع</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="priceGroup">
+                <label class="form-label">سعر الفصل</label>
+                <div style="position: relative;">
+                  <input type="number" class="form-input" id="chapterPrice" name="chapterPrice" min="0" step="0.01" value="<%= chapter.chapterPrice || 0 %>">
+                  <span style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-secondary);">جنيه</span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">رابط الصورة</label>
+                <input type="text" class="form-input" id="chapterIMG" name="chapterIMG" value="<%= chapter.chapterIMG || '/images/default-chapter.jpg' %>">
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">اترك فارغًا للصورة الافتراضية</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">حالة الفصل</label>
+                <select class="form-select" id="isActive" name="isActive">
+                  <option value="true" <%= chapter.isActive ? 'selected' : '' %>>نشط</option>
+                  <option value="false" <%= !chapter.isActive ? 'selected' : '' %>>غير نشط</option>
+                </select>
+              </div>
+              
+              <!-- Advanced Options -->
+              <div class="form-group">
+                <label class="form-label">خيارات متقدمة</label>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" id="isFeatured" name="isFeatured" <%= chapter.isFeatured ? 'checked' : '' %> style="width: auto;">
+                  <label for="isFeatured" style="margin: 0;">عرض في الصفحة الرئيسية</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Preview -->
+          <div class="dashboard-card" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 class="section-title">معاينة الفصل</h3>
+            
+            <div style="display: flex; gap: 2rem; align-items: flex-start;">
+              <div style="flex-shrink: 0; width: 200px; height: 150px; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); display: flex; align-items: center; justify-content: center;">
+                <img id="previewImg" src="<%= chapter.chapterIMG || '/images/default-chapter.jpg' %>" alt="صورة الفصل" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              
+              <div>
+                <h3 id="previewName" style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.5rem;"><%= chapter.chapterName %></h3>
+                
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                  <span id="previewGrade" class="status-badge" style="background: var(--info-color);">
+                    <% if(chapter.chapterGrade === '1') { %>
+                      الصف الأول الثانوي
+                    <% } else if(chapter.chapterGrade === '2') { %>
+                      الصف الثاني الثانوي
+                    <% } else if(chapter.chapterGrade === '3') { %>
+                      الصف الثالث الثانوي
+                    <% } %>
+                  </span>
+                  
+                  <span id="previewAccess" class="status-badge <%= chapter.chapterAccessibility === 'EnterInFree' ? 'active' : 'pending' %>">
+                    <%= chapter.chapterAccessibility === 'EnterInFree' ? 'مجاني' : 'مدفوع' %>
+                  </span>
+                  
+                  <% if(chapter.chapterAccessibility === 'EnterInPaid') { %>
+                    <span id="previewPrice" class="status-badge" style="background: var(--danger-color);"><%= chapter.chapterPrice %> جنيه</span>
+                  <% } %>
+                </div>
+                
+                <p id="previewDescription" style="color: var(--text-secondary); margin-bottom: 0;"><%= chapter.chapterDescription || 'لا يوجد وصف' %></p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Form Actions -->
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i>
+              حفظ التغييرات
+            </button>
+            
+            <a href="/teacher/chapters/<%= chapter._id %>" class="btn btn-outline">
+              <i class="fas fa-times"></i>
+              إلغاء
+            </a>
+            
+            <button type="button" id="deleteChapterBtn" class="btn btn-danger">
+              <i class="fas fa-trash"></i>
+              حذف الفصل
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الحذف</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+          <p>هل أنت متأكد من حذف الفصل الدراسي "<%= chapter.chapterName %>"؟</p>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">لا يمكن التراجع عن هذا الإجراء</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">إلغاء</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">حذف</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Sidebar Toggle
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    
+    // Form validation
+    const form = document.getElementById('chapterEditForm');
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    });
+
+    // Toggle price field based on accessibility
+    const accessibilitySelect = document.getElementById('chapterAccessibility');
+    const priceGroup = document.getElementById('priceGroup');
+    
+    function togglePriceField() {
+      if (accessibilitySelect.value === 'EnterInPaid') {
+        priceGroup.style.display = 'block';
+        document.getElementById('chapterPrice').setAttribute('required', 'required');
+      } else {
+        priceGroup.style.display = 'none';
+        document.getElementById('chapterPrice').removeAttribute('required');
+      }
+    }
+    
+    togglePriceField();
+    accessibilitySelect.addEventListener('change', togglePriceField);
+
+    // Live preview
+    const nameInput = document.getElementById('chapterName');
+    const gradeSelect = document.getElementById('chapterGrade');
+    const accessSelect = document.getElementById('chapterAccessibility');
+    const priceInput = document.getElementById('chapterPrice');
+    const imgInput = document.getElementById('chapterIMG');
+    const descInput = document.getElementById('chapterDescription');
+    
+    const previewName = document.getElementById('previewName');
+    const previewGrade = document.getElementById('previewGrade');
+    const previewAccess = document.getElementById('previewAccess');
+    const previewImg = document.getElementById('previewImg');
+    const previewDescription = document.getElementById('previewDescription');
+    
+    nameInput.addEventListener('input', function() {
+      previewName.textContent = this.value || 'اسم الفصل';
+    });
+    
+    gradeSelect.addEventListener('change', function() {
+      let gradeText = '';
+      if (this.value === '1') gradeText = 'الصف الأول الثانوي';
+      else if (this.value === '2') gradeText = 'الصف الثاني الثانوي';
+      else if (this.value === '3') gradeText = 'الصف الثالث الثانوي';
+      previewGrade.textContent = gradeText;
+    });
+    
+    accessSelect.addEventListener('change', function() {
+      if (this.value === 'EnterInFree') {
+        previewAccess.textContent = 'مجاني';
+        previewAccess.className = 'status-badge active';
+        
+        // Hide or remove price badge
+        const existingPrice = document.getElementById('previewPrice');
+        if (existingPrice) existingPrice.remove();
+      } else {
+        previewAccess.textContent = 'مدفوع';
+        previewAccess.className = 'status-badge pending';
+        
+        // Add or update price badge
+        let priceElement = document.getElementById('previewPrice');
+        if (!priceElement) {
+          priceElement = document.createElement('span');
+          priceElement.id = 'previewPrice';
+          priceElement.className = 'status-badge';
+          priceElement.style.background = 'var(--danger-color)';
+          previewAccess.parentNode.insertBefore(priceElement, previewAccess.nextSibling);
+        }
+        priceElement.textContent = priceInput.value + ' جنيه';
+      }
+    });
+    
+    priceInput.addEventListener('input', function() {
+      const priceElement = document.getElementById('previewPrice');
+      if (priceElement) {
+        priceElement.textContent = this.value + ' جنيه';
+      }
+    });
+    
+    imgInput.addEventListener('input', function() {
+      previewImg.src = this.value || '/images/default-chapter.jpg';
+    });
+    
+    descInput.addEventListener('input', function() {
+      previewDescription.textContent = this.value || 'لا يوجد وصف';
+    });
+
+    // Delete chapter functionality
+    const deleteBtn = document.getElementById('deleteChapterBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    
+    function showDeleteModal() {
+      document.getElementById('deleteModal').classList.add('show');
+    }
+    
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('show');
+    }
+    
+    deleteBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      showDeleteModal();
+    });
+    
+    confirmDeleteBtn.addEventListener('click', function() {
+      // Send delete request
+      fetch('/teacher/chapters/<%= chapter._id %>/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/teacher/chapters?success=chapter_deleted';
+        } else {
+          alert('حدث خطأ أثناء حذف الفصل');
+          closeDeleteModal();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء حذف الفصل');
+        closeDeleteModal();
+      });
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDeleteModal();
+      }
+    });
+  </script>
+</body>
+</html> 
+</script>

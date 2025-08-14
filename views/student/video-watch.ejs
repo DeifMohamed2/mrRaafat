@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= video.videoName || 'مشاهدة الفيديو' %> - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <style>
+    .video-container {
+      background: var(--gray-900);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--spacing-xl);
+      position: relative;
+    }
+    
+    .video-player {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    
+    .video-player iframe {
+      border: none;
+    }
+    
+    .video-player > div {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    
+    .video-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255, 255, 255, 0.1);
+      font-size: 1.5rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 10;
+      user-select: none;
+    }
+    
+    .video-info {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .video-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--spacing-lg);
+      align-items: start;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .video-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .video-subtitle {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    
+    .chapter-badge, .video-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-xl);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .chapter-badge {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    
+    .badge-lecture {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+    
+    .badge-summary {
+      background: var(--success-light);
+      color: var(--success-color);
+    }
+    
+    .badge-solving {
+      background: var(--warning-light);
+      color: var(--warning-color);
+    }
+    
+    .video-meta {
+      display: flex;
+      gap: var(--spacing-lg);
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+    
+    .video-meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+    
+    .video-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+    
+    .attempts-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--accent-orange);
+      color: var(--white);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-xl);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .video-progress {
+      background: var(--gray-100);
+      border-radius: var(--radius-xl);
+      height: 8px;
+      margin-bottom: var(--spacing-lg);
+      overflow: hidden;
+    }
+    
+    .video-progress-fill {
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    
+    .video-description {
+      color: var(--gray-700);
+      line-height: 1.6;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .homework-section {
+      background: var(--gray-50);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      border: 2px dashed var(--gray-300);
+    }
+    
+    .homework-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .homework-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--accent-orange);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .homework-info h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .homework-info p {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+    
+    .homework-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    
+    .file-upload-area {
+      background: var(--white);
+      border: 2px dashed var(--primary-color);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      text-align: center;
+      margin: var(--spacing-lg) 0;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .file-upload-area:hover {
+      background: var(--gray-50);
+      border-color: var(--primary-dark);
+    }
+    
+    .file-upload-area.dragover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary-color);
+      transform: scale(1.02);
+    }
+    
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .upload-text {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .upload-hint {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+    }
+    
+    .file-list {
+      margin-top: var(--spacing-lg);
+    }
+    
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md);
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary-color);
+      color: var(--white);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .file-details h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .file-details p {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+    
+    .file-actions button {
+      background: none;
+      border: none;
+      color: var(--error);
+      cursor: pointer;
+      padding: var(--spacing-xs);
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+    }
+    
+    .file-actions button:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .breadcrumb {
+      background: var(--gray-50);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .breadcrumb-link {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    .breadcrumb-link:hover {
+      text-decoration: underline;
+    }
+    
+    .related-content {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--spacing-lg);
+    }
+    
+    .related-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .related-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-bottom: var(--spacing-sm);
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .related-item:hover {
+      background: var(--gray-50);
+      border-color: var(--primary-color);
+      transform: translateX(-2px);
+    }
+    
+    .related-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary-color);
+      color: var(--white);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    .related-info h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .related-info p {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+    
+    .success-modal, .rest-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .modal-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .modal-icon.success {
+      color: var(--secondary-color);
+    }
+    
+    .modal-icon.rest {
+      color: var(--accent-orange);
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .modal-description {
+      color: var(--gray-600);
+      margin-bottom: var(--spacing-xl);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+          <i class="fas fa-graduation-cap"></i>
+          منصة الشهادة
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="/student/dash" class="nav-link">
+            <i class="material-icons-outlined nav-icon">dashboard</i>
+            <span>لوحة التحكم</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/chapters" class="nav-link active">
+            <i class="material-icons-outlined nav-icon">library_books</i>
+            <span>الأبواب التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/exams" class="nav-link">
+            <i class="material-icons-outlined nav-icon">quiz</i>
+            <span>الامتحانات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/PDFs" class="nav-link">
+            <i class="material-icons-outlined nav-icon">description</i>
+            <span>المواد التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/ranking" class="nav-link">
+            <i class="material-icons-outlined nav-icon">leaderboard</i>
+            <span>التصنيف</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/settings" class="nav-link">
+            <i class="material-icons-outlined nav-icon">settings</i>
+            <span>الإعدادات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/logOut" class="nav-link">
+            <i class="material-icons-outlined nav-icon">logout</i>
+            <span>تسجيل الخروج</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="/student/chapters" class="breadcrumb-link">الأبواب التعليمية</a>
+        <span> / </span>
+        <a href="/student/chapter/<%= chapterId %>" class="breadcrumb-link"><%= chapterName %></a>
+        <span> / </span>
+        <span><%= video.videoName || 'مشاهدة الفيديو' %></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 300px; gap: var(--spacing-xl);">
+        <!-- Main Video Section -->
+        <div>
+          <!-- Video Player -->
+          <div class="video-container">
+            <div class="video-player" dir="ltr" id="videoPlayer">
+              <% if (video && video.videoURL) { %>
+                <%- video.videoURL %>
+              <% } else { %>
+                <div style="position:relative;padding-top:56.25%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">
+                  <p style="position:absolute;color:#666;">الفيديو غير متوفر حالياً</p>
+                </div>
+              <% } %>
+            </div>
+            <div class="video-watermark" id="watermark">
+              <%= userData ? userData.Username : 'مستخدم' %> - <%= userData ? userData.Code : '000' %>
+            </div>
+          </div>
+
+          <!-- Video Info -->
+          <div class="video-info">
+            <div class="video-header">
+              <div>
+                <h1 class="video-title" id="videoTitle"><%= video.lectureName || video.videoName || 'فيديو تعليمي' %></h1>
+                <div class="video-subtitle">
+                  <span class="chapter-badge">
+                    <i class="material-icons-outlined">menu_book</i>
+                    <%= chapter.chapterName %>
+                  </span>
+                  <span class="video-type-badge badge-<%= videoType %>">
+                    <i class="material-icons-outlined">
+                      <%= videoType === 'lecture' ? 'school' : videoType === 'summary' ? 'bookmark' : 'calculate' %>
+                    </i>
+                    <%= videoType === 'lecture' ? 'فيديو الشرح' : videoType === 'summary' ? 'فيديو المراجعة' : 'فيديو الحلول' %>
+                  </span>
+                </div>
+                <div class="video-meta">
+               
+                  <div class="video-meta-item">
+                    <i class="material-icons-outlined">visibility</i>
+                    <span><%= video.views || 0 %> مشاهدة</span>
+                  </div>
+                  <div class="video-meta-item">
+                    <i class="material-icons-outlined">star</i>
+                    <span><%= video.lecturePrice || video.price || 'مجاني' %> <%= video.lecturePrice ? 'جنيه' : '' %></span>
+                  </div>
+                  <div class="video-meta-item">
+                    <i class="material-icons-outlined">date_range</i>
+                    <span><%= new Date(video.createdAt || Date.now()).toLocaleDateString('ar-EG') %></span>
+                  </div>
+                </div>
+                <% if (video.description || video.lectureDescription) { %>
+                <div class="video-description">
+                  <p><%= video.description || video.lectureDescription %></p>
+                </div>
+                <% } %>
+              </div>
+              
+              <div class="video-actions">
+                <% if (userVideoInfo && userVideoInfo.videoAllowedAttemps !== undefined) { %>
+                <div class="attempts-badge">
+                  <i class="material-icons-outlined">visibility</i>
+                  <span><%= userVideoInfo.videoAllowedAttemps %> محاولة متبقية</span>
+                </div>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- Video Progress -->
+            <div class="video-progress">
+              <div class="video-progress-fill" style="width: <%= (watchProgress || 0) %>%"></div>
+            </div>
+
+            <!-- Video Description -->
+            <% if (video && (video.videoDescription || video.lectureDescription)) { %>
+            <div class="video-description">
+              <%= video.videoDescription || video.lectureDescription %>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Homework Section -->
+          <% if (video.PDFURL) { %>
+          <div class="homework-section">
+            <div class="homework-header">
+              <div class="homework-icon">
+                <i class="material-icons-outlined">assignment</i>
+              </div>
+              <div class="homework-info">
+                <h3>واجب <%= video.videoName || 'الفيديو' %></h3>
+                <p>حمل الواجب المطلوب وقم برفع الحل للمراجعة</p>
+              </div>
+            </div>
+
+            <div class="homework-actions">
+              <a href="<%= video.PDFURL %>" target="_blank" class="btn btn-outline">
+                <i class="material-icons-outlined" style="margin-left: 8px;">download</i>
+                تحميل الواجب PDF
+              </a>
+              <button class="btn btn-primary" onclick="toggleHomeworkUpload()">
+                <i class="material-icons-outlined" style="margin-left: 8px;">cloud_upload</i>
+                رفع الحل
+              </button>
+            </div>
+
+            <!-- File Upload Area -->
+            <div id="homeworkUploadArea" style="display: none;">
+              <div class="file-upload-area" onclick="document.getElementById('homeworkFiles').click()">
+                <div class="upload-icon">
+                  <i class="material-icons-outlined">cloud_upload</i>
+                </div>
+                <div class="upload-text">اسحب الملفات هنا أو اضغط للاختيار</div>
+                <div class="upload-hint">يمكنك رفع ملفات PDF، صور، أو مستندات Word</div>
+                <input type="file" id="homeworkFiles" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;">
+              </div>
+              
+              <div id="fileList" class="file-list"></div>
+              
+              <button id="uploadHomeworkBtn" class="btn btn-success" style="width: 100%; margin-top: var(--spacing-md); display: none;">
+                <i class="material-icons-outlined" style="margin-left: 8px;">send</i>
+                رفع الواجب
+              </button>
+            </div>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+          <!-- Related Content -->
+          <div class="related-content">
+            <div class="related-title">
+              <i class="material-icons-outlined">playlist_play</i>
+              محتوى مشابه
+            </div>
+            
+            <% if (relatedVideos && relatedVideos.length > 0) { %>
+              <% relatedVideos.forEach(relatedVideo => { %>
+              <a href="/student/chapter/<%= chapterId %>/video/<%= relatedVideo._id %>" class="related-item">
+                <div class="related-icon">
+                  <i class="material-icons-outlined">play_arrow</i>
+                </div>
+                <div class="related-info">
+                  <h4><%= relatedVideo.videoTitle %></h4>
+                </div>
+              </a>
+              <% }); %>
+            <% } else { %>
+              <p style="text-align: center; color: var(--gray-500); padding: var(--spacing-lg);">
+                لا يوجد محتوى مشابه متاح حالياً
+              </p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-modal" id="successModal">
+    <div class="modal-content">
+      <div class="modal-icon success">
+        <i class="material-icons-outlined">check_circle</i>
+      </div>
+      <div class="modal-title">تم رفع الواجب بنجاح!</div>
+      <div class="modal-description">
+        سيتم مراجعة واجبك من قبل المدرس وفي حال قبوله سيتم فتح الفيديو التالي لك.
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('successModal')">
+        حسناً
+      </button>
+    </div>
+  </div>
+
+  <!-- Rest Modal -->
+  <div class="rest-modal" id="restModal">
+    <div class="modal-content">
+      <div class="modal-icon rest">
+        <i class="material-icons-outlined">coffee</i>
+      </div>
+      <div class="modal-title">لقد أحسنت!</div>
+      <div class="modal-description">
+        لقد تخطيت نصف الفيديو. بإمكانك أخذ قسط من الراحة ومن ثم إكمال المشاهدة.
+      </div>
+      <button class="btn btn-primary" onclick="closeModal('restModal')">
+        متابعة المشاهدة
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1001; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <script>
+    let selectedFiles = [];
+
+    // Toggle homework upload area
+    function toggleHomeworkUpload() {
+      const uploadArea = document.getElementById('homeworkUploadArea');
+      uploadArea.style.display = uploadArea.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // File upload handling
+    document.getElementById('homeworkFiles').addEventListener('change', function(e) {
+      handleFiles(e.target.files);
+    });
+
+    // Drag and drop handling
+    const uploadArea = document.querySelector('.file-upload-area');
+    
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files);
+      displayFileList();
+      
+      if (selectedFiles.length > 0) {
+        document.getElementById('uploadHomeworkBtn').style.display = 'block';
+      }
+    }
+
+    function displayFileList() {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      
+      selectedFiles.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <div class="file-info">
+            <div class="file-icon">
+              <i class="material-icons-outlined">${getFileIcon(file.type)}</i>
+            </div>
+            <div class="file-details">
+              <h4>${file.name}</h4>
+              <p>${formatFileSize(file.size)}</p>
+            </div>
+          </div>
+          <div class="file-actions">
+            <button onclick="removeFile(${index})">
+              <i class="material-icons-outlined">delete</i>
+            </button>
+          </div>
+        `;
+        fileList.appendChild(fileItem);
+      });
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      displayFileList();
+      
+      if (selectedFiles.length === 0) {
+        document.getElementById('uploadHomeworkBtn').style.display = 'none';
+      }
+    }
+
+    function getFileIcon(type) {
+      if (type.includes('pdf')) return 'picture_as_pdf';
+      if (type.includes('image')) return 'image';
+      if (type.includes('word') || type.includes('document')) return 'description';
+      return 'attachment';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Upload homework
+    document.getElementById('uploadHomeworkBtn').addEventListener('click', function() {
+      if (selectedFiles.length === 0) return;
+      
+      const formData = new FormData();
+      selectedFiles.forEach(file => {
+        formData.append('homework', file);
+      });
+      
+      // Show loading state
+      this.innerHTML = '<i class="material-icons-outlined">hourglass_empty</i> جاري الرفع...';
+      this.disabled = true;
+      
+      // Submit homework
+      fetch(window.location.pathname + '/homework', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          showModal('successModal');
+          selectedFiles = [];
+          document.getElementById('fileList').innerHTML = '';
+          document.getElementById('homeworkUploadArea').style.display = 'none';
+        } else {
+          throw new Error('Upload failed');
+        }
+      })
+      .catch(error => {
+        alert('حدث خطأ في رفع الواجب. يرجى المحاولة مرة أخرى.');
+      })
+      .finally(() => {
+        this.innerHTML = '<i class="material-icons-outlined">send</i> رفع الواجب';
+        this.disabled = false;
+        this.style.display = 'none';
+      });
+    });
+
+    // Modal functions
+    function showModal(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Video progress tracking (simplified)
+    let videoStartTime = Date.now();
+    let progressInterval;
+
+    function startProgressTracking() {
+      progressInterval = setInterval(() => {
+        const elapsed = (Date.now() - videoStartTime) / 1000; // seconds
+        const videoDuration = <%= (video.duration || video.lectureDuration || 0) %> * 60; // convert to seconds
+        
+        if (videoDuration > 0) {
+          const progress = Math.min((elapsed / videoDuration) * 100, 100);
+          document.querySelector('.video-progress-fill').style.width = progress + '%';
+          
+          // Show rest modal at 50%
+          if (progress >= 50 && progress < 51) {
+            showModal('restModal');
+          }
+        }
+      }, 1000);
+    }
+
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    // Mobile responsive handling
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        document.querySelector('.mobile-menu-toggle').style.display = 'block';
+        document.querySelector('main').style.display = 'block';
+        document.querySelector('main > div').style.gridTemplateColumns = '1fr';
+      } else {
+        document.querySelector('.mobile-menu-toggle').style.display = 'none';
+        document.querySelector('.sidebar').classList.remove('open');
+        document.querySelector('main > div').style.gridTemplateColumns = '1fr 300px';
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Start tracking when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      startProgressTracking();
+    });
+
+    // Prevent page refresh during video watching
+    window.addEventListener('beforeunload', function(e) {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+    });
+
+    // Update watermark position periodically
+    setInterval(() => {
+      const watermark = document.getElementById('watermark');
+      if (watermark) {
+        const x = Math.random() * 80 + 10; // 10-90%
+        const y = Math.random() * 80 + 10; // 10-90%
+        watermark.style.top = y + '%';
+        watermark.style.left = x + '%';
+      }
+    }, 30000); // Every 30 seconds
+  </script>
+
+  <style>
+    @media (max-width: 1024px) {
+      .mobile-menu-toggle {
+        display: block !important;
+      }
+      
+      main > div {
+        grid-template-columns: 1fr !important;
+        gap: var(--spacing-lg);
+      }
+      
+      .video-header {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+      
+      .video-actions {
+        justify-content: flex-start;
+      }
+      
+      .homework-actions {
+        flex-direction: column;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .video-meta {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+      }
+      
+      .breadcrumb {
+        font-size: 0.875rem;
+      }
+      
+      .homework-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+      }
+    }
+  </style>
+</body>
+</html> 

@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المواد التعليمية - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <style>
+    .pdfs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: var(--spacing-xl);
+      margin-top: var(--spacing-xl);
+    }
+    
+    .pdf-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .pdf-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .pdf-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .pdf-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .pdf-icon {
+      font-size: 4rem;
+      color: var(--white);
+      opacity: 0.8;
+    }
+    
+    .pdf-type-badge {
+      position: absolute;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary-color);
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: var(--radius-xl);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .pdf-content {
+      padding: var(--spacing-xl);
+    }
+    
+    .pdf-header {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .pdf-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: var(--spacing-sm);
+      line-height: 1.4;
+    }
+    
+    .pdf-description {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    
+    .pdf-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      padding: var(--spacing-md);
+      background: var(--gray-50);
+      border-radius: var(--radius);
+    }
+    
+    .pdf-meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+    
+    .pdf-meta-icon {
+      font-size: 1rem;
+      color: var(--primary-color);
+    }
+    
+    .pdf-price {
+      font-weight: 600;
+      color: var(--secondary-color);
+    }
+    
+    .pdf-status {
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: var(--radius-xl);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .pdf-status.free {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--secondary-color);
+    }
+    
+    .pdf-status.paid {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--accent-orange);
+    }
+    
+    .pdf-actions {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+    
+    .pdf-preview-btn {
+      flex: 1;
+      padding: var(--spacing-md);
+      background: var(--gray-100);
+      color: var(--gray-700);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+    }
+    
+    .pdf-preview-btn:hover {
+      background: var(--gray-200);
+      border-color: var(--gray-300);
+    }
+    
+    .pdf-download-btn {
+      flex: 2;
+      padding: var(--spacing-md);
+      background: var(--primary-color);
+      color: var(--white);
+      border: 2px solid var(--primary-color);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+    }
+    
+    .pdf-download-btn:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .pdf-download-btn:disabled {
+      background: var(--gray-300);
+      border-color: var(--gray-300);
+      cursor: not-allowed;
+    }
+    
+    .code-input-section {
+      display: none;
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--gray-50);
+      border-radius: var(--radius);
+    }
+    
+    .code-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .code-submit-btn {
+      width: 100%;
+      padding: var(--spacing-md);
+      background: var(--secondary-color);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .filters-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .stat-item {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: var(--spacing-lg);
+      text-align: center;
+      border: 1px solid var(--gray-200);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin: 0 auto var(--spacing-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--white);
+    }
+    
+    .stat-icon.total {
+      background: var(--primary-color);
+    }
+    
+    .stat-icon.free {
+      background: var(--secondary-color);
+    }
+    
+    .stat-icon.paid {
+      background: var(--accent-orange);
+    }
+    
+    .stat-icon.downloaded {
+      background: var(--accent-purple);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl) * 2;
+      color: var(--gray-500);
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-lg);
+      opacity: 0.5;
+    }
+    
+    .empty-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .empty-description {
+      margin-bottom: var(--spacing-lg);
+    }
+  </style>
+</head>
+  <body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+          <i class="fas fa-graduation-cap"></i>
+          منصة الشهادة
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="/student/dash" class="nav-link">
+            <i class="material-icons-outlined nav-icon">dashboard</i>
+            <span>لوحة التحكم</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/chapters" class="nav-link">
+            <i class="material-icons-outlined nav-icon">library_books</i>
+            <span>الأبواب التعليمية</span>
+          </a>
+                </div>
+        
+        <div class="nav-item">
+          <a href="/student/exams" class="nav-link">
+            <i class="material-icons-outlined nav-icon">quiz</i>
+            <span>الامتحانات</span>
+          </a>
+              </div>
+        
+        <div class="nav-item">
+          <a href="/student/PDFs" class="nav-link active">
+            <i class="material-icons-outlined nav-icon">description</i>
+            <span>المواد التعليمية</span>
+          </a>
+            </div>
+        
+        <div class="nav-item">
+          <a href="/student/ranking" class="nav-link">
+            <i class="material-icons-outlined nav-icon">leaderboard</i>
+            <span>التصنيف</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/settings" class="nav-link">
+            <i class="material-icons-outlined nav-icon">settings</i>
+            <span>الإعدادات</span>
+          </a>
+                      </div>
+                         
+        <div class="nav-item">
+          <a href="/student/logOut" class="nav-link">
+            <i class="material-icons-outlined nav-icon">logout</i>
+            <span>تسجيل الخروج</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <header class="dashboard-header slide-in-up">
+        <div class="welcome-message">المواد التعليمية والمراجع</div>
+        <div class="welcome-subtitle">تحميل ومراجعة الملفات والمراجع الخاصة بمادة اللغة العربية</div>
+      </header>
+
+      <!-- Stats Overview -->
+      <div class="stats-overview slide-in-up">
+        <div class="stat-item">
+          <div class="stat-icon total">
+            <i class="material-icons-outlined">folder</i>
+          </div>
+          <div class="stat-value"><%= PDFs.length %></div>
+          <div class="stat-label">إجمالي المواد</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon free">
+            <i class="material-icons-outlined">folder_open</i>
+          </div>
+          <div class="stat-value"><%= PDFs.filter(pdf => pdf.pdfStatus === 'Free').length %></div>
+          <div class="stat-label">مواد مجانية</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon paid">
+            <i class="material-icons-outlined">lock</i>
+          </div>
+          <div class="stat-value"><%= PDFs.filter(pdf => pdf.pdfStatus === 'Paid').length %></div>
+          <div class="stat-label">مواد مدفوعة</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon downloaded">
+            <i class="material-icons-outlined">download_done</i>
+          </div>
+          <div class="stat-value"><%= PDFs.filter(pdf => pdf.isPaid).length %></div>
+          <div class="stat-label">تم تحميلها</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-section slide-in-up">
+        <div class="search-container">
+          <input type="text" class="search-input" placeholder="ابحث عن مادة تعليمية..." id="searchInput">
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">جميع المواد</button>
+            <button class="filter-btn" data-filter="free">مجاني</button>
+            <button class="filter-btn" data-filter="paid">مدفوع</button>
+            <button class="filter-btn" data-filter="downloaded">محملة</button>
+          </div>
+                          </div>
+                  </div> 
+
+      <!-- PDFs Grid -->
+      <div class="pdfs-grid slide-in-up" id="pdfsGrid">
+        <% if (PDFs && PDFs.length > 0) { %>
+          <% PDFs.forEach(pdf => { %>
+          <div class="pdf-card" data-filter="<%= pdf.pdfStatus === 'Free' ? 'free' : 'paid' %> <%= pdf.isPaid ? 'downloaded' : '' %>">
+            <div class="pdf-image">
+              <% if (pdf.pdfPhoto) { %>
+                <img src="<%= pdf.pdfPhoto %>" alt="<%= pdf.pdfName %>">
+              <% } else { %>
+                <i class="material-icons-outlined pdf-icon">description</i>
+                  <% } %>
+              <div class="pdf-type-badge">
+                <i class="material-icons-outlined" style="font-size: 0.875rem; margin-left: 4px;">
+                  <%= pdf.pdfStatus === 'Free' ? 'lock_open' : 'lock' %>
+                </i>
+                <%= pdf.pdfStatus === 'Free' ? 'مجاني' : 'مدفوع' %>
+              </div>
+            </div>
+            
+            <div class="pdf-content">
+              <div class="pdf-header">
+                <div class="pdf-title"><%= pdf.pdfName %></div>
+                <div class="pdf-description">
+                  مادة تعليمية شاملة في اللغة العربية تحتوي على شرح مفصل ومبسط للموضوع
+                </div>
+              </div>
+
+              <div class="pdf-meta">
+                <div class="pdf-meta-item">
+                  <i class="material-icons-outlined pdf-meta-icon">picture_as_pdf</i>
+                  <span>PDF</span>
+                </div>
+                
+                <div class="pdf-meta-item">
+                  <i class="material-icons-outlined pdf-meta-icon">schedule</i>
+                  <span>متاح دائماً</span>
+                </div>
+                
+                <% if (pdf.pdfStatus === 'Paid') { %>
+                <div class="pdf-meta-item">
+                  <i class="material-icons-outlined pdf-meta-icon">monetization_on</i>
+                  <span class="pdf-price"><%= pdf.pdfPrice %> جنيه</span>
+                </div>
+                <% } else { %>
+                <div class="pdf-status free">مجاني</div>
+                <% } %>
+              </div>
+
+              <div class="pdf-actions">
+                <button class="pdf-preview-btn" onclick="previewPDF('<%= pdf._id %>')">
+                  <i class="material-icons-outlined">visibility</i>
+                  معاينة
+                </button>
+                
+                <% if (pdf.pdfStatus === 'Free' || pdf.isPaid) { %>
+                  <a href="/student/PDFs/<%= pdf._id %>" class="pdf-download-btn" style="text-decoration: none;">
+                    <i class="material-icons-outlined">download</i>
+                    تحميل / عرض
+                  </a>
+                <% } else { %>
+                  <button class="pdf-download-btn" onclick="toggleCodeInput('<%= pdf._id %>')">
+                    <i class="material-icons-outlined">vpn_key</i>
+                    أدخل كود الوصول
+                  </button>
+                <% } %>
+              </div>
+
+              <!-- Code Input Section -->
+              <% if (pdf.pdfStatus === 'Paid' && !pdf.isPaid) { %>
+              <div class="code-input-section" id="codeInput_<%= pdf._id %>">
+                <form action="/student/buyPDF/<%= pdf._id %>" method="POST">
+                  <input type="text" name="code" class="code-input" placeholder="أدخل كود الوصول للمادة" required>
+                  <button type="submit" class="code-submit-btn">
+                    <i class="material-icons-outlined" style="margin-left: 8px;">check</i>
+                    تفعيل المادة
+                  </button>
+                </form>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% }); %>
+        <% } else { %>
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">
+              <i class="material-icons-outlined">folder_open</i>
+            </div>
+            <div class="empty-title">لا توجد مواد تعليمية متاحة</div>
+            <div class="empty-description">
+              سيتم إضافة المواد التعليمية والمراجع قريباً. تابع معنا للحصول على أحدث المواد.
+            </div>
+            <a href="/student/chapters" class="btn btn-primary">
+              تصفح الأبواب التعليمية
+            </a>
+          </div>
+        <% } %>
+            </div>
+          </main>
+        </div>
+
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1001; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Preview Modal -->
+  <div class="modal" id="previewModal" style="display: none;">
+    <div class="modal-overlay" onclick="closePreview()"></div>
+    <div class="modal-content" style="max-width: 800px; max-height: 90vh;">
+      <div class="modal-header">
+        <div class="modal-title">معاينة المادة التعليمية</div>
+        <button class="modal-close" onclick="closePreview()">
+          <i class="material-icons-outlined">close</i>
+        </button>
+      </div>
+      <div class="modal-body" id="previewContent">
+        <!-- Preview content will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+    <script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const pdfs = document.querySelectorAll('.pdf-card');
+      
+      pdfs.forEach(pdf => {
+        const title = pdf.querySelector('.pdf-title').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm)) {
+          pdf.style.display = 'block';
+        } else {
+          pdf.style.display = 'none';
+        }
+      });
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active filter button
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        const filter = this.getAttribute('data-filter');
+        const pdfs = document.querySelectorAll('.pdf-card');
+        
+        pdfs.forEach(pdf => {
+          const pdfFilters = pdf.getAttribute('data-filter').split(' ');
+          
+          if (filter === 'all' || pdfFilters.includes(filter)) {
+            pdf.style.display = 'block';
+          } else {
+            pdf.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Toggle code input
+    function toggleCodeInput(pdfId) {
+      const container = document.getElementById('codeInput_' + pdfId);
+      if (container) {
+        container.style.display = container.style.display === 'block' ? 'none' : 'block';
+      }
+    }
+
+    // Preview PDF
+    function previewPDF(pdfId) {
+      const modal = document.getElementById('previewModal');
+      const content = document.getElementById('previewContent');
+      
+      content.innerHTML = `
+        <div style="text-align: center; padding: var(--spacing-xl);">
+          <div style="background: var(--gray-100); border-radius: var(--radius); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg);">
+            <i class="material-icons-outlined" style="font-size: 4rem; color: var(--primary-color); margin-bottom: var(--spacing-md);">description</i>
+            <h3 style="margin-bottom: var(--spacing-md);">معاينة المادة التعليمية</h3>
+            <p style="color: var(--gray-600); margin-bottom: var(--spacing-lg);">
+              هذه معاينة للمادة التعليمية. للحصول على النسخة الكاملة، يرجى تحميل الملف.
+            </p>
+            <div style="background: var(--white); border-radius: var(--radius); padding: var(--spacing-lg); border: 2px dashed var(--gray-300);">
+              <p style="color: var(--gray-500); font-style: italic;">
+                نموذج من محتوى المادة التعليمية...<br>
+                يحتوي الملف الكامل على شرح مفصل ومبسط<br>
+                مع أمثلة وتطبيقات عملية
+              </p>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: var(--spacing-md); justify-content: center;">
+            <button class="btn btn-outline" onclick="closePreview()">إغلاق</button>
+            <button class="btn btn-primary" onclick="closePreview()">تحميل الملف الكامل</button>
+          </div>
+        </div>
+      `;
+      
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close preview
+    function closePreview() {
+      const modal = document.getElementById('previewModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    // Mobile responsive handling
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        document.querySelector('.mobile-menu-toggle').style.display = 'block';
+      } else {
+        document.querySelector('.mobile-menu-toggle').style.display = 'none';
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(event) {
+      const sidebar = document.querySelector('.sidebar');
+      const toggleBtn = document.querySelector('.mobile-menu-toggle');
+      
+      if (window.innerWidth <= 1024 && 
+          !sidebar.contains(event.target) && 
+          !toggleBtn.contains(event.target) &&
+          sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // Add loading animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.querySelectorAll('.slide-in-up');
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+        }, index * 100);
+      });
+    });
+
+    // Handle error message from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error')) {
+      // Show error notification
+      const notification = document.createElement('div');
+      notification.innerHTML = `
+        <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--error); color: white; padding: var(--spacing-lg); border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 1000;">
+          <i class="material-icons-outlined" style="vertical-align: middle; margin-left: 8px;">error</i>
+          كود الوصول غير صحيح أو مستخدم من قبل
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+    </script>
+
+  <style>
+    .slide-in-up {
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+    }
+    
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      margin: var(--spacing-lg);
+      max-width: calc(100% - var(--spacing-lg) * 2);
+      overflow: hidden;
+    }
+    
+    .modal-header {
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--gray-500);
+      cursor: pointer;
+      padding: var(--spacing-xs);
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+    }
+    
+    .modal-close:hover {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    
+    .modal-body {
+      padding: 0;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    
+    @media (max-width: 1024px) {
+      .mobile-menu-toggle {
+        display: block !important;
+      }
+      
+      .pdfs-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .stats-overview {
+        grid-template-columns: 1fr;
+      }
+      
+      .pdf-actions {
+        flex-direction: column;
+      }
+      
+      .filter-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .modal-content {
+        margin: var(--spacing-md);
+        max-width: calc(100% - var(--spacing-md) * 2);
+      }
+    }
+  </style>
+  </body>
+</html>

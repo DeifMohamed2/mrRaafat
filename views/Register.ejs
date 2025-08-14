@@ -1,112 +1,63 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="max-age=31536000, immutable" />
+    
+    <!-- Preconnect to fonts.google.com for faster font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register</title>
-  <link rel="icon" href="images/logo.png" type="image/x-icon">
+    <!-- Preload fonts to speed up their rendering -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arima:wght@100..700&family=Noto+Kufi+Arabic:wght@100..900&family=Viga&display=swap"
+      rel="stylesheet"
+      rel="preload"
+      as="style"
+    />
+    <!-- Favicon -->
+    <!-- <link
+      rel="icon"
+      href="assetsLanding/img/headerIMG.webp"
+      type="image/webp"
+    /> -->
+    <!-- Consolidate and defer CSS loading for better performance -->
+    <link rel="preload" href="assetsLanding/css/all.min.css" as="style" />
+    <link rel="stylesheet" href="assetsLanding/css/all.min.css" />
+    <link rel="stylesheet" href="assetsLanding/css/header.css" />
+    <link rel="stylesheet" href="assetsLanding/css/style.css" />
+    <link rel="stylesheet" href="assetsLanding/css/main.css" />
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="/assest/bootstrap.min.css">
-  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.6/css/unicons.css">
+    <!-- Lazy load the sign-in-up CSS -->
+    <link rel="stylesheet" href="assetsLanding/css/sign-in-up.css" media="print" onload="this.media='all'" />
 
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/Register.css">
-</head>
+    <!-- Remove unused 'webfonts/' link -->
+    <!-- If this folder is necessary for specific fonts, re-add it with proper path -->
 
-<body>
+    <title>الشهادة</title>
+  </head>
 
-  <%- include("./partials/nav.ejs") %>
+  <body>
+    <!-- Start Header -->
+    <header>
+        <%- include("./partials/head.ejs") %>
 
+    </header>
+    <main>
+      <div class="main-container">
+        <div class="Sign-Left up">
+          <h2 class="title">
+            <i class="fa-regular fa-square-plus"></i> طلب
+            <span>انشاء حساب :</span>
+          </h2>
+          <p>
+            ادخل بياناتك بشكل صحيح وسيتم التواصل معاك خلال ساعات قليلة لتفعيل
+            الحساب !
+          </p>
+          <form action="/Register" method="POST">
 
-    <!-- Modal -->
-
-
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div class="success-animation ">
-              <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
-                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
-            </div>
-          </div>
-          <div class="modal-body text-center " style="color: black;">
-            <h3>تم ارسال طلبك بنجاح!</h3>
-            <h4> هذا هوا الكود الخاص بك يرجي الاحتفاظ به جيداً</h4>
-            <span style="font-size: 2rem; "> <b>#</b><b id="student_id"></b> </span>
-          </div>
-          
-          <div class="modal-footer mx-auto">
-            <a href="login"><button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="copyCode"> حسنا
-              </button></a>
-          </div>
-          </div>
-     
-        </div>
-      </div>
-    </div>
-
-
-
-    <section class="contact">
-
-      <div class="container contact__container">
-
-        <button type="button" style="display: none;" id="modelbtn" class="btn btn-primary" data-bs-toggle="modal"
-          data-bs-target="#exampleModal">
-          Launch demo modal
-        </button>
-
-        <aside class="contact__aside">
-
-          <div class="row">
-            <div class="col-lg-12">
-              <div class="right">
-                <div class="aside__image">
-                  <i class="fa-solid fa-handshake-angle" style="font-size: 5rem;"> </i>
-                </div>
-                <h2>تواصل معنا في حال واجهتك مشكله</h2>
-                <p>
-                  فريق الدعم الفني متواجد من الساعه العاشره صباحاً حتي العاشره مساءً
-                </p>
-                <ul class="contact__details">
-                  <li>
-                    <i class="uil uil-phone"></i>
-                    <h5>01029069041</h5>
-                  </li>
-                  <li>
-                    <i class="uil uil-phone"></i>
-                    <h5>0242198163</h5>
-                  </li>
-                  <li>
-                    <i class="uil uil-envelope"></i>
-                    <h5>info@mrRafat.com</h5>
-                  </li>
-
-                </ul>
-                <ul class="contact__socials">
-                  <li> <a href="https://www.facebook.com/The.LeGend.Mr.Raft"
-                      target="_blank"><i class="uil uil-facebook-f"></i></a>
-                  </li>
-                  <li> <a href="https://wa.me/+201014091584" target="_blank"><i class="uil uil-whatsapp"></i></a> </li>
-
-                </ul>
-              </div>
-            </div>
-          </div>
-
-        </aside>
-
-
-        <form action="/Register" method="post" class="contact__form ">
-          <% if (typeof errors !=='undefined' ) { %>
+           <% if (typeof errors !=='undefined' ) { %>
             <ul class="errors">
               <% for (const key in errors) { %>
                 <li class="erorr">
@@ -118,175 +69,328 @@
             </ul>
             <% } %>
 
-              <div class="row  justify-content-center align-items-center">
+            <div class="input-container">
+          
+              <div class="inputs-form name">
+                <input type="text" id="first-name" name="Username" required />
+                <div class="input-details">
+                  <i class="fa-solid fa-user"></i>
+                  <label for="first-name">الاسم بالكامل</label>
+                </div>
+              </div>
+<!-- 
+              <div class="inputs-form name">
+                <input type="text" id="last-name" name="last-name" required />
+                <div class="input-details">
+                  <i class="fa-solid fa-user"></i>
+                  <label for="last-name">اسم العائلة</label>
+                </div>
+              </div> -->
 
-                <div class="col-12 text-center ">
-                  <input type="text" name="Username" placeholder=" اسم الطالب بالكامل"
-                    value="<%= formData.Username || '' %>" required>
-                </div>
-
-
-                <div class="col-12 text-center">
-                  <input type="number" name="phone"  id="phone" 
-                    placeholder="رقم هاتف الطالب" value="<%= formData.phone || '' %>" required>
-                    <h5 class="text-warning">ده الرقم الي هتعمل بيه تسجيل دخول</h5>
-                    <h5 class="text-warning"> لازم الرقم يكون عليه واتساب</h5>
-                </div> 
-                
-         
-                <div class="col-12 text-center">
-                    <input type="password" name="Password"   placeholder="كلمه المرور"
-                      value="<%= formData.Password || '' %>" required>
-                    <!-- <span class="toggle-password fas fa-eye" onclick="togglePasswordVisibility()"></span> -->
-                </div>
-                <div class="col-12 text-center">
-                  <select  name="gov"  value="<%= formData.gov || '' %>" required>
-                    <option  value="">اختر المحافظه</option>
-                    <option value="القاهرة">القاهرة</option>
-                    <option value="الغربية">الغربية</option>
-                    <option value="الجيزة">الجيزة </option>
-                    <option value="الإسماعيلية">الإسماعيلية</option>
-                    <option value="كفر الشيخ">كفر الشيخ</option>
-                    <option value="مطروح">مطروح</option>
-                    <option value="المنيا">المنيا</option>
-                    <option value="المنوفية">المنوفية</option>
-                    <option value="الوادي الجديد">الوادي الجديد</option>
-                    <option value="شمال سيناء">شمال سيناء</option>
-                    <option value="بورسعيد">بورسعيد</option>
-                    <option value="القليوبية">القليوبية</option>
-                    <option value="قنا">قنا</option>
-                    <option value="البحر الأحمر">البحر الأحمر</option>
-                    <option value="الشرقية">الشرقية</option>
-                    <option value="سوهاج">سوهاج</option>
-                    <option value="جنوب سيناء">جنوب سيناء</option>
-                    <option value="السويس">السويس</option>
-                    <option value="الأقصر">الأقصر</option>
-                    <option value="الإسكندرية">الإسكندرية</option>
-                    <option value="الفيوم">الفيوم</option>
-                    <option value="أسوان">أسوان</option>
-                    <option value="أسيوط">أسيوط</option>
-                    <option value="البحيرة">البحيرة</option>
-                    <option value="بني سويف">بني سويف</option>
-                    <option value="الدقهلية">الدقهلية</option>
-                    <option value="دمياط">دمياط</option>
-                  </select>
-                </div>
-                <div class="col-12 text-center">
-                  <input type="text" name="Markez" id="Markez" placeholder="  المركز او المنطقه التابع ليها "
-                    value="<%= formData.Markez || '' %>" required>
-
-                </div>
-                <div class="col-12 text-center">
-                  <input type="text" name="schoolName" id="schoolName" placeholder="اسم مدرستك "
-                    value="<%= formData.schoolName || '' %>" required>
-
-                </div>
-
-                <div class="col-12 text-center">
-                  <select name="gender"  value="<%= formData.gender || '' %>" required>
-                    <option value=""> اختر الجنس </option>
-                    <option value="male">ذكر</option>
-                    <option value="female">انثي</option>
-                  </select>
-                </div>
-              
-         
-                <div class="col-12 text-center">
-                  <input type="number" name="parentPhone" id="parentPhone"
-                    placeholder=" رقم هاتف ولي الامر " value="<%= formData.parentPhone || '' %>" required>
-                </div>
-                <div class="col-12 text-center">
-                  <select name="Grade" class="regSel" value="<%= formData.Grade || '' %>" required>
-                    <option  value=""> اختر الصف الدراسي </option>
-                    <option value="Grade1">الصف الاول الثانوي</option>
-                    <option value="Grade2">الصف الثاني الثانوي</option>
-                    <option value="Grade3"> الصف الثالث الثانوي </option>
-                  </select>
-                </div>
-                <div class="col-12 text-center">
-                  <h4 class="text-warning  mt-2">بتحضر معانا فين ؟</h4>
-                </div>
-                <div class="col-12 text-center">
-                  <select name="place" id="place" value="<%= formData.place || '' %>" required>
-                    <option selected value="center"> سنتر </option>
-                    <option value="online"> اونلاين </option>
-                    <option value="hosting"> استضافه فقط </option>
-
-                  </select>
-                </div>
-                <div class="col-12 text-center d-none">
-                  <h4 class="text-warning  mt-2">  اختار انت عربي ولا لغات </h4>
-                </div>
-                <div class="col-12 text-center d-none">
-                  <select name="ARorEN" id="place" value="<%= formData.ARorEN || '' %>" required>
-                    <option selected value="AR"> انا عربي </option>
-                    <option value="EN"> انا لغات </option>
-              
-                  </select>
-                </div>
-                <div class="col-12 text-center">
-                  <button type="submit" class="btn btn-primary"> ارسال طلب</button><label><span>
-
+              <!-- رقم الهاتف الشخصي -->
+              <div class="inputs-form phone-number">
+                <input
+                  type="number"
+                  id="personal-phone"
+                  name="phone"
+                  required
+                />
+                <div class="input-details">
+                  <i class="fa-solid fa-phone"></i>
+                  <label for="personal-phone">رقم الهاتف الشخصي</label>
                 </div>
               </div>
 
+              <!-- رقم الهاتف الأب -->
+              <div class="inputs-form phone-number">
+                <input
+                  type="number"
+                  id="father-phone"
+                  name="parentPhone"
+                  required
+                />
+                <div class="input-details">
+                  <i class="fa-solid fa-phone"></i>
+                  <label for="father-phone">رقم الهاتف الأب</label>
+                </div>
+              </div>
 
- 
-        </form>
+              <!-- رقم الهاتف الأم -->
+              <!-- <div class="inputs-form phone-number">
+                <input
+                  type="text"
+                  id="mother-phone"
+                  name="mother-phone"
+                  required
+                />
+                <div class="input-details">
+                  <i class="fa-solid fa-phone"></i>
+                  <label for="mother-phone">رقم الهاتف الأم</label>
+                </div>
+              </div> -->
+
+              <!-- اسم المدرسة -->
+              <div class="inputs-form school-name">
+                <input
+                  type="text"
+                  id="school-name"
+                  name="schoolName"
+                  required
+                />
+                <div class="input-details">
+                  <i class="fa-solid fa-school"></i>
+                  <label for="school-name">اسم المدرسة</label>
+                </div>
+              </div>
+                  <div class="dropdown-container">
+                <div class="dropdown-selected">
+                  الصف الأول الثانوي
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="1em"
+                    viewBox="0 0 512 512"
+                    class="dropdown-arrow"
+                  >
+                    <path
+                      d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+                    ></path>
+                  </svg>
+                </div>
+                <div class="dropdown-options">
+                  <div>
+                    <input id="option1" value="Grade1" name="Grade" type="radio" checked />
+                    <label
+                      class="dropdown-option-label"
+                      for="option1"
+                      data-txt="الصف الأول الثانوي"
+                    ></label>
+                  </div>
+                  <div>
+                    <input id="option2" value="Grade2" name="Grade" type="radio" />
+                    <label
+                      class="dropdown-option-label"
+                      for="option2"
+                      data-txt="الصف الثاني الثانوي"
+                    ></label>
+                  </div>
+                  <div>
+                    <input id="option3" value="Grade3" name="Grade" type="radio" />
+                    <label
+                      class="dropdown-option-label"
+                      for="option3"
+                      data-txt="الصف الثالث الثانوي"
+                    ></label>
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown-container">
+                <div class="dropdown-selected">
+                  القاهرة
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="1em"
+                    viewBox="0 0 512 512"
+                    class="dropdown-arrow"
+                  >
+                    <path
+                      d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+                    ></path>
+                  </svg>
+                </div>
+
+               <div class="dropdown-options two">
+                <div>
+                  <input id="option1-1" name="gov" type="radio" value="Cairo" checked />
+                  <label class="dropdown-option-label" for="option1-1" data-txt="القاهرة"></label>
+                </div>
+                <div>
+                  <input id="option2-2" name="gov" type="radio" value="Alexandria" />
+                  <label class="dropdown-option-label" for="option2-2" data-txt="الإسكندرية"></label>
+                </div>
+                <div>
+                  <input id="option3-3" name="gov" type="radio" value="Giza" />
+                  <label class="dropdown-option-label" for="option3-3" data-txt="الجيزة"></label>
+                </div>
+                <div>
+                  <input id="option4" name="gov" type="radio" value="Sharm El-Sheikh" />
+                  <label class="dropdown-option-label" for="option4" data-txt="شرم الشيخ"></label>
+                </div>
+                <div>
+                  <input id="option5" name="gov" type="radio" value="Hurghada" />
+                  <label class="dropdown-option-label" for="option5" data-txt="الغردقة"></label>
+                </div>
+                <div>
+                  <input id="option6" name="gov" type="radio" value="Aswan" />
+                  <label class="dropdown-option-label" for="option6" data-txt="أسوان"></label>
+                </div>
+                <div>
+                  <input id="option7" name="gov" type="radio" value="Marsa Alam" />
+                  <label class="dropdown-option-label" for="option7" data-txt="مرسى علم"></label>
+                </div>
+                <div>
+                  <input id="option8" name="gov" type="radio" value="Luxor" />
+                  <label class="dropdown-option-label" for="option8" data-txt="الأقصر"></label>
+                </div>
+                <div>
+                  <input id="option9" name="gov" type="radio" value="Port Said" />
+                  <label class="dropdown-option-label" for="option9" data-txt="بور سعيد"></label>
+                </div>
+                <div>
+                  <input id="option10" name="gov" type="radio" value="Suez" />
+                  <label class="dropdown-option-label" for="option10" data-txt="السويس"></label>
+                </div>
+                <div>
+                  <input id="option11" name="gov" type="radio" value="Tanta" />
+                  <label class="dropdown-option-label" for="option11" data-txt="طنطا"></label>
+                </div>
+                <div>
+                  <input id="option12" name="gov" type="radio" value="Zagazig" />
+                  <label class="dropdown-option-label" for="option12" data-txt="الزقازيق"></label>
+                </div>
+                <div>
+                  <input id="option13" name="gov" type="radio" value="Mataria" />
+                  <label class="dropdown-option-label" for="option13" data-txt="المطرية"></label>
+                </div>
+                <div>
+                  <input id="option14" name="gov" type="radio" value="Damanhour" />
+                  <label class="dropdown-option-label" for="option14" data-txt="دمنهور"></label>
+                </div>
+                <div>
+                  <input id="option15" name="gov" type="radio" value="Fayoum" />
+                  <label class="dropdown-option-label" for="option15" data-txt="الفيوم"></label>
+                </div>
+                <div>
+                  <input id="option16" name="gov" type="radio" value="Beni Suef" />
+                  <label class="dropdown-option-label" for="option16" data-txt="بني سويف"></label>
+                </div>
+                <div>
+                  <input id="option17" name="gov" type="radio" value="Menoufia" />
+                  <label class="dropdown-option-label" for="option17" data-txt="المنوفية"></label>
+                </div>
+                <div>
+                  <input id="option18" name="gov" type="radio" value="Kafr El-Sheikh" />
+                  <label class="dropdown-option-label" for="option18" data-txt="كفر الشيخ"></label>
+                </div>
+                <div>
+                  <input id="option19" name="gov" type="radio" value="Shebin El-Kom" />
+                  <label class="dropdown-option-label" for="option19" data-txt="شبين الكوم"></label>
+                </div>
+                <div>
+                  <input id="option20" name="gov" type="radio" value="Banha" />
+                  <label class="dropdown-option-label" for="option20" data-txt="بنها"></label>
+                </div>
+                <div>
+                  <input id="option21" name="gov" type="radio" value="Ismailia" />
+                  <label class="dropdown-option-label" for="option21" data-txt="الإسماعيلية"></label>
+                </div>
+                <div>
+                  <input id="option22" name="gov" type="radio" value="Sohag" />
+                  <label class="dropdown-option-label" for="option22" data-txt="سوهاج"></label>
+                </div>
+                <div>
+                  <input id="option23" name="gov" type="radio" value="Asyut" />
+                  <label class="dropdown-option-label" for="option23" data-txt="أسيوط"></label>
+                </div>
+                <div>
+                  <input id="option24" name="gov" type="radio" value="Minya" />
+                  <label class="dropdown-option-label" for="option24" data-txt="المنيا"></label>
+                </div>
+                <div>
+                  <input id="option25" name="gov" type="radio" value="Qena" />
+                  <label class="dropdown-option-label" for="option25" data-txt="قنا"></label>
+                </div>
+                <div>
+                  <input id="option26" name="gov" type="radio" value="New Valley" />
+                  <label class="dropdown-option-label" for="option26" data-txt="الوادى الجديد"></label>
+                </div>
+                <div>
+                  <input id="option27" name="gov" type="radio" value="North Sinai" />
+                  <label class="dropdown-option-label" for="option27" data-txt="شمال سيناء"></label>
+                </div>
+               </div>
+
+              </div>
+              <!-- مهنة ولي الأمر -->
+              <!-- <div class="inputs-form parent-job">
+                <input type="text" id="parent-job" name="parent-job" required />
+                <div class="input-details">
+                  <i class="fa-solid fa-briefcase"></i>
+                  <label for="parent-job">مهنة ولي الأمر</label>
+                </div>
+              </div> -->
+
+              <!-- البريد الإلكتروني -->
+              <div class="inputs-form Markez">
+                <input type="Markez" id="Markez" name="Markez" required />
+                <div class="input-details">
+                  <i class="fa-solid fa-briefcase"></i>
+                  <label for="Markez">المركز او المنطقة التابع لها </label>
+                </div>
+              </div> 
+
+              <!-- كلمة المرور -->
+              <div class="inputs-form p">
+                <input
+                  type="password"
+                  id="password1"
+                  name="password"
+                  required
+                />
+                <div class="input-details password-check">
+                  <i class="fa-solid fa-lock"></i>
+                  <label for="password1">كلمة السر</label>
+                </div>
+              </div>
+              <!--  المرور -->
+              <div class="inputs-form password-confirm">
+                <input
+                  class="inputPassword"
+                  type="password"
+                  id="password"
+                  name="password2"
+                  required
+                />
+                <i
+                  class="fa-solid fa-eye-slash password-icon"
+                  id="password_hidden"
+                ></i>
+                <div class="input-details">
+                  <i class="fa-solid fa-lock"></i>
+                  <label for="password">تأكيد كلمة السر</label>
+                </div>
+              </div>
+            </div>
+
+            
+            
+            <button class="Landing-btn-book" style="margin-top: 30px;">ارسل طلب </button>
+           
+              <div class="success-message" style="display: none;">
+                <h3 >تم انشاء حسابك بنجاح! وهذا هوا الكود الخاص بك <span class="Code" id="student_Code"></span> <br> يرجي الاحتفاظ به جيدا </h3>
+              </div>
+
+          </form>
+
+         
+         
+       
+          <p>
+            يوجد لديك حساب بالفعل؟
+            <a href="login" class="sign-in-join"
+              >ادخل إلى حسابك الآن !</a
+            >
+          </p>
+          <a href="/">
+            <button class="Landing-btn-book">الصفحة الرئيسية</button>
+          </a>
+        </div>
+
       </div>
-    </section>
+    </main>
 
-    <%- include("./partials/footer.ejs") %>
-
-
-      <script src="/assest/bootstrap.min.js"></script>
-      <script src="/assest/bootstrap.bundle.min.js"></script>
-
-
-      <script>
-        window.addEventListener('DOMContentLoaded', (event) => {
-          // Function to get the value of a query string parameter
-          const getQueryStringParameter = (name) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-          };
-
-          // Get the student code query string parameter
-          const studentCode = getQueryStringParameter('StudentCode');
-
-          // Check if the student code exists
-          if (studentCode) {
-            // Show the modal
-            document.getElementById("modelbtn").click();
-
-
-            document.getElementById('student_id').innerText = studentCode;
-
-            const url = new URL(window.location.href);
-            url.searchParams.delete('StudentCode');
-            history.replaceState(null, null, url);
-
-          }
-
-        });
-
-        function togglePasswordVisibility() {
-          const passwordField = document.getElementById("Password");
-          const toggleIcon = document.querySelector(".toggle-password");
-
-          if (passwordField.type === "password") {
-            passwordField.type = "text";
-            toggleIcon.classList.remove("fa-eye");
-            toggleIcon.classList.add("fa-eye-slash");
-          } else {
-            passwordField.type = "password";
-            toggleIcon.classList.remove("fa-eye-slash");
-            toggleIcon.classList.add("fa-eye");
-          }
-        }
-
-
-      </script>
-</body>
-
+     <!-- Footer Section -->
+     <%- include("./partials/footer.ejs") %>
+    <script src="assetsLanding/js/script.js" defer></script>
+    <script src="assetsLanding/js/sign-in-up.js" defer></script>
+  </body>
 </html>

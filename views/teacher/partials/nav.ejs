@@ -1,66 +1,355 @@
-<aside>
-    <div class="top">
-        <div class="logo">
-            <img src="../images/logo.png" alt="logo">
-        </div>
-        <div class="close" id="close-btn">
-            <i class="fa-solid fa-xmark"></i>
-        </div>
+<aside class="teacher-sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <img src="/images/logo.png" alt="Logo" class="logo-img">
     </div>
-    <div class="sidebar">
-        <a href="/teacher/dash" class="<%= path === '/dash' ? 'active' : '' %>" >
-            <i class="fa-solid fa-gauge"></i>
-            <h3>لوحه تحكمي</h3>
-        </a>
-        <a href="/teacher/addQuiz" class="<%= path === '/addQuiz' ? 'active' : '' %>"  >
-            <span class="material-icons-sharp">
-                quiz
-                </span>
-            <h3>اضافه امتحان</h3>
-        </a>
-        <a href="/teacher/handleQuizzes" class="<%= path === '/handleQuizzes' ? 'active' : '' %>"  >
-            <span class="material-icons-sharp">
-                quiz
-                </span>
-            <h3> متابعه الامتحانات</h3>
-        </a>
-
-        <a href="/teacher/addVideo" class="<%= path === '/addVideo' ? 'active' : '' %>" >
-            <i class="fa-solid fa-photo-film"></i>
-            <h3>اضف فيديو</h3>
-        </a> 
-        <a href="/teacher/handleVideos" class="<%= path === '/handleVideos' ? 'active' : '' %>" >
-            <i class="fa-solid fa-photo-film"></i>
-            <h3> متابعه الفيديوهات</h3>
-        </a> 
-
-        
-                <a href="/teacher/Codes" class="<%= path === '/Codes' ? 'active' : '' %>" >
-                    <i class="fa-solid fa-table"></i>
-                    <h3>  اضف اكواد </h3>
-                </a> 
-        <a href="/teacher/handelCodes" class="<%= path === '/handelCodes' ? 'active' : '' %>"  >
-                    <i class="fa-solid fa-table"></i>
-                    <h3> متابعه الاكواد </h3>
-                </a> 
-        <a href="/teacher/myStudent"  class="<%= path === '/myStudent' ? 'active' : '' %>" >
-            <i class="fa-solid fa-graduation-cap"></i>
-            <h3>متابعة الطالب </h3>
-        </a>
-        <a href="/teacher/studentsRequests" class="<%= path === '/studentsRequests' ? 'active' : '' %>" >
-            <i class="fa-solid fa-user-plus"></i>
-            <h3>طلبات التسجيل </h3>
-        </a> 
-        <a href="/teacher/homeWork"  class="<%= path === '/homeWork' ? 'active' : '' %>" >
-            <i class="fa-solid fa-list-check"></i>
-            <h3>مراجعة الواجب</h3>
-        </a>
+    <h2 class="sidebar-title">منصة المعلم</h2>
+    <button id="close-sidebar" class="close-sidebar-btn">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
   
-        <a href="/teacher/logOut" >
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <h3>تسجيل الخروج</h3>
-        </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <h3 class="nav-section-title">الرئيسية</h3>
+      <ul>
+        <li class="nav-item">
+          <a href="/teacher/dash" class="nav-link <%= path === '/teacher/dash' ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+            <span class="nav-text">لوحة التحكم</span>
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+          <a href="/teacher/analytics" class="nav-link <%= path === '/teacher/analytics' ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-chart-pie"></i></span>
+            <span class="nav-text">التحليلات</span>
+          </a>
+        </li> -->
+      </ul>
     </div>
+    
+    <div class="nav-section">
+      <h3 class="nav-section-title">إدارة المحتوى</h3>
+      <ul>
+        <li class="nav-item">
+          <a href="/teacher/chapters" class="nav-link <%= path && path.includes('/teacher/chapters') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-book-open"></i></span>
+            <span class="nav-text">الفصول الدراسية</span>
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+          <a href="/teacher/videos" class="nav-link <%= path && path.includes('/teacher/videos') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-film"></i></span>
+            <span class="nav-text">الفيديوهات</span>
+          </a>
+        </li> -->
+        <li class="nav-item">
+          <a href="/teacher/quizzes" class="nav-link <%= path && path.includes('/teacher/quizzes') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-tasks"></i></span>
+            <span class="nav-text">الاختبارات</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/teacher/pdfs" class="nav-link <%= path && path.includes('/teacher/pdfs') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+            <span class="nav-text">المذكرات</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <h3 class="nav-section-title">الطلاب</h3>
+      <ul>
+        <li class="nav-item">
+          <a href="/teacher/students" class="nav-link <%= path === '/teacher/students' ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-user-graduate"></i></span>
+            <span class="nav-text">إدارة الطلاب</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/teacher/students/requests" class="nav-link <%= path === '/teacher/students/requests' ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
+            <span class="nav-text">طلبات التسجيل</span>
+            <% if (typeof stats !== 'undefined' && stats.pendingStudents > 0) { %>
+              <span class="nav-badge"><%= stats.pendingStudents %></span>
+            <% } %>
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+          <a href="/teacher/attendance" class="nav-link <%= path && path.includes('/teacher/attendance') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
+            <span class="nav-text">الحضور</span>
+          </a>
+        </li> -->
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <h3 class="nav-section-title">النظام</h3>
+      <ul>
+        <li class="nav-item">
+          <a href="/teacher/codes" class="nav-link <%= path && path.includes('/teacher/codes') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-key"></i></span>
+            <span class="nav-text">الأكواد</span>
+          </a>
+        </li>
+        <!-- <li class="nav-item">
+          <a href="/teacher/communication" class="nav-link <%= path && path.includes('/teacher/communication') ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
+            <span class="nav-text">التواصل</span>
+          </a>
+        </li> -->
+        <!-- <li class="nav-item">
+          <a href="/teacher/settings" class="nav-link <%= path === '/teacher/settings' ? 'active' : '' %>">
+            <span class="nav-icon"><i class="fas fa-sliders-h"></i></span>
+            <span class="nav-text">الإعدادات</span>
+          </a>
+        </li> -->
+      </ul>
+    </div>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <a href="/teacher/logout" class="logout-link">
+      <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+      <span class="nav-text">تسجيل الخروج</span>
+    </a>
+  </div>
 </aside>
+
+<style>
+  .teacher-sidebar {
+    background-color: #ffffff;
+    color: #334155;
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    right: 0;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+    box-shadow: -3px 0 15px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #f1f5f9;
+  }
+  
+  .sidebar-header {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    position: relative;
+    background-color: #f8fafc;
+  }
+  
+  .close-sidebar-btn {
+    display: none;
+    position: absolute;
+    left: 1rem;
+    top: 1.5rem;
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+  
+  .sidebar-logo {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3b82f6;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .logo-img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1e293b;
+  }
+  
+  .sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+  }
+  
+  .nav-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .nav-section-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    padding: 0 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .nav-item {
+    list-style: none;
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-right: 3px solid transparent;
+    position: relative;
+  }
+  
+  .nav-link:hover {
+    background-color: #f1f5f9;
+    color: #3b82f6;
+  }
+  
+  .nav-link.active {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border-right-color: #3b82f6;
+  }
+  
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1rem;
+    font-size: 1rem;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+  }
+  
+  .nav-link:hover .nav-icon,
+  .nav-link.active .nav-icon {
+    color: #3b82f6;
+  }
+  
+  .nav-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  
+  .nav-badge {
+    position: absolute;
+    left: 1.5rem;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 0 6px;
+  }
+  
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+  }
+  
+  .logout-link {
+    display: flex;
+    align-items: center;
+    color: #64748b;
+    text-decoration: none;
+    padding: 0.75rem 0;
+    transition: all 0.2s ease;
+  }
+  
+  .logout-link:hover {
+    color: #ef4444;
+  }
+  
+  .logout-link .nav-icon {
+    color: #94a3b8;
+  }
+  
+  .logout-link:hover .nav-icon {
+    color: #ef4444;
+  }
+  
+  /* Animation for active link */
+  .nav-link.active::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background-color: #3b82f6;
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.6;
+    }
+  }
+  
+  /* Responsive design */
+  @media (max-width: 992px) {
+    .teacher-sidebar {
+      transform: translateX(100%);
+    }
+    
+    .teacher-sidebar.show {
+      transform: translateX(0);
+    }
+    
+    .close-sidebar-btn {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle sidebar on mobile
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const closeSidebar = document.getElementById('close-sidebar');
+    
+    if (menuBtn) {
+      menuBtn.addEventListener('click', function() {
+        sidebar.classList.add('show');
+      });
+    }
+    
+    if (closeSidebar) {
+      closeSidebar.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+      });
+    }
+  });
+</script>
 
 

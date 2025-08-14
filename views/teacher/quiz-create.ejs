@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء اختبار جديد - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="/css/quiz-modern.css">
+  <link rel="stylesheet" href="/css/quiz-create.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  
+  <!-- JavaScript -->
+  <script src="/js/quiz-create.js"></script>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <header class="teacher-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">إنشاء اختبار جديد</h1>
+        </div>
+        
+        <div class="header-right">
+          <div style="display: flex; gap: 0.5rem;">
+            <% if (locals.chapter) { %>
+              <a href="/teacher/chapters/<%= chapter._id %>" class="btn btn-outline">
+                <i class="fas fa-arrow-right"></i>
+                العودة للفصل
+              </a>
+            <% } else { %>
+              <a href="/teacher/quizzes" class="btn btn-outline">
+                <i class="fas fa-arrow-right"></i>
+                العودة للاختبارات
+              </a>
+            <% } %>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Content -->
+      <div class="teacher-content quiz-create-content">
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <% if (error === 'missing_fields') { %>
+              يرجى ملء جميع الحقول المطلوبة
+            <% } else if (error === 'creation_failed') { %>
+              حدث خطأ أثناء إنشاء الاختبار
+            <% } else { %>
+              <%= error %>
+            <% } %>
+          </div>
+        <% } %>
+        
+        <form id="quizForm" method="POST" action="<%= locals.chapter ? `/teacher/chapters/${chapter._id}/quizzes/create` : '/teacher/quizzes/create' %>" class="needs-validation" novalidate>
+          <!-- Quiz Basic Info -->
+          <div class="form-grid">
+            <div class="form-section">
+              <h3 class="section-title">معلومات الاختبار الأساسية</h3>
+              
+              <div class="form-group">
+                <label class="form-label">اسم الاختبار <span style="color: var(--danger-color)">*</span></label>
+                <input type="text" class="form-input" id="quizName" name="quizName" required>
+              </div>
+              
+              <% if (!locals.chapter) { %>
+                <div class="form-group">
+                  <label class="form-label">الصف الدراسي <span style="color: var(--danger-color)">*</span></label>
+                  <select class="form-select" id="Grade" name="Grade" required>
+                    <option value="">اختر الصف الدراسي</option>
+                    <option value="Grade1">الصف الأول الثانوي</option>
+                    <option value="Grade2">الصف الثاني الثانوي</option>
+                    <option value="Grade3">الصف الثالث الثانوي</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">الفصل (اختياري)</label>
+                  <select class="form-select" id="chapterId" name="chapterId">
+                    <option value="">بدون فصل محدد</option>
+                    <% if (locals.chapters && chapters.length > 0) { %>
+                      <% chapters.forEach(function(chapter) { %>
+                        <option value="<%= chapter._id %>"><%= chapter.chapterName %> (<%= chapter.chapterGrade === 'Grade1' ? 'الأول الثانوي' : chapter.chapterGrade === 'Grade2' ? 'الثاني الثانوي' : 'الثالث الثانوي' %>)</option>
+                      <% }); %>
+                    <% } %>
+                  </select>
+                </div>
+              <% } else { %>
+                <div class="form-group">
+                  <label class="form-label">الفصل</label>
+                  <div class="form-input" style="background: var(--surface-color); cursor: not-allowed;">
+                    <%= chapter.chapterName %> 
+                    (<%= chapter.chapterGrade === 'Grade1' ? 'الأول الثانوي' : chapter.chapterGrade === 'Grade2' ? 'الثاني الثانوي' : 'الثالث الثانوي' %>)
+                  </div>
+                  <input type="hidden" name="chapterId" value="<%= chapter._id %>">
+                  <input type="hidden" name="Grade" value="<%= chapter.chapterGrade %>">
+                </div>
+              <% } %>
+              
+              <div class="form-group">
+                <label class="form-label">وقت الاختبار (بالدقائق) <span style="color: var(--danger-color)">*</span></label>
+                <input type="number" class="form-input" id="timeOfQuiz" name="timeOfQuiz" min="1" max="180" value="60" required>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h3 class="section-title">إعدادات الاختبار</h3>
+              
+              <div class="form-group">
+                <label class="form-label">حالة الدفع <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="prepaidStatus" name="prepaidStatus" required>
+                  <option value="false">مجاني</option>
+                  <option value="true">مدفوع</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="priceGroup" style="display: none;">
+                <label class="form-label">سعر الاختبار</label>
+                <div style="position: relative;">
+                  <input type="number" class="form-input" id="quizPrice" name="quizPrice" min="0" step="0.01" value="0">
+                  <span style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-secondary);">جنيه</span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">حالة الاختبار</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="isQuizActive" name="isQuizActive" class="checkbox-input" value="true" checked>
+                  <label for="isQuizActive">نشط</label>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">الاختبار النشط متاح للطلاب</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">إذن العرض</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="permissionToShow" name="permissionToShow" class="checkbox-input" value="true" checked>
+                  <label for="permissionToShow">إظهار الاختبار للطلاب</label>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">إظهار الاختبار في قائمة الاختبارات المتاحة</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">إظهار الإجابات بعد الاختبار</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="showAnswersAfterQuiz" name="showAnswersAfterQuiz" class="checkbox-input" value="true" checked>
+                  <label for="showAnswersAfterQuiz">إظهار الإجابات الصحيحة</label>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">الطلاب سيرون الإجابات الصحيحة بعد الانتهاء من الاختبار</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">فيديو سيتم فتحه بعد الاختبار (اختياري)</label>
+                <select class="form-select" id="videoWillbeOpen" name="videoWillbeOpen">
+                  <option value="">لا يوجد</option>
+                  <% if (locals.videos && videos.length > 0) { %>
+                    <% videos.forEach(function(video) { %>
+                      <option value="<%= video._id %>"><%= video.videoTitle || video.lectureName %></option>
+                    <% }); %>
+                  <% } %>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">عدد الأسئلة التي ستظهر للطالب <span style="color: var(--danger-color)">*</span></label>
+                <input type="number" class="form-input" id="questionsToShow" name="questionsToShow" min="1" value="10" required>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">سيتم اختيار هذا العدد من الأسئلة عشوائياً من مجموعة الأسئلة الكاملة</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Questions Management -->
+          <div class="form-section" style="margin-top: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 class="section-title">الأسئلة</h3>
+              <button type="button" id="addQuestionBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                إضافة سؤال
+              </button>
+            </div>
+            
+            <div id="questionsContainer">
+              <!-- Questions will be added here dynamically -->
+              <div class="empty-state" id="noQuestionsMessage">
+                <div style="text-align: center; padding: 2rem;">
+                  <i class="fas fa-question-circle" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem;"></i>
+                  <h4>لا توجد أسئلة بعد</h4>
+                  <p>اضغط على زر "إضافة سؤال" لإضافة أسئلة للاختبار</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Submit Button -->
+          <div style="display: flex; justify-content: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-save"></i>
+              إنشاء الاختبار
+            </button>
+          </div>
+          
+          <!-- Hidden input for questions data -->
+          <input type="hidden" id="questionsData" name="questions" value="[]">
+        </form>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Question Template (Hidden) -->
+  <template id="questionTemplate">
+    <div class="question-card">
+      <div class="question-header">
+        <div class="question-number">سؤال #<span class="question-index">1</span></div>
+        <div class="question-actions">
+          <button type="button" class="btn-icon edit-question" title="تعديل السؤال">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button type="button" class="btn-icon delete-question" title="حذف السؤال">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="question-body">
+        <div class="question-text"></div>
+        
+        <div class="question-image-container" style="display: none;">
+          <img src="" alt="صورة السؤال" class="question-image">
+        </div>
+        
+        <div class="question-options">
+          <div class="option" data-option="1">
+            <span class="option-marker">أ</span>
+            <span class="option-text"></span>
+          </div>
+          <div class="option" data-option="2">
+            <span class="option-marker">ب</span>
+            <span class="option-text"></span>
+          </div>
+          <div class="option" data-option="3">
+            <span class="option-marker">ج</span>
+            <span class="option-text"></span>
+          </div>
+          <div class="option" data-option="4">
+            <span class="option-marker">د</span>
+            <span class="option-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <!-- Question Modal -->
+  <div class="modal" id="questionModal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modalTitle">إضافة سؤال جديد</h3>
+        <button type="button" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">نص السؤال <span style="color: var(--danger-color)">*</span></label>
+          <textarea class="form-input" id="questionTitle" rows="2" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">صورة السؤال (اختياري)</label>
+          <div style="border: 2px dashed var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+            <div id="questionImagePreview" style="width: 100%; height: 150px; margin-bottom: 1rem; border-radius: var(--radius-md); overflow: hidden; display: none;">
+              <img id="questionImageDisplay" src="" alt="صورة السؤال" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            
+            <button type="button" id="uploadQuestionImageBtn" class="btn btn-outline" style="width: 100%;">
+              <i class="fas fa-cloud-upload-alt"></i>
+              تحميل صورة
+            </button>
+            
+            <input type="hidden" id="questionImageURL">
+            <div id="uploadProgress" class="upload-progress-container" style="display: none;">
+              <div class="upload-status">
+                <i class="fas fa-spinner"></i>
+                <span id="uploadStatusText">جاري رفع الصورة...</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="progressText">0%</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="options-container">
+          <div class="form-group">
+            <label class="form-label">اختر الإجابة الصحيحة <span style="color: var(--danger-color)">*</span></label>
+            <select class="form-select" id="correctAnswer" required>
+              <option value="1">الخيار الأول</option>
+              <option value="2">الخيار الثاني</option>
+              <option value="3">الخيار الثالث</option>
+              <option value="4">الخيار الرابع</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الأول <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer1" required>
+              <span class="correct-indicator" data-option="1" style="display: none;">✓</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الثاني <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer2" required>
+              <span class="correct-indicator" data-option="2" style="display: none;">✓</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الثالث <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer3" required>
+              <span class="correct-indicator" data-option="3" style="display: none;">✓</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الرابع <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer4" required>
+              <span class="correct-indicator" data-option="4" style="display: none;">✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline modal-cancel">إلغاء</button>
+        <button type="button" class="btn btn-primary" id="saveQuestionBtn">حفظ السؤال</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize the quiz creation functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // The quiz-create.js file will handle all the functionality
+      console.log('Quiz creation page loaded');
+      
+      // Check if the external script loaded properly
+      if (typeof cloudinary !== 'undefined') {
+        console.log('Cloudinary loaded successfully');
+      } else {
+        console.log('Cloudinary not loaded');
+      }
+    });
+  </script>
+</body>
+</html> 

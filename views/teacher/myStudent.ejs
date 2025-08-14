@@ -25,27 +25,8 @@
 
                             <div class=" col-md-6 ">
                                 <div class="left" style="margin-top: 0.2rem;">
-                                    <div class="top">
-                                        <button id="menu-btn">
-                                            <span class="material-icons-sharp">
-                                                menu
-                                            </span>
-                                        </button>
-                                        <div class="theme-toggler">
-                                            <span class="material-icons-sharp active">
-                                                light_mode
-                                            </span>
-                                            <span class="material-icons-sharp">
-                                                dark_mode
-                                            </span>
-                                        </div>
-                                        <div class="profile">
-                                            <div class="info">
-                                                <p>اهلا بك،<b id="Tname"> </b></p>
-                                            </div>
+                                    <%- include("./partials/top.ejs") %> 
 
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -170,6 +151,7 @@
 
                                 </div>
                             </div>
+
                             <div class="col-md-12  col-sm-12">
                                 <h1>Quizzes Data</h1>
                                 <div class="student-table ">
@@ -230,6 +212,64 @@
 
                                 </div>
                             </div>
+                            <div class="col-md-12  col-sm-12">
+                                <h1>Attendance Data</h1>
+                                <div class="student-table ">
+
+                                
+
+                                    <table id="myTable">
+                                        <thead>
+                                            <th style="padding: 10px;"># </th>
+                        
+                                            <th style="padding-left: 20px;">  اسم السنتر </th>
+                                            <th style="padding-left: 20px;"> اسم  الجروب </th>
+                                            <th style="padding-left: 20px;">  نوع الحضور  </th>
+                                            
+                                            <th style="padding-left: 20px;"> تاريخ الحضور   </th>        
+                                        </thead>
+
+                                        <tbody>
+
+                                            <% if (attendance ) { %>
+                                                <% let counter = 1; %>
+                                                    <% attendance.forEach(data => { %>
+                                                   
+                                                        <tr>
+                                                            <td> <%= counter %></td>
+                                                            <td  style="line-height: 20px;"><span ><i class="fa-solid "></i></span><%= data.centerName %></td>
+                                                            <td  ><%= data.GroupTime%></td>
+                                                            <td >Online</td>
+                                                            <td>
+                                                            <%= data.dateOfAttend 
+                                                                ? new Date(data.dateOfAttend).toLocaleDateString() + " " + 
+                                                                    new Date(data.dateOfAttend).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
+                                                                : "لم يحضر" 
+                                                            %>
+                                                            </td>
+                                                                                                                
+                                                        
+                                                        </tr>
+        
+                                                    <% counter++; %>
+        
+                                                    <% }) %>
+                                                        
+                                                <% } else { %>
+                                                    <tr style="text-align: center;">
+                                                        <td colspan="8">
+                                                            <h1></h1>
+                                                        </td>
+                                                    </tr>
+                                                <% } %>
+
+                                        </tbody>
+
+                                    </table>
+                                 
+
+                                </div>
+                            </div>
 
                             <div class="pagination justify-content-between mb-5">
                              <% if (userData ) { %>
@@ -259,20 +299,7 @@
         <script src="/assest/bootstrap.bundle.min.js"></script>
         <script src="/assest/bootstrap.min.js"></script>
 
-<script>
-       
-       const sdieMenu = document.querySelector("aside");
-    const menuBtn = document.querySelector("#menu-btn");
-    const closeBtn = document.querySelector("#close-btn");
-  
-    menuBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "block";
-    });
-  
-    closeBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "none";
-    });
-</script>
+
     </body>
 
 

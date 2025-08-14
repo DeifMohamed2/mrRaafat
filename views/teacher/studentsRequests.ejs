@@ -36,8 +36,10 @@
                     <input type="tel" id="ModalUserphone" class="modal-input"name="phone" value="<%= modalData.phone %>"> <br>
                     
                     <label for="ModalUserPassword">  باسورد الطالب : </label> 
-                    <h3 id="ModalUserPassword" ><%= modalData.PasswordNotHashed %></h3>
-                    
+
+                     <h3 id="ModalUserPassword" ><%= modalData.PasswordWithOutHash %></h3>
+
+
                     <label for="ModalParentUserphone">رقم هاتف ولي امر الطالب : </label> 
                     <input type="tel" id="ModalParentUserphone" class="modal-input" name="parentPhone" value="<%= modalData.parentPhone %>"> <br>
                     

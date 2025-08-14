@@ -1,211 +1,721 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
-    <%- include("./partials/head.ejs") %>
-
-
+<head>
+  <%- include('./partials/head.ejs') %>
+  <style>
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background-color: var(--surface-color, #fff);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color, #e2e8f0);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .stat-icon.students {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+    
+    .stat-icon.videos {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+    
+    .stat-icon.quizzes {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    
+    .stat-icon.codes {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+    
+    .stat-content {
+      flex: 1;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary, #1e293b);
+      margin: 0;
+      line-height: 1;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary, #64748b);
+      margin: 0.5rem 0 0;
+    }
+    
+    .stat-change {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+    
+    .stat-change.positive {
+      color: #10b981;
+    }
+    
+    .stat-change.negative {
+      color: #ef4444;
+    }
+    
+    .dashboard-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .chart-container {
+      background-color: var(--surface-color, #fff);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border-color, #e2e8f0);
+      position: relative;
+      height: 350px; /* Fixed height for chart containers */
+      overflow: hidden;
+    }
+    
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    
+    .chart-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary, #1e293b);
+      margin: 0;
+    }
+    
+    .chart-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .chart-period {
+      font-size: 0.875rem;
+      color: var(--text-secondary, #64748b);
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      background-color: var(--background-color, #f1f5f9);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .chart-period.active {
+      background-color: var(--primary-color, #3b82f6);
+      color: white;
+    }
+    
+    .recent-container {
+      background-color: var(--surface-color, #fff);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border-color, #e2e8f0);
+      max-height: 350px; /* Fixed height for recent containers */
+      overflow-y: auto;
+    }
+    
+    .recent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    
+    .recent-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary, #1e293b);
+      margin: 0;
+    }
+    
+    .recent-actions a {
+      color: var(--primary-color, #3b82f6);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .student-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .student-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .student-item:hover {
+      background-color: var(--background-color, #f1f5f9);
+    }
+    
+    .student-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      margin-left: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .student-info {
+      flex: 1;
+    }
+    
+    .student-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary, #1e293b);
+      margin: 0 0 0.25rem;
+    }
+    
+    .student-details {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary, #64748b);
+    }
+    
+    .student-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .student-badge.active {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    
+    .student-badge.pending {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+    
+    .student-actions {
+      display: flex;
+      align-items: center;
+    }
+    
+    .student-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary, #64748b);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+    }
+    
+    .student-btn:hover {
+      background-color: var(--background-color, #f1f5f9);
+      color: var(--primary-color, #3b82f6);
+    }
+    
+    .performance-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .performance-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .performance-item:hover {
+      background-color: var(--background-color, #f1f5f9);
+    }
+    
+    .performance-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: var(--background-color, #f1f5f9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary, #64748b);
+      margin-left: 1rem;
+    }
+    
+    .performance-rank.top {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #f59e0b;
+    }
+    
+    .performance-info {
+      flex: 1;
+    }
+    
+    .performance-score {
+      font-weight: 600;
+      color: var(--primary-color, #3b82f6);
+      margin-right: 0.5rem;
+    }
+    
+    .grade-distribution {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+    
+    .grade-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .grade-bar {
+      width: 40px;
+      background-color: var(--background-color, #f1f5f9);
+      border-radius: 0.25rem;
+      position: relative;
+    }
+    
+    .grade-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      border-radius: 0.25rem;
+    }
+    
+    .grade-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary, #64748b);
+    }
+    
+    .grade-count {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary, #1e293b);
+    }
+    
+    /* Fix for teacher content scrolling */
+    .teacher-content {
+      padding: 1.5rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 70px); /* Adjust based on header height */
+    }
+    
+    /* Chart canvas container */
+    .chart-canvas-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
+    }
+    
+    @media (max-width: 992px) {
+      .dashboard-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .chart-container,
+      .recent-container {
+        height: auto;
+        max-height: 350px;
+      }
+    }
+  </style>
+</head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-2" >
-                <%- include("./partials/nav.ejs") %>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+          <!-- Students Stats -->
+          <div class="stat-card">
+            <div class="stat-icon students">
+              <i class="fas fa-user-graduate"></i>
+          </div>
+            <div class="stat-content">
+              <h3 class="stat-value"><%= stats.totalStudents %></h3>
+              <p class="stat-label">إجمالي الطلاب</p>
+              <div class="stat-details">
+                <span class="stat-detail"><%= stats.activeStudents %> نشط</span>
+                <span class="stat-detail"><%= stats.pendingStudents %> في الانتظار</span>
+              </div>
             </div>
-            <!--------------------END ASIDE  ------------------>
-
-            <div class="col-lg-10 ">
-                <main>       
-                    <select name="Grde" id="Grade" class="Grade">
-                        <option selected value="Grade1">الصف الاول الثانوي</option>
-                        <option value="Grade2">الصف الثاني الثانوي </option>
-                        <option value="Grade3">الصف الثالث الثانوي</option>
-                    </select>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="insights">
-                                <div class="sales">
-                                    <span class="material-icons-sharp">
-                                        analytics
-                                    </span>
-                                    <div class="middle">
-                                        <div class="right">
-                                            <h3>مجموع الامتحانات</h3>
-                                            <h1 id="numberOfExams"></h1>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">last 24 hours</small>
-                                </div>
-                                <!---------------- end OF sales ---------------->
-                                <div class="expenses">
-                                    <span class="material-icons-sharp">
-                                        bar_chart
-                                    </span>
-                                    <div class="middle">
-                                        <div class="right">
-                                            <h3>الطلبات علي الفيديوهات</h3>
-                                            <h1>20</h1>
-                                        </div>
-                                    
-                                    </div>
-                                    <small class="text-muted">last 24 hours</small>
-                                </div>
-                                <!---------------- end OF expenes ---------------->
-                                <div class="income">
-                                        <span class="material-icons-sharp">
-                                            school
-                                            </span>
-                                    
-                                    <div class="middle">
-                                        <div class="right">
-                                            <h3>الطلاب المفعل اشتراكهم</h3>
-                                            <h1 id="subscripeTrue"></h1>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">last 24 hours</small>
-                                </div>
-                                <!---------------- end OF INCOME ---------------->
-                                <div class="expenses">
-                                    <span class="material-icons-sharp">
-                                        analytics
-                                    </span>
-                                    <div class="middle">
-                                        <div class="right">
-                                            <h3>عدد الطلاب الغير مشتركين</h3>
-                                            <h1  id="subscripeFalse">0</h1>
-                                        </div>
-                                     
-                                    </div>
-                                    <small class="text-muted">last 24 hours</small>
-                                </div>
-                                <!---------------- end OF sales ---------------->
-                                <div class="expenses">
-                                    <span class="material-icons-sharp">
-                                        bar_chart
-                                    </span>
-                                    <div class="middle">
-                                        <div class="right">
-                                            <h3>الدخل الكامل من الفيديوهات</h3>
-                                            <h1>400LE</h1>
-                                        </div>
-                                    
-                                    </div>
-                                    <small class="text-muted">last 24 hours</small>
-                                </div>
-                                <!---------------- end OF expenes ---------------->
-                                <div class="income">
-                                    <span class="material-icons-sharp">
-                                        stacked_line_chart
-                                    </span>
-                                    <div class="middle">
-                                        <div class="right">
-                                            <h3>الدخل الكامل من اشتراكات الطلاب</h3>
-                                            <h1>2400LE</h1>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">last 24 hours</small>
-                                </div>
-                                <!---------------- end OF INCOME ---------------->
-                            </div>
-                            <div class="col-12  float-end">
-                                <div class="recent-orders ">
-                                    <h2 style="margin: 1.5rem;">رسم يوضح متوسط درجات الطلاب في الامتحانات</h2>
-                                    <div class="chart">
-                                        <canvas id="myChart" height="200"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!------------------- END OF INSGIHTS ---------------->
-                        <div class="col-lg-4 ">
-                            <div class="left">
-                                <div class="top">
-                                    <button id="menu-btn">
-                                        <span class="material-icons-sharp">
-                                            menu
-                                        </span>
-                                    </button>
-                                    <div class="theme-toggler">
-                                        <span class="material-icons-sharp active">
-                                            light_mode
-                                        </span>
-                                        <span class="material-icons-sharp">
-                                            dark_mode
-                                        </span>
-                                    </div>
-                                    <div class="profile">
-                                        <div class="info">
-                                            <p>اهلا بك،<b id="userName"> </b></p>
-                                        </div>
-                                        <div class="profile-photo">
-                                            <a href="settings.html"><img id="profile_photo" alt="profile photo"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- END OF TOP -->
-                                <div class="recent-updates " onclick="window.location.href = 'ranking.html'">
-                                    <h2></h2>
-                                    <div class="updates">
-                                        <div class="third">
-                                            <div class="profile-photo">
-                                                <img src="" id="third" alt="profile photo">
-                                            </div>
-                                            <div class="text">
-                                                <h3>3<span>ST</span> </h3>
-                                            </div>
-                                        </div>
-                                        <div class="first">
-                                            <i class="fa-solid fa-crown"></i>
-                                            <div class="profile-photo">
-                                                <img src="" id="first" alt="profile photo">
-            
-                                            </div>
-                                            <div class="text">
-                                                <h3>1<span>ST</span> </h3>
-                                            </div>
-                                        </div>
-                                        <div class="second">
-                                            <div class="profile-photo">
-                                                <img src="" id="second" alt="profile photo">
-                                            </div>
-                                            <div class="text">
-                                                <h3>2<span>ST</span> </h3>
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </main>
+          </div>
+          
+          <!-- Videos Stats -->
+          <div class="stat-card">
+            <div class="stat-icon videos">
+                <i class="fas fa-video"></i>
             </div>
-
-            <!-------------------- END OF MAIN --------------------->
-         
+            <div class="stat-content">
+              <h3 class="stat-value"><%= stats.totalVideos %></h3>
+              <p class="stat-label">إجمالي الفيديوهات</p>
+              <div class="stat-details">
+                <span class="stat-detail"><%= stats.totalChapters %> فصل</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quizzes Stats -->
+          <div class="stat-card">
+            <div class="stat-icon quizzes">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value"><%= stats.totalQuizzes %></h3>
+              <p class="stat-label">إجمالي الاختبارات</p>
+              <div class="stat-details">
+                <span class="stat-detail"><%= stats.totalPDFs %> ملف</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Codes Stats -->
+          <div class="stat-card">
+            <div class="stat-icon codes">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value"><%= stats.totalCodes %></h3>
+              <p class="stat-label">إجمالي الأكواد</p>
+              <div class="stat-details">
+                <span class="stat-detail"><%= stats.usedCodes %> مستخدم</span>
+                <span class="stat-detail"><%= stats.activeCodes %> متاح</span>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-
-
-
-    <script src="../assest/bootstrap.bundle.min.js"></script>
-    <script src="../assest/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-<script>
-       
-       const sdieMenu = document.querySelector("aside");
-    const menuBtn = document.querySelector("#menu-btn");
-    const closeBtn = document.querySelector("#close-btn");
+        
+        <!-- Charts & Recent Activity -->
+        <div class="dashboard-row">
+          <!-- Student Registration Chart -->
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">تسجيلات الطلاب</h3>
+              <div class="chart-actions">
+                <span class="chart-period active" data-period="month">شهري</span>
+                <span class="chart-period" data-period="quarter">ربع سنوي</span>
+                <span class="chart-period" data-period="year">سنوي</span>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="registrationsChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Grade Distribution -->
+          <div class="recent-container">
+            <div class="recent-header">
+              <h3 class="recent-title">توزيع الصفوف</h3>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="gradeDistributionChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div class="dashboard-row">
+          <!-- Recent Students -->
+          <div class="recent-container">
+            <div class="recent-header">
+              <h3 class="recent-title">آخر الطلاب المسجلين</h3>
+              <div class="recent-actions">
+                <a href="/teacher/students">عرض الكل</a>
+              </div>
+            </div>
+            <div class="student-list">
+              <% if (recentStudents && recentStudents.length > 0) { %>
+                <% recentStudents.forEach(student => { %>
+                  <div class="student-item">
+                    <div class="student-avatar">
+                      <%= student.Username.charAt(0) %>
+                    </div>
+                    <div class="student-info">
+                      <h4 class="student-name"><%= student.Username %></h4>
+                      <div class="student-details">
+                        <span>كود: <%= student.Code %></span>
+                        <span>
+                          <%= student.Grade === 'Grade1' ? 'الأول الثانوي' : 
+                             student.Grade === 'Grade2' ? 'الثاني الثانوي' : 'الثالث الثانوي' %>
+                        </span>
+                        <span class="student-badge <%= student.subscribe ? 'active' : 'pending' %>">
+                          <%= student.subscribe ? 'نشط' : 'في الانتظار' %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="student-actions">
+                      <a href="/teacher/students/<%= student._id %>" class="student-btn">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                    </div>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <div class="empty-state">
+                  <p>لا يوجد طلاب مسجلين حديثاً</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+          
+          <!-- Top Performers -->
+          <div class="recent-container">
+            <div class="recent-header">
+              <h3 class="recent-title">أفضل الطلاب أداءً</h3>
+            </div>
+            <div class="performance-list">
+              <% if (topPerformers && topPerformers.length > 0) { %>
+                <% topPerformers.forEach((student, index) => { %>
+                  <div class="performance-item">
+                    <div class="performance-rank <%= index < 3 ? 'top' : '' %>">
+                      <%= index + 1 %>
+                    </div>
+                    <div class="performance-info">
+                      <h4 class="student-name"><%= student.Username %></h4>
+                      <div class="student-details">
+                        <span>كود: <%= student.Code %></span>
+                        <span>
+                          <%= student.Grade === 'Grade1' ? 'الأول الثانوي' : 
+                             student.Grade === 'Grade2' ? 'الثاني الثانوي' : 'الثالث الثانوي' %>
+                      </span>
+                      </div>
+                    </div>
+                    <div class="performance-score">
+                      <% const scorePercent = student.totalQuestions > 0 ? 
+                         Math.round((student.totalScore / student.totalQuestions) * 100) : 0 %>
+                      <%= scorePercent %>%
+                    </div>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <div class="empty-state">
+                  <p>لا توجد بيانات متاحة</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
   
-    menuBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "block";
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Registration Chart
+      const registrationsCtx = document.getElementById('registrationsChart').getContext('2d');
+      
+      // Process monthly stats data
+      const monthNames = ['يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+      const monthlyData = Array(12).fill(0);
+      
+      <% if (monthlyStats && monthlyStats.length > 0) { %>
+        <% monthlyStats.forEach(stat => { %>
+          monthlyData[<%= stat._id.month - 1 %>] = <%= stat.count %>;
+        <% }); %>
+      <% } %>
+      
+      const registrationsChart = new Chart(registrationsCtx, {
+        type: 'line',
+        data: {
+          labels: monthNames,
+          datasets: [{
+            label: 'تسجيلات الطلاب',
+            data: monthlyData,
+            fill: true,
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderColor: '#3b82f6',
+            tension: 0.4,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#fff',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              titleColor: '#1e293b',
+              bodyColor: '#1e293b',
+              borderColor: '#e2e8f0',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
+              callbacks: {
+                title: function(tooltipItems) {
+                  return tooltipItems[0].label;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#64748b'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(226, 232, 240, 0.5)'
+              },
+              ticks: {
+                precision: 0,
+                color: '#64748b'
+              }
+            }
+          }
+        }
+      });
+      
+      // Grade Distribution Chart
+      const gradeDistributionCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+      
+      // Process grade stats data
+      const gradeLabels = [];
+      const gradeCounts = [];
+      const gradeColors = ['#3b82f6', '#f59e0b', '#10b981'];
+      
+      <% if (gradeStats && gradeStats.length > 0) { %>
+        <% gradeStats.forEach((grade, index) => { %>
+          gradeLabels.push('<%= grade._id === "Grade1" ? "الأول الثانوي" : 
+                              grade._id === "Grade2" ? "الثاني الثانوي" : "الثالث الثانوي" %>');
+          gradeCounts.push(<%= grade.count %>);
+        <% }); %>
+      <% } %>
+      
+      const gradeDistributionChart = new Chart(gradeDistributionCtx, {
+        type: 'doughnut',
+        data: {
+          labels: gradeLabels,
+          datasets: [{
+            data: gradeCounts,
+            backgroundColor: gradeColors,
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              titleColor: '#1e293b',
+              bodyColor: '#1e293b',
+              borderColor: '#e2e8f0',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true
+            }
+          }
+        }
+      });
+      
+      // Period selector for registration chart
+      const periodSelectors = document.querySelectorAll('.chart-period');
+      periodSelectors.forEach(selector => {
+        selector.addEventListener('click', function() {
+          periodSelectors.forEach(s => s.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Here you would update the chart data based on the selected period
+          // For demo purposes, we'll just show the same data
+          
+          // Example of how you would update the chart:
+          // registrationsChart.data.labels = newLabels;
+          // registrationsChart.data.datasets[0].data = newData;
+          // registrationsChart.update();
+        });
+      });
     });
-  
-    closeBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "none";
-    });
-</script>
+  </script>
 </body>
-
-
 </html>

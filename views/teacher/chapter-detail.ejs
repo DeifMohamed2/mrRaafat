@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title"><%= chapter.chapterName %></h1>
+          <div class="page-actions">
+            <a href="/teacher/chapters/<%= chapter._id %>/edit" class="btn btn-primary">
+              <i class="fas fa-edit"></i>
+              تعديل الفصل
+            </a>
+            <a href="/teacher/chapters" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للفصول
+            </a>
+          </div>
+        </div>
+        
+        <!-- Chapter Overview -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-video"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= stats.totalVideos %></h3>
+              <p class="stat-label">إجمالي الفيديوهات</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= stats.totalQuizzes %></h3>
+              <p class="stat-label">الاختبارات</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= stats.totalPDFs %></h3>
+              <p class="stat-label">الملفات</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= stats.studentsCount %></h3>
+              <p class="stat-label">المشتركين</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chapter Info -->
+        <div class="grid-layout">
+          <div class="teacher-table-container">
+            <div class="table-header">
+              <h3 class="table-title">معلومات الفصل</h3>
+            </div>
+            <div class="chapter-info-content">
+              <div class="chapter-cover">
+                <img src="<%= chapter.chapterIMG || '/images/default-chapter.jpg' %>" alt="<%= chapter.chapterName %>">
+              </div>
+              <div class="chapter-details">
+                <div class="detail-item">
+                  <span class="detail-label">الصف الدراسي:</span>
+                  <span class="detail-value">
+                    <% if (chapter.chapterGrade === 'Grade1') { %>الصف الأول الثانوي<% } %>
+                    <% if (chapter.chapterGrade === 'Grade2') { %>الصف الثاني الثانوي<% } %>
+                    <% if (chapter.chapterGrade === 'Grade3') { %>الصف الثالث الثانوي<% } %>
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">نوع الوصول:</span>
+                  <span class="detail-value">
+                    <span class="status-badge <%= chapter.chapterAccessibility === 'EnterInFree' ? 'active' : 'premium' %>">
+                      <%= chapter.chapterAccessibility === 'EnterInFree' ? 'مجاني' : 'مدفوع' %>
+                    </span>
+                  </span>
+                </div>
+                <% if (chapter.chapterAccessibility !== 'EnterInFree' && chapter.chapterPrice) { %>
+                  <div class="detail-item">
+                    <span class="detail-label">السعر:</span>
+                    <span class="detail-value"><%= chapter.chapterPrice %> جنيه</span>
+                  </div>
+                <% } %>
+                <div class="detail-item">
+                  <span class="detail-label">اللغة:</span>
+                  <span class="detail-value"><%= chapter.ARorEN === 'AR' ? 'العربية' : 'الإنجليزية' %></span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">الحالة:</span>
+                  <span class="detail-value">
+                    <span class="status-badge <%= chapter.isActive ? 'active' : 'inactive' %>">
+                      <%= chapter.isActive ? 'نشط' : 'غير نشط' %>
+                    </span>
+                  </span>
+                </div>
+                <% if (chapter.chapterDescription) { %>
+                  <div class="detail-item full-width">
+                    <span class="detail-label">الوصف:</span>
+                    <span class="detail-value description">
+                      <%= chapter.chapterDescription %>
+                    </span>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content Management -->
+          <div class="teacher-table-container">
+            <div class="table-header">
+              <h3 class="table-title">إدارة المحتوى</h3>
+            </div>
+            <div class="content-management">
+              <a href="/teacher/chapters/<%= chapter._id %>/videos/create" class="action-card">
+                <i class="fas fa-video"></i>
+                <span>إضافة فيديو</span>
+              </a>
+              <!-- <a href="/teacher/chapters/<%= chapter._id %>/quizzes/create" class="action-card">
+                <i class="fas fa-clipboard-question"></i>
+                <span>إضافة اختبار</span>
+              </a>
+              <a href="/teacher/chapters/<%= chapter._id %>/pdfs/create" class="action-card">
+                <i class="fas fa-file-pdf"></i>
+                <span>إضافة ملف</span>
+              </a>
+              <a href="/teacher/codes/generate/chapter?chapterId=<%= chapter._id %>" class="action-card">
+                <i class="fas fa-key"></i>
+                <span>إنشاء أكواد</span>
+              </a> -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Content Tabs -->
+        <div class="content-tabs">
+          <button class="tab-button active" data-tab="videos">
+            <i class="fas fa-video"></i>
+            الفيديوهات (<%= allVideos.length %>)
+          </button>
+          <button class="tab-button" data-tab="quizzes">
+            <i class="fas fa-clipboard-question"></i>
+            الاختبارات (<%= quizzes.length %>)
+          </button>
+          <button class="tab-button" data-tab="pdfs">
+            <i class="fas fa-file-pdf"></i>
+            الملفات (<%= pdfs.length %>)
+          </button>
+          <button class="tab-button" data-tab="students">
+            <i class="fas fa-users"></i>
+            المشتركين (<%= studentsWithAccess.length %>)
+          </button>
+        </div>
+        
+        <!-- Videos Tab -->
+        <div class="tab-content" id="videos-tab">
+          <div class="teacher-table-container">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th>عنوان الفيديو</th>
+                  <th>النوع</th>
+                  <th>المشاهدات</th>
+                  <th>نوع الوصول</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (allVideos && allVideos.length > 0) { %>
+                  <% allVideos.forEach(video => { %>
+                    <tr>
+                      <td>
+                        <div class="table-cell-primary">
+                          <span><%= video.videoTitle || video.lectureName %></span>
+                        </div>
+                      </td>
+                      <td>
+                        <% let type = ''; %>
+                        <% if (video.type === 'lecture' || chapter.chapterLectures.some(v => v._id.toString() === video._id.toString())) type = 'محاضرة'; %>
+                        <% if (video.type === 'summary' || chapter.chapterSummaries.some(v => v._id.toString() === video._id.toString())) type = 'ملخص'; %>
+                        <% if (video.type === 'solving' || chapter.chapterSolvings.some(v => v._id.toString() === video._id.toString())) type = 'تمارين'; %>
+                        <%= type %>
+                      </td>
+                      <td><%= video.views || 0 %></td>
+                      <td>
+                        <span class="status-badge <%= video.paymentStatus === 'Free' ? 'active' : 'premium' %>">
+                          <%= video.paymentStatus === 'Free' ? 'مجاني' : 'مدفوع' %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="table-actions">
+                          <a href="/teacher/videos/<%= video._id %>" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <a href="/teacher/videos/<%= video._id %>/edit" class="btn btn-sm btn-outline">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <button class="btn btn-sm btn-outline video-delete-btn" data-id="<%= video._id %>">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" class="empty-table">
+                      <div class="empty-state">
+                        <i class="fas fa-video"></i>
+                        <p>لا توجد فيديوهات في هذا الفصل</p>
+                        <a href="/teacher/chapters/<%= chapter._id %>/videos/create" class="btn btn-primary">إضافة فيديو</a>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Quizzes Tab -->
+        <div class="tab-content hidden" id="quizzes-tab">
+          <div class="teacher-table-container">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th>عنوان الاختبار</th>
+                  <th>عدد الأسئلة</th>
+                  <th>المدة</th>
+                  <th>نوع الوصول</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (quizzes && quizzes.length > 0) { %>
+                  <% quizzes.forEach(quiz => { %>
+                    <tr>
+                      <td>
+                        <div class="table-cell-primary">
+                          <span><%= quiz.quizName %></span>
+                        </div>
+                      </td>
+                      <td><%= quiz.questionsCount || (quiz.Questions ? quiz.Questions.length : 0) %></td>
+                      <td><%= quiz.timeOfQuiz %> دقيقة</td>
+                      <td>
+                        <span class="status-badge <%= quiz.prepaidStatus ? 'premium' : 'active' %>">
+                          <%= quiz.prepaidStatus ? 'مدفوع' : 'مجاني' %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="table-actions">
+                          <a href="/teacher/quizzes/<%= quiz._id %>" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <a href="/teacher/quizzes/<%= quiz._id %>/edit" class="btn btn-sm btn-outline">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <button class="btn btn-sm btn-outline quiz-delete-btn" data-id="<%= quiz._id %>">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" class="empty-table">
+                      <div class="empty-state">
+                        <i class="fas fa-clipboard-question"></i>
+                        <p>لا توجد اختبارات في هذا الفصل</p>
+                        <a href="/teacher/chapters/<%= chapter._id %>/quizzes/create" class="btn btn-primary">إضافة اختبار</a>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- PDFs Tab -->
+        <div class="tab-content hidden" id="pdfs-tab">
+          <div class="teacher-table-container">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th>عنوان الملف</th>
+                  <th>نوع الوصول</th>
+                  <th>التنزيلات</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (pdfs && pdfs.length > 0) { %>
+                  <% pdfs.forEach(pdf => { %>
+                    <tr>
+                      <td>
+                        <div class="table-cell-primary">
+                          <span><%= pdf.pdfName %></span>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-badge <%= pdf.pdfStatus === 'Free' ? 'active' : 'premium' %>">
+                          <%= pdf.pdfStatus === 'Free' ? 'مجاني' : 'مدفوع' %>
+                        </span>
+                      </td>
+                      <td><%= pdf.downloads || 0 %></td>
+                      <td>
+                        <div class="table-actions">
+                          <a href="<%= pdf.pdfURL %>" target="_blank" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <a href="/teacher/pdfs/<%= pdf._id %>/edit" class="btn btn-sm btn-outline">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <button class="btn btn-sm btn-outline pdf-delete-btn" data-id="<%= pdf._id %>">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="empty-table">
+                      <div class="empty-state">
+                        <i class="fas fa-file-pdf"></i>
+                        <p>لا توجد ملفات في هذا الفصل</p>
+                        <a href="/teacher/chapters/<%= chapter._id %>/pdfs/create" class="btn btn-primary">إضافة ملف</a>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Students Tab -->
+        <div class="tab-content hidden" id="students-tab">
+          <div class="teacher-table-container">
+            <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 class="table-title">الطلاب المشتركين في الفصل</h3>
+              <button id="syncVideoAccessBtn" class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-sync-alt"></i>
+                مزامنة وصول الفيديوهات
+              </button>
+            </div>
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th>اسم الطالب</th>
+                  <th>الكود</th>
+                  <th>الصف</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (studentsWithAccess && studentsWithAccess.length > 0) { %>
+                  <% studentsWithAccess.forEach(student => { %>
+                    <tr>
+                      <td>
+                        <div class="table-cell-primary">
+                          <span><%= student.Username %></span>
+                        </div>
+                      </td>
+                      <td><%= student.Code %></td>
+                      <td>
+                        <% let gradeName = ''; %>
+                        <% if (student.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+                        <% if (student.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+                        <% if (student.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+                        <%= gradeName %>
+                      </td>
+                      <td>
+                        <div class="table-actions">
+                          <a href="/teacher/students/<%= student._id %>" class="btn btn-sm btn-outline">
+                            <i class="fas fa-user"></i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="empty-table">
+                      <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>لا يوجد طلاب مشتركين في هذا الفصل</p>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Tab Navigation
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Deactivate all buttons and hide all contents
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.add('hidden'));
+        
+        // Activate clicked button and show corresponding content
+        button.classList.add('active');
+        const tabId = button.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+      });
+    });
+    
+    // Sync Video Access Handler
+    const syncVideoAccessBtn = document.getElementById('syncVideoAccessBtn');
+    if (syncVideoAccessBtn) {
+      syncVideoAccessBtn.addEventListener('click', function() {
+        const chapterId = '<%= chapter._id %>';
+        
+        // Disable button and show loading state
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المزامنة...';
+        
+        fetch(`/teacher/chapters/${chapterId}/sync-video-access`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showToast('success', data.message);
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            showToast('error', data.message || 'حدث خطأ أثناء المزامنة');
+          }
+        })
+        .catch(error => {
+          console.error('Sync error:', error);
+          showToast('error', 'حدث خطأ أثناء المزامنة');
+        })
+        .finally(() => {
+          // Re-enable button
+          this.disabled = false;
+          this.innerHTML = '<i class="fas fa-sync-alt"></i> مزامنة وصول الفيديوهات';
+        });
+      });
+    }
+    
+    // Delete Video Handler
+    const videoDeleteBtns = document.querySelectorAll('.video-delete-btn');
+    videoDeleteBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const videoId = this.getAttribute('data-id');
+        
+        confirmAction(
+          'حذف الفيديو',
+          'هل أنت متأكد من رغبتك في حذف هذا الفيديو؟',
+          'نعم، حذف',
+          function() {
+            fetch(`/teacher/videos/${videoId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('success', 'تم حذف الفيديو بنجاح');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
+              } else {
+                showToast('error', data.message || 'حدث خطأ أثناء حذف الفيديو');
+              }
+            })
+            .catch(error => {
+              showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+              console.error('Error:', error);
+            });
+          }
+        );
+      });
+    });
+    
+    // Delete Quiz Handler
+    const quizDeleteBtns = document.querySelectorAll('.quiz-delete-btn');
+    quizDeleteBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const quizId = this.getAttribute('data-id');
+        
+        confirmAction(
+          'حذف الاختبار',
+          'هل أنت متأكد من رغبتك في حذف هذا الاختبار؟',
+          'نعم، حذف',
+          function() {
+            fetch(`/teacher/quizzes/${quizId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('success', 'تم حذف الاختبار بنجاح');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
+              } else {
+                showToast('error', data.message || 'حدث خطأ أثناء حذف الاختبار');
+              }
+            })
+            .catch(error => {
+              showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+              console.error('Error:', error);
+            });
+          }
+        );
+      });
+    });
+    
+    // Delete PDF Handler
+    const pdfDeleteBtns = document.querySelectorAll('.pdf-delete-btn');
+    pdfDeleteBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const pdfId = this.getAttribute('data-id');
+        
+        confirmAction(
+          'حذف الملف',
+          'هل أنت متأكد من رغبتك في حذف هذا الملف؟',
+          'نعم، حذف',
+          function() {
+            fetch(`/teacher/pdfs/${pdfId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('success', 'تم حذف الملف بنجاح');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
+              } else {
+                showToast('error', data.message || 'حدث خطأ أثناء حذف الملف');
+              }
+            })
+            .catch(error => {
+              showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+              console.error('Error:', error);
+            });
+          }
+        );
+      });
+    });
+  </script>
+  
+  <style>
+    .chapter-info-content {
+      display: flex;
+      padding: 1.5rem;
+      gap: 2rem;
+    }
+    
+    .chapter-cover {
+      width: 200px;
+      height: 150px;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .chapter-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .chapter-details {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .detail-item {
+      flex-basis: 48%;
+    }
+    
+    .detail-item.full-width {
+      flex-basis: 100%;
+    }
+    
+    .detail-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+      color: var(--text-primary);
+    }
+    
+    .detail-value.description {
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+    
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .content-management {
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .action-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.5rem;
+      background: var(--background-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+    
+    .action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+    }
+    
+    .action-card i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    
+    .content-tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .tab-button {
+      padding: 0.75rem 1.5rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .tab-button.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-dark);
+    }
+    
+    .tab-button:hover:not(.active) {
+      background: var(--surface-hover);
+    }
+    
+    .tab-content {
+      margin-bottom: 2rem;
+    }
+    
+    .status-badge.premium {
+      background: var(--accent-color);
+      color: white;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .chapter-info-content {
+        flex-direction: column;
+      }
+      
+      .chapter-cover {
+        width: 100%;
+        height: 200px;
+      }
+      
+      .detail-item {
+        flex-basis: 100%;
+      }
+      
+      .content-tabs {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</body>
+</html> 

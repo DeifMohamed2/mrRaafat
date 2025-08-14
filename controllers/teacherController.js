@@ -1,2064 +1,3339 @@
-const Quiz = require("../models/Quiz");
-const User = require("../models/User");
-const Chapter = require("../models/Chapter");
-const Code = require("../models/Code");
+const Quiz = require('../models/Quiz');
+const User = require('../models/User');
+const Chapter = require('../models/Chapter');
+const Code = require('../models/Code');
+const Card = require('../models/Card');
+const Attendance = require('../models/Attendance'); 
+const PDFs = require('../models/PDFs');
 const mongoose = require('mongoose');
 
-
-
-
+const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWTSECRET;
 
 const Excel = require('exceljs');
+const PDFDocument = require('pdfkit');
+const stream = require('stream');
 
-const { v4: uuidv4 } = require('uuid')
+const { v4: uuidv4 } = require('uuid');
 
+// ==================  Dashboard  ====================== //
 
-
-
-const dash_get = (req, res) => {
-//   const idsToKeep = [
-//     "65e4cfe6022bba8f9ed4a80f",
-//     "65e4d024022bba8f9ed4a811",
-//     "65e4d045022bba8f9ed4a813",
-//     "65eb2856a76c472e4fa64fd3",
-//     "65e8fd8449a3eecaa4593bd3"
-// ];
-//   User.deleteMany({ _id: { $nin: idsToKeep } })
-//   .then(result => {
-//       console.log(`${result.deletedCount} users deleted.`);
-//   })
-//   .catch(error => {
-//       console.error("Error deleting users:", error);
-//   });
-
-  res.render("teacher/dash", { title: "DashBoard", path: req.path });
-};
-
-
-
-const myStudent_get = (req, res) => {
-  res.render("teacher/myStudent", { title: "Mystudent", path: req.path, userData: null });
-};
-
-const homeWork_get = (req, res) => {
-  res.render("teacher/homeWork", { title: "HomeWork", path: req.path });
-};
-
-
-
-
-// const studentsRequests_get = (req, res) => {
-//   res.render("teacher/studentsRequests", { title: "StudentsRequests", path: req.path });
-// };
-
-
-
-
-
-// =================================================== Add Video ================================================ // 
-
-
-const addVideo_get = (req, res) => {
-
-  res.render("teacher/addVideo", { title: "AddVideo", path: req.path, chaptersData: null });
-};
-
-const chapter_post = (req, res) => {
-  const {
-    chapterName, chapterGrade, chapterAccessibility, chapterPrice,ARorEN
-  } = req.body
-
-  const chapter = new Chapter({
-    chapterName: chapterName || "",
-    chapterGrade: chapterGrade || "",
-    chapterAccessibility: chapterAccessibility || " ",
-    chapterPrice: chapterPrice || 0,
-    ARorEN:ARorEN,
-    chapterLectures: [],
-    chapterSummaries: [],
-    chapterSolvings: [],
-  })
-
-  if (!chapterName || !chapterGrade || !chapterAccessibility || !ARorEN) {
-    return res.status(400).send('Missing required fields');
-  }
-
-  chapter.save().then((result) => {
-    console.log(result._id)
-    res.redirect('/teacher/addVideo')
-  })
-}
-
-const getAllChapters = async (req, res) => {
+const dash_get = async (req, res) => {
   try {
-    const data = []
-    const { chapterGrade } = req.body
-    await Chapter.find({
-      chapterGrade: chapterGrade
-    }).then((result) => {
-      console.log(result)
-      result.forEach((cahpter) => {
-        data.push({
-          chapterName: cahpter.chapterName,
-          chapterId: cahpter._id,
-          chapterLectures: cahpter.chapterLectures
-        })
-
+    // Use Promise.all for parallel execution and optimize queries
+    const [
+      studentStats,
+      totalChapters,
+      totalQuizzes,
+      totalPDFs,
+      videoStats,
+      recentStudents,
+      gradeStats,
+      topPerformers,
+      codeStats
+    ] = await Promise.all([
+      // Get student statistics in one query
+      User.aggregate([
+        { $match: { isTeacher: false } },
+        {
+          $group: {
+            _id: null,
+            totalStudents: { $sum: 1 },
+            activeStudents: { $sum: { $cond: [{ $eq: ['$subscribe', true] }, 1, 0] } },
+            pendingStudents: { $sum: { $cond: [{ $eq: ['$subscribe', false] }, 1, 0] } }
+          }
+        }
+      ]),
+      
+      // Basic counts
+      Chapter.countDocuments({ isActive: true }),
+      Quiz.countDocuments({ isQuizActive: true }),
+      PDFs.countDocuments({}),
+      
+      // Get video count efficiently
+      Chapter.aggregate([
+        { $match: { isActive: true } },
+        {
+          $project: {
+            totalVideos: {
+              $add: [
+                { $size: { $ifNull: ['$chapterLectures', []] } },
+                { $size: { $ifNull: ['$chapterSummaries', []] } },
+                { $size: { $ifNull: ['$chapterSolvings', []] } }
+              ]
+            }
+          }
+        },
+        { $group: { _id: null, totalVideos: { $sum: '$totalVideos' } } }
+      ]),
+      
+      // Recent students
+      User.find({ isTeacher: false })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('Username Code Grade createdAt subscribe')
+        .lean(),
+      
+      // Grade distribution
+      User.aggregate([
+        { $match: { isTeacher: false } },
+        { $group: { _id: '$Grade', count: { $sum: 1 } } }
+      ]),
+      
+      // Top performers
+      User.find({ 
+        isTeacher: false, 
+        totalScore: { $gt: 0 } 
       })
-      res.status(200).render("teacher/addVideo", { title: "AddVideo", path: req.path, chaptersData: data });
+      .sort({ totalScore: -1 })
+      .limit(5)
+      .select('Username Code totalScore totalQuestions Grade')
+      .lean(),
+      
+      // Code statistics
+      Code.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalCodes: { $sum: 1 },
+            usedCodes: { $sum: { $cond: [{ $eq: ['$isUsed', true] }, 1, 0] } }
+          }
+        }
+      ])
+    ]);
 
-
-    })
+    // Extract results
+    const stats = studentStats[0] || { totalStudents: 0, activeStudents: 0, pendingStudents: 0 };
+    const totalVideos = videoStats[0]?.totalVideos || 0;
+    const codes = codeStats[0] || { totalCodes: 0, usedCodes: 0 };
+    const activeCodes = codes.totalCodes - codes.usedCodes;
+    
+    // Simple monthly stats (last 3 months only for performance)
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    const monthlyStats = await User.aggregate([
+          {
+            $match: {
+          isTeacher: false, 
+          createdAt: { $gte: threeMonthsAgo } 
+        } 
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+      { $limit: 6 } // Limit results
+    ]);
+    
+    res.render('teacher/dash', {
+      title: 'لوحة التحكم',
+              path: req.path,
+      teacherData: req.userData || req.teacherData,
+      stats: {
+        totalStudents: stats.totalStudents,
+        activeStudents: stats.activeStudents,
+        pendingStudents: stats.pendingStudents,
+        totalChapters,
+        totalVideos,
+        totalQuizzes,
+        totalPDFs,
+        totalCodes: codes.totalCodes,
+        usedCodes: codes.usedCodes,
+        activeCodes
+      },
+      recentStudents: recentStudents || [],
+      gradeStats: gradeStats || [],
+      topPerformers: topPerformers || [],
+      monthlyStats: monthlyStats || [],
+      success: req.query.success,
+      error: req.query.error
+      });
   } catch (error) {
-    console.log(error)
+    console.error('Dashboard error:', error);
+    res.status(500).send('Internal Server Error');
   }
+};
 
-}
+// ==================  Chapter Management  ====================== //
 
-const addVideo_post = async (req, res) => {
+const chapters_get = async (req, res) => {
+  try {
+    const { grade, search, page = 1 } = req.query;
+    const perPage = 12;
+    
+    let query = { isActive: true };
+    if (grade) query.chapterGrade = grade;
+    if (search) {
+      query.chapterName = { $regex: search, $options: 'i' };
+    }
+    
+    const chapters = await Chapter.find(query)
+      .sort({ createdAt: -1 })
+      .limit(perPage * page)
+      .skip((page - 1) * perPage);
+    
+    const totalChapters = await Chapter.countDocuments(query);
+    
+    // Add statistics to each chapter
+    const chaptersWithStats = chapters.map(chapter => {
+      const chapterData = chapter.toObject();
+      
+      // Count content
+      const lecturesCount = chapterData.chapterLectures?.length || 0;
+      const summariesCount = chapterData.chapterSummaries?.length || 0;
+      const solvingsCount = chapterData.chapterSolvings?.length || 0;
+      const totalVideos = lecturesCount + summariesCount + solvingsCount;
+      
+      chapterData.stats = {
+        totalVideos,
+        lecturesCount,
+        summariesCount,
+        solvingsCount
+      };
+      
+      return chapterData;
+    });
+    
+    res.render('teacher/chapters', {
+      title: 'إدارة الفصول',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      chapters: chaptersWithStats,
+      totalChapters,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalChapters / perPage),
+      filters: { grade, search }
+    });
+  } catch (error) {
+    console.error('Chapters error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const chapter_create_get = async (req, res) => {
+  try {
+    res.render('teacher/chapter-create', {
+      title: 'إنشاء فصل جديد',
+          path: req.path,
+      teacherData: req.teacherData,
+      error: req.query.error
+      });
+  } catch (error) {
+    console.error('Chapter create get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const chapter_create_post = async (req, res) => {
   try {
     const {
-      ChaptersIds,
-      VideoType,
+      chapterName,
+      chapterGrade,
+      chapterAccessibility,
+      chapterPrice,
+      chapterIMG,
+      chapterDescription,
+      ARorEN
+    } = req.body;
+    
+    // Validation
+    if (!chapterName || !chapterGrade || !chapterAccessibility || !ARorEN) {
+      return res.redirect('/teacher/chapters/create?error=missing_fields');
+    }
+    
+    const chapter = new Chapter({
+      chapterName,
+      chapterGrade,
+      chapterAccessibility,
+      chapterPrice: chapterPrice || 0,
+      chapterIMG: chapterIMG || '/images/default-chapter.jpg',
+      chapterDescription: chapterDescription || '',
+      ARorEN,
+      chapterLectures: [],
+      chapterSummaries: [],
+      chapterSolvings: [],
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    
+    await chapter.save();
+    
+    res.redirect('/teacher/chapters?success=chapter_created');
+  } catch (error) {
+    console.error('Chapter create error:', error);
+    res.redirect('/teacher/chapters/create?error=creation_failed');
+  }
+};
+
+const chapter_detail_get = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId);
+    
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
+    }
+    
+    // Get all videos in chapter
+    const allVideos = [
+      ...(chapter.chapterLectures || []),
+      ...(chapter.chapterSummaries || []),
+      ...(chapter.chapterSolvings || [])
+    ];
+    
+    // Get quizzes for this chapter
+    const quizzes = await Quiz.find({ chapterId: chapterId });
+    
+    // Get PDFs for this chapter
+    const pdfs = await PDFs.find({ chapterId: chapterId });
+    
+    // Get students who have access to this chapter
+    const studentsWithAccess = await User.find({
+      isTeacher: false,
+      chaptersPaid: chapterId
+    }).select('Username Code Grade');
+    
+    res.render('teacher/chapter-detail', {
+      title: `${chapter.chapterName} - تفاصيل الفصل`,
+      path: req.path,
+      teacherData: req.teacherData,
+      chapter,
+      allVideos,
+      quizzes,
+      pdfs,
+      studentsWithAccess,
+      stats: {
+        totalVideos: allVideos.length,
+        totalQuizzes: quizzes.length,
+        totalPDFs: pdfs.length,
+        studentsCount: studentsWithAccess.length
+      }
+    });
+  } catch (error) {
+    console.error('Chapter detail error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const chapter_edit_get = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId);
+    
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
+    }
+    
+    res.render('teacher/chapter-edit', {
+      title: `تعديل ${chapter.chapterName}`,
+        path: req.path,
+      teacherData: req.teacherData,
+      chapter,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Chapter edit get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const chapter_edit_post = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    const {
+      chapterName,
+      chapterGrade,
+      chapterAccessibility,
+      chapterPrice,
+      chapterIMG,
+      chapterDescription,
+      ARorEN,
+      isActive
+    } = req.body;
+    
+    const updateData = {
+      chapterName,
+      chapterGrade,
+      chapterAccessibility,
+      chapterPrice: chapterPrice || 0,
+      chapterIMG,
+      chapterDescription,
+      ARorEN,
+      isActive: isActive === 'true',
+      updatedAt: new Date()
+    };
+    
+    await Chapter.findByIdAndUpdate(chapterId, updateData);
+    
+    res.redirect(`/teacher/chapters/${chapterId}?success=chapter_updated`);
+  } catch (error) {
+    console.error('Chapter edit error:', error);
+    res.redirect(`/teacher/chapters/${req.params.chapterId}/edit?error=update_failed`);
+  }
+};
+
+const chapter_delete = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    
+    // Soft delete - just set isActive to false
+    await Chapter.findByIdAndUpdate(chapterId, { 
+      isActive: false,
+      updatedAt: new Date()
+    });
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Chapter delete error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ==================  Video Management  ====================== //
+
+const videos_get = async (req, res) => {
+  try {
+    const { chapter, type, search, page = 1 } = req.query;
+    const perPage = 12;
+    
+    // Get all chapters for filter
+    const chapters = await Chapter.find({ isActive: true }, 'chapterName chapterGrade');
+    
+    let allVideos = [];
+    
+    if (chapter) {
+      const chapterData = await Chapter.findById(chapter);
+      if (chapterData) {
+        if (!type || type === 'lectures') {
+          allVideos.push(...(chapterData.chapterLectures || []).map(v => ({ ...v, type: 'lecture', chapterName: chapterData.chapterName })));
+        }
+        if (!type || type === 'summaries') {
+          allVideos.push(...(chapterData.chapterSummaries || []).map(v => ({ ...v, type: 'summary', chapterName: chapterData.chapterName })));
+        }
+        if (!type || type === 'solvings') {
+          allVideos.push(...(chapterData.chapterSolvings || []).map(v => ({ ...v, type: 'solving', chapterName: chapterData.chapterName })));
+        }
+      }
+    } else {
+      // Get videos from all chapters
+      const allChapters = await Chapter.find({ isActive: true });
+      allChapters.forEach(chapterData => {
+        if (!type || type === 'lectures') {
+          allVideos.push(...(chapterData.chapterLectures || []).map(v => ({ ...v, type: 'lecture', chapterName: chapterData.chapterName, chapterId: chapterData._id })));
+        }
+        if (!type || type === 'summaries') {
+          allVideos.push(...(chapterData.chapterSummaries || []).map(v => ({ ...v, type: 'summary', chapterName: chapterData.chapterName, chapterId: chapterData._id })));
+        }
+        if (!type || type === 'solvings') {
+          allVideos.push(...(chapterData.chapterSolvings || []).map(v => ({ ...v, type: 'solving', chapterName: chapterData.chapterName, chapterId: chapterData._id })));
+        }
+      });
+    }
+    
+    // Apply search filter
+    if (search) {
+      allVideos = allVideos.filter(video => 
+        video.videoTitle?.toLowerCase().includes(search.toLowerCase()) ||
+        video.lectureName?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    // Pagination
+    const totalVideos = allVideos.length;
+    const paginatedVideos = allVideos.slice((page - 1) * perPage, page * perPage);
+    
+    res.render('teacher/videos', {
+      title: 'إدارة الفيديوهات',
+    path: req.path,
+      teacherData: req.teacherData,
+      videos: paginatedVideos,
+      chapters,
+      totalVideos,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalVideos / perPage),
+      filters: { chapter, type, search }
+    });
+  } catch (error) {
+    console.error('Videos error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const video_create_get = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId);
+    
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
+    }
+    
+    res.render('teacher/video-create', {
+      title: `إضافة فيديو جديد - ${chapter.chapterName}`,
+    path: req.path,
+      teacherData: req.teacherData,
+      chapter,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Video create get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const video_create_post = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    console.log('Received form submission for video creation');
+    console.log('Request body keys:', Object.keys(req.body));
+    
+    const {
+      videoType,
       videoTitle,
       paymentStatus,
       prerequisites,
       permissionToShow,
       AccessibleAfterViewing,
       videoAllowedAttemps,
-      accessibleAfterPassExam,
       videoPrice,
       imgURL,
       videoURL,
+      scheduledTime,
+      PDFURL,
+      videoDescription
     } = req.body;
-
-    // Validate input data
-    if (!ChaptersIds || !VideoType || !videoTitle || !paymentStatus) {
-      throw new Error('Missing required fields');
+    
+    // Validation
+    if (!videoType || !videoTitle || !paymentStatus || !imgURL || !videoURL) {
+      console.log('Missing required fields:', {
+        videoType: !videoType ? 'missing' : 'present',
+        videoTitle: !videoTitle ? 'missing' : 'present',
+        paymentStatus: !paymentStatus ? 'missing' : 'present',
+        imgURL: !imgURL ? 'missing' : 'present',
+        videoURL: !videoURL ? 'missing' : 'present'
+      });
+      
+      return res.redirect(`/teacher/chapters/${chapterId}/videos/create?error=missing_fields`);
     }
-
-    if (imgURL == '' || videoURL == '') {
-      throw new Error('Missing required fields');
-    }
-    // Generate unique ID for video object
-    const videoId = uuidv4();
-
-    const currentDate = new Date();
-    // Create video object
-    const VideoObject = {
-      _id: videoId,
-      videoTitle: videoTitle || '',
-      paymentStatus: paymentStatus || '',
-      prerequisites: prerequisites || '',
-      permissionToShow: permissionToShow || '',
-      AccessibleAfterViewing: AccessibleAfterViewing || '',
-      videoAllowedAttemps: +videoAllowedAttemps || 0,
-      videoPrice: videoPrice || 0,
-      videoURL: videoURL || '',
-      imgURL: imgURL || '',
-      accessibleAfterPassExam : accessibleAfterPassExam || '',
-    };
-
-    const videosInfo = {};
-    videosInfo['_id'] = videoId;
-    videosInfo['prerequisites'] = prerequisites;
-    videosInfo['createdAt'] = currentDate;
-    videosInfo['updatedAt'] = currentDate;
-    videosInfo['fristWatch'] = null;
-    videosInfo['lastWatch'] = null;
-    videosInfo['videoName'] = videoTitle;
-
-    if (paymentStatus == 'Pay') {
-      videosInfo['videoPurchaseStatus'] = false;
-      videosInfo['isVideoPrepaid'] = true;
-    } else {
-      videosInfo['videoPurchaseStatus'] = true;
-      videosInfo['isVideoPrepaid'] = false;
-    }
-    if (prerequisites == 'WithHw') {
-      videosInfo['isUploadedHWApproved'] = false;
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
-      videosInfo['numberOfWatches'] = 0;
-      videosInfo['isUserUploadPerviousHWAndApproved'] = false;
-      videosInfo['isHWIsUploaded'] = false;
-      videosInfo['isUserEnterQuiz'] = true;
-      videosInfo['accessibleAfterViewing'] = AccessibleAfterViewing;
-    } else if (prerequisites == 'WithExam') {
-      videosInfo['isUploadedHWApproved'] = false;
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
-      videosInfo['numberOfWatches'] = 0;
-      videosInfo['isUserUploadPerviousHWAndApproved'] = true;
-      videosInfo['isHWIsUploaded'] = false;
-      videosInfo['isUserEnterQuiz'] = false;
-      videosInfo['accessibleAfterViewing'] = '';
-    } else if (prerequisites == 'WithExamaAndHw') {
-      videosInfo['isUploadedHWApproved'] = false;
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
-      videosInfo['numberOfWatches'] = 0;
-      videosInfo['isUserUploadPerviousHWAndApproved'] = false;
-      videosInfo['isHWIsUploaded'] = false;
-      videosInfo['isUserEnterQuiz'] = false;
-      videosInfo['accessibleAfterViewing'] = AccessibleAfterViewing;
-    } else {
-      videosInfo['isUploadedHWApproved'] = false;
-      videosInfo['videoAllowedAttemps'] = +videoAllowedAttemps;
-      videosInfo['numberOfWatches'] = 0;
-      videosInfo['isUserUploadPerviousHWAndApproved'] = true;
-      videosInfo['isHWIsUploaded'] = false;
-      videosInfo['isUserEnterQuiz'] = true;
-      videosInfo['accessibleAfterViewing'] = '';
-    }
-
-    // Update chapter with video object
-    await Chapter.findOneAndUpdate(
-      { _id: ChaptersIds },
-      { $push: { [`${VideoType}`]: VideoObject } }
-    ).then((resultChapter) => {
-      User.updateMany(
-        { Grade: resultChapter.chapterGrade },
-        {
-          $push: {
-            videosInfo: videosInfo,
-          },
-        },
-        {
-          upsert: true,
-        }
-      )
-        .then((result) => {
-          res.status(201).redirect('/teacher/addVideo');
-        })
-        .catch((error) => {
-          res.send('error can you refresh and try again');
-        });
-    });
-  } catch (error) {
-    // Handle errors
-    console.error('Error adding video:', error.message);
-    res.status(500).redirect('/teacher/addVideo?error=true');
-  }
-};
-
-
-// =================================================== END ADD Videos ================================================ // 
-
-
-
-
-
-// =================================================== Start Handle Videos ================================================ // 
-
-
-const handleVideos_get = (req, res) => {
-  res.render("teacher/handleVideos", { title: "Handle Videos", path: req.path, chaptersData: null, chapterData: null, videoData: null, nextPage: null, previousPage: null });
-};
-
-
-
-const getAllChaptersInHandle = async (req, res) => {
-  try {
-    const data = []
-    const { chapterGrade } = req.body
-    await Chapter.find({
-      chapterGrade: chapterGrade
-    }).then((result) => {
-
-      result.forEach((cahpter) => {
-        data.push({
-          chapterName: cahpter.chapterName,
-          chapterId: cahpter._id,
-          chapterLectures: cahpter.chapterLectures
-        })
-
-      })
-      res.status(200).render("teacher/handleVideos", { title: "AddVideo", path: req.path, chaptersData: data, chapterData: null, videoData: null, nextPage: null, previousPage: null });
-
-
-    })
-  } catch (error) {
-    console.log(error)
-  }
-
-}
-
-
-
-let ChapterId
-const getChapterDataToEdit = async (req, res) => {
-  try {
-    let data = Object()
-    const { ChaptersIds } = req.body
-    ChapterId = ChaptersIds
-    await Chapter.findById(ChaptersIds).then((result) => {
-      data = {
-        chapterName: result.chapterName,
-        chapterAccessibility: result.chapterAccessibility,
-        chapterPrice: result.chapterPrice,
-        chapterLectures: result.chapterLectures,
-        chapterSummaries: result.chapterSummaries,
-        chapterSolvings: result.chapterSolvings
-      }
-
-      res.status(200).render("teacher/handleVideos", { title: "AddVideo", path: req.path, chapterData: data, chaptersData: null, videoData: null, nextPage: null, previousPage: null });
-
-
-    })
-  } catch (error) {
-    console.log(error)
-  }
-
-}
-
-
-
-const editChapterData = async (req, res) => {
-  try {
-    const { chapterName, chapterAccessibility, chapterPrice } = req.body
-    const updateData = {
-      chapterName: chapterName,
-      chapterAccessibility: chapterAccessibility,
-      chapterPrice: chapterPrice, // Example field to update
-    };
-    await Chapter.findByIdAndUpdate(ChapterId, updateData, { new: true })
-      .then((result) => {
-        res.status(200).redirect("/teacher/handleVideos");
-        ChapterId = ""
-
-      }).catch((err) => {
-        console.log(err)
-      })
-  } catch (error) {
-    console.log(error)
-  }
-
-}
-
-let VideoID
-let videoType
-const getSingleVideoAllData = async (req, res) => {
-  try {
-    VideoID = req.params.videoCode;
-    let videoData;
-    let perPage = 50;
-    let page = req.query.page || 1;
-    console.log(page)
-    Chapter.findOne({ _id: ChapterId }, {
-      chapterLectures: { $elemMatch: { _id: VideoID } },
-      chapterSummaries: { $elemMatch: { _id: VideoID } },
-      chapterSolvings: { $elemMatch: { _id: VideoID } },
-      chapterGrade: 1
-    }).then(async (result) => {
-      if (!result) {
-        // Handle the case where the Chapter document is not found
-        console.log('Chapter not found');
+    
+    try {
+      const chapter = await Chapter.findById(chapterId);
+      if (!chapter) {
+        console.log('Chapter not found with ID:', chapterId);
         return res.status(404).send('Chapter not found');
       }
+      
+      // Generate unique ID for video using MongoDB ObjectId instead of UUID
+      const videoId = new mongoose.Types.ObjectId();
+      const currentDate = new Date();
+      
 
-      if (result['chapterLectures'].length > 0) {
-        videoData = result['chapterLectures'][0];
-        videoType = 'chapterLectures';
-      } else if (result['chapterSummaries'].length > 0) {
-        videoData = result['chapterSummaries'][0];
-        videoType = 'chapterSummaries';
-      } else {
-        videoData = result['chapterSolvings'][0];
-        videoType = 'chapterSolvings';
+
+      
+      const videoObject = {
+        _id: videoId,
+        videoTitle: videoTitle || '',
+        lectureName: videoTitle || '', // For compatibility
+        paymentStatus: paymentStatus || '',
+        prerequisites: prerequisites || '',
+        permissionToShow: permissionToShow === 'true',
+        AccessibleAfterViewing: AccessibleAfterViewing || '',
+        videoAllowedAttemps: parseInt(videoAllowedAttemps) || 3,
+        videoPrice: parseFloat(videoPrice) || 0,
+        videoURL: videoURL || '',
+        imgURL: imgURL || '',
+        PDFURL: PDFURL || '',
+        scheduledTime: scheduledTime || '',
+        videoDescription: videoDescription || '',
+        views: 0,
+        createdAt: currentDate,
+        updatedAt: currentDate
+      };
+      
+      console.log('Video object to save:', videoObject);
+      
+      // Add video to appropriate array
+      if (videoType === 'lecture') {
+        if (!chapter.chapterLectures) chapter.chapterLectures = [];
+        chapter.chapterLectures.push(videoObject);
+        console.log('Added to chapterLectures array');
+      } else if (videoType === 'summary') {
+        if (!chapter.chapterSummaries) chapter.chapterSummaries = [];
+        chapter.chapterSummaries.push(videoObject);
+        console.log('Added to chapterSummaries array');
+      } else if (videoType === 'solving') {
+        if (!chapter.chapterSolvings) chapter.chapterSolvings = [];
+        chapter.chapterSolvings.push(videoObject);
+        console.log('Added to chapterSolvings array');
       }
-
-      const data = [];
-      await Chapter.find({ chapterGrade: result.chapterGrade }).then((result) => {
-        result.forEach((cahpter) => {
-          data.push({
-            chapterName: cahpter.chapterName,
-            chapterId: cahpter._id,
-            chapterLectures: cahpter.chapterLectures
-          });
-        });
-      });
-
-      // let totalWatches = 0;
-      // User.find({videosInfo: { $elemMatch: { _id: VideoID , numberOfWatches: { $gt: 0 } }}},{Username:1,Code:1,videosInfo:1}).then((result)=>{
-
-      //   result.forEach(user => {
-      //     user.videosInfo.forEach(videoInfo => {
-      //       if (videoInfo._id === VideoID) {
-      //         totalWatches += videoInfo.numberOfWatches;
-      //       }
-      //     });
-      //   });
-
-      // })
-
-      await User.aggregate([
-        {
-          $match: {
-            "videosInfo": {
-              $elemMatch: {
-                "_id": VideoID,
-                "numberOfWatches": { $gt: 0 }
-              }
-            }
+      
+      chapter.updatedAt = currentDate;
+      await chapter.save();
+      console.log('Chapter saved successfully with new video');
+      
+      // Update all users with this video info - using ObjectId for _id
+      const videosInfo = {
+        _id: videoId, // This is now a MongoDB ObjectId
+        videoName: videoTitle,
+        chapterId: chapter._id,
+        videoType: videoType,
+        fristWatch: null,
+        lastWatch: null,
+        numberOfWatches: 0,
+        videoAllowedAttemps: parseInt(videoAllowedAttemps) || 3,
+        videoPurchaseStatus: paymentStatus === 'Free' ? true : false,
+        purchaseDate: null,
+        purchaseCode: null,
+        isUserEnterQuiz: false,
+        isHWIsUploaded: false,
+        isUserUploadPerviousHWAndApproved: false,
+        prerequisites: prerequisites || 'none',
+        accessibleAfterViewing: null
+      };
+      
+      // First, add video info to all students of the same grade
+      await User.updateMany(
+        { isTeacher: false, Grade: chapter.chapterGrade },
+        { $push: { videosInfo: videosInfo } }
+      );
+      
+      // Then, grant access to students who have already purchased this chapter
+      // This ensures that new videos are automatically accessible to chapter owners
+      await User.updateMany(
+        { 
+          isTeacher: false, 
+          chaptersPaid: chapter._id 
+        },
+        { 
+          $set: { 
+            "videosInfo.$[video].videoPurchaseStatus": true,
+            "videosInfo.$[video].purchaseDate": new Date()
           }
         },
         {
-          $project: {
-            "Username": 1,
-            "Code": 1,
-            "videosInfo": 1
-          }
+          arrayFilters: [{ "video._id": videoId }]
+        }
+      );
+      
+      // Also add the video to videosPaid array for chapter owners
+      await User.updateMany(
+        { 
+          isTeacher: false, 
+          chaptersPaid: chapter._id 
         },
-        {
-          $sort: {
-            "createdAt": 1
-          }
+        { 
+          $addToSet: { videosPaid: videoId }
         }
-      ])
-        .skip(perPage * page - perPage)
-        .limit(perPage)
-        .exec()
-        .then(async (result) => {
-          result.forEach(user => {
-            // Filter the videosInfo array for each user
-            user.videosInfo = user.videosInfo.filter(videoInfo => videoInfo._id === VideoID);
-
-          });
-
-
-
-          // Now you can add totalWatches to your videoData object
-          videoData['totalWatches'] = result.length;
-          videoData['VideoID'] = VideoID;
-          videoData['usersWatchedData'] = result;
-
-          const count = await User.countDocuments({});
-          const nextPage = parseInt(page) + 1;
-          const hasNextPage = nextPage <= Math.ceil(count / perPage);
-          const hasPreviousPage = page > 1; // Check if current page is greater than 1
-          res.render("teacher/handleVideos", {
-            title: "AddVideo",
-            path: req.path,
-            chapterData: null,
-            chaptersData: data,
-            videoData: videoData,
-
-            // current: page,
-            nextPage: hasNextPage ? nextPage : null,
-            previousPage: hasPreviousPage ? page - 1 : null // Calculate previous page
-          });
-        })
-        .catch(error => {
-          console.error(error);
-          // Handle the error here
-        });
-
-
-    }).catch((error) => {
-      console.error(error);
-    });
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-
-const updateVideoData = async (req, res) => {
-  const {
-    videoId,
-    videoTitle,
-    paymentStatus,
-    prerequisites,
-    permissionToShow,
-    videoAllowedAttemps,
-    AccessibleAfterViewing,
-    videoPrice,
-  } = req.body;
-
-  try {
-
-    const result = await Chapter.findOneAndUpdate(
-      {
-        _id: ChapterId,
-        [`${videoType}._id`]: VideoID
-      },
-      {
-        $set: {
-          [`${videoType}.$.videoTitle`]: videoTitle || "",
-          [`${videoType}.$.paymentStatus`]: paymentStatus || "",
-          [`${videoType}.$.prerequisites`]: prerequisites || "",
-          [`${videoType}.$.permissionToShow`]: permissionToShow || "",
-          [`${videoType}.$.videoAllowedAttemps`]: +videoAllowedAttemps || 0,
-          [`${videoType}.$.AccessibleAfterViewing`]: AccessibleAfterViewing || "",
-          [`${videoType}.$.videoPrice`]: videoPrice || 0,
-        }
-      },
-      {
-        new: true
-      }
-    );
-
-
-
-
-    User.updateMany(
-      { Grade: result.chapterGrade },
-      {
-        $set: {
-          'videosInfo.$[elem].videoPurchaseStatus': paymentStatus === "Pay" ? false : true,
-          'videosInfo.$[elem].isVideoPrepaid': paymentStatus === "Pay" ? true : false,
-          'videosInfo.$[elem].prerequisites': prerequisites,
-          'videosInfo.$[elem].isUploadedHWApproved': prerequisites !== "WithHw" && prerequisites !== "WithExamaAndHw" ? true : false,
-          'videosInfo.$[elem].videoAllowedAttemps': +videoAllowedAttemps,
-          'videosInfo.$[elem].isUserUploadPerviousHWAndApproved': prerequisites !== "WithHw" && prerequisites !== "WithExamaAndHw" ? true : false,
-          'videosInfo.$[elem].isHWIsUploaded': false,
-          'videosInfo.$[elem].accessibleAfterViewing': AccessibleAfterViewing,
-          'videosInfo.$[elem].isUserEnterQuiz': prerequisites !== "WithExam" && prerequisites !== "WithExamaAndHw" ? true : false
-        }
-      },
-      {
-
-        new: true,
-        arrayFilters: [{ 'elem._id': VideoID }]
-      }
-    ).then(() => {
-      res.status(201).redirect(`/teacher/handleVideo/${VideoID}`);
-
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error updating video data");
-  }
-}
-
-
-const addViewsToStudent = async (req, res) => {
-  const videoId = req.params.VideoID;
-  const userId = req.query.UserId;
-  const { NumberOfWatchesWillAdded } = req.body;
-  console.log(videoId)
-  User.findOneAndUpdate(
-    {
-      _id: userId,
-
-    },
-    {
-
-      $inc: {
-        'videosInfo.$[elem].videoAllowedAttemps': +NumberOfWatchesWillAdded
-      }
-    },
-    {
-      new: true,
-      arrayFilters: [{ 'elem._id': videoId }] // Match the specific videoId within the videosInfo array
+      );
+      
+      console.log('User records updated successfully');
+      
+      return res.redirect(`/teacher/chapters/${chapterId}?success=video_created`);
+    } catch (error) {
+      console.error('Error saving video:', error);
+      return res.redirect(`/teacher/chapters/${chapterId}/videos/create?error=creation_failed&message=${encodeURIComponent(error.message)}`);
     }
-  )
-    .then((result) => {
-      console.log(result);
-      res.redirect(`/teacher/handleVideo/${VideoID}`);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
-    });
-}
-
-
-const convertToExcel = async (req, res) => { 
-  try {
-    const videoId = req.params.VideoID;
-
-    // Fetch user data
-    const users = await User.aggregate([
-      {
-        $match: {
-          "videosInfo": {
-            $elemMatch: {
-              "_id": videoId,
-              "numberOfWatches": { $gt: 0 }
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          "Username": 1,
-          "Code": 1,
-          "phone": 1,
-          'parentPhone': 1,
-        }
-      },
-      {
-        $sort: {
-          "createdAt": 1
-        }
-      }
-    ])
-    console.log(users)
-    // Create a new Excel workbook
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet('Users Data');
-
-    const headerRow = worksheet.addRow(['#', 'User Name', 'Student Code', 'Student Phone', 'Parent Phone']);
-    headerRow.font = { bold: true };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-
-    // Add user data to the worksheet with alternating row colors
-    let c = 0;
-    users.forEach(user => {
-      c++;
-      const row = worksheet.addRow([c, user.Username, user.Code, user.phone, user.parentPhone]);
-      // Apply alternating row colors
-      if (c % 2 === 0) {
-        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-      }
-    });
-
-    const excelBuffer = await workbook.xlsx.writeBuffer();
-
-    // Set response headers for file download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=users_data.xlsx');
-
-    // Send Excel file as response
-    res.send(excelBuffer)
-
-
   } catch (error) {
-    console.error('Error generating Excel file:', error);
-    res.status(500).send('Error generating Excel file');
+    console.error('Video create error:', error);
+    return res.redirect(`/teacher/chapters/${req.params.chapterId}/videos/create?error=creation_failed&message=${encodeURIComponent(error.message)}`);
   }
 };
 
+const video_detail_get = async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+    
+    // Find the video in all chapters
+    let video = null;
+    let chapter = null;
+    let videoType = '';
+    
+    const chapters = await Chapter.find({ isActive: true });
+    
+    for (const chapterData of chapters) {
+      // Check lectures
+      const lecture = chapterData.chapterLectures?.find(v => v._id.toString() === videoId);
+      if (lecture) {
+        video = lecture;
+        chapter = chapterData;
+        videoType = 'lecture';
+        break;
+      }
+      
+      // Check summaries
+      const summary = chapterData.chapterSummaries?.find(v => v._id.toString() === videoId);
+      if (summary) {
+        video = summary;
+        chapter = chapterData;
+        videoType = 'summary';
+        break;
+      }
+      
+      // Check solvings
+      const solving = chapterData.chapterSolvings?.find(v => v._id.toString() === videoId);
+      if (solving) {
+        video = solving;
+        chapter = chapterData;
+        videoType = 'solving';
+        break;
+      }
+    }
+    
+    if (!video || !chapter) {
+      return res.status(404).send('Video not found');
+    }
+    
+    // Get all students in the chapter's grade
+    const allStudents = await User.find({
+      isTeacher: false,
+      Grade: chapter.chapterGrade
+    }, {
+      Username: 1,
+      Code: 1,
+      Grade: 1,
+      phone: 1,
+      parentPhone: 1,
+      videosInfo: { $elemMatch: { _id: new mongoose.Types.ObjectId(videoId) } }
+    });
+    
+    // Prepare student stats
+    const studentsStats = allStudents.map(student => {
+      const videoInfo = student.videosInfo && student.videosInfo[0];
+      
+      return {
+        studentId: student._id,
+        studentName: student.Username,
+        studentCode: student.Code,
+        grade: student.Grade,
+        phone: student.phone || 'غير متوفر',
+        parentPhone: student.parentPhone || 'غير متوفر',
+        numberOfWatches: videoInfo ? videoInfo.numberOfWatches || 0 : 0,
+        videoAllowedAttemps: videoInfo ? videoInfo.videoAllowedAttemps || 3 : 3,
+        fristWatch: videoInfo ? videoInfo.fristWatch : null,
+        lastWatch: videoInfo ? videoInfo.lastWatch : null,
+        purchaseStatus: videoInfo ? videoInfo.videoPurchaseStatus : false
+      };
+    });
+    
+    // Calculate statistics
+    const totalWatches = studentsStats.reduce((sum, s) => sum + s.numberOfWatches, 0);
+    const uniqueViewers = studentsStats.filter(s => s.numberOfWatches > 0).length;
+    const unwatchedCount = studentsStats.filter(s => s.numberOfWatches === 0).length;
+    
+    res.render('teacher/video-detail', {
+      title: `${video.videoTitle || video.lectureName} - تفاصيل الفيديو`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      video,
+      chapter,
+      videoType,
+      studentsStats,
+      totalWatches,
+      uniqueViewers,
+      unwatchedCount
+    });
+  } catch (error) {
+    console.error('Video detail error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
+const video_edit_get = async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+    
+    // Find the video in all chapters
+    let video = null;
+    let chapter = null;
+    let videoType = '';
+    
+    const chapters = await Chapter.find({ isActive: true });
+    
+    for (const chapterData of chapters) {
+      // Check lectures
+      const lecture = chapterData.chapterLectures?.find(v => v._id.toString() === videoId);
+      if (lecture) {
+        video = lecture;
+        chapter = chapterData;
+        videoType = 'lecture';
+        break;
+      }
+      
+      // Check summaries
+      const summary = chapterData.chapterSummaries?.find(v => v._id.toString() === videoId);
+      if (summary) {
+        video = summary;
+        chapter = chapterData;
+        videoType = 'summary';
+        break;
+      }
+      
+      // Check solvings
+      const solving = chapterData.chapterSolvings?.find(v => v._id.toString() === videoId);
+      if (solving) {
+        video = solving;
+        chapter = chapterData;
+        videoType = 'solving';
+        break;
+      }
+    }
+    
+    if (!video || !chapter) {
+      return res.status(404).send('Video not found');
+    }
+    
+    res.render('teacher/video-edit', {
+      title: `تعديل ${video.videoTitle || video.lectureName}`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      video,
+      chapter,
+      videoType,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Video edit get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
+const video_edit_post = async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+    const {
+      chapterId,
+      videoType,
+      videoTitle,
+      paymentStatus,
+      prerequisites,
+      permissionToShow,
+      AccessibleAfterViewing,
+      videoAllowedAttemps,
+      videoPrice,
+      imgURL,
+      videoURL,
+      scheduledTime,
+      PDFURL,
+      videoDescription
+    } = req.body;
+    
+    // Validation
+    if (!videoTitle || !paymentStatus || !imgURL || !videoURL) {
+      return res.redirect(`/teacher/videos/${videoId}/edit?error=missing_fields`);
+    }
+    
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
+    }
+    
+    // Update the video based on its type
+    let videoArray;
+    if (videoType === 'lecture') {
+      videoArray = chapter.chapterLectures;
+    } else if (videoType === 'summary') {
+      videoArray = chapter.chapterSummaries;
+    } else if (videoType === 'solving') {
+      videoArray = chapter.chapterSolvings;
+    } else {
+      return res.redirect(`/teacher/videos/${videoId}/edit?error=invalid_video_type`);
+    }
+    
+    // Find the video in the array
+    const videoIndex = videoArray.findIndex(v => v._id.toString() === videoId);
+    if (videoIndex === -1) {
+      return res.status(404).send('Video not found in chapter');
+    }
+    
+    // Update video properties
+    videoArray[videoIndex].videoTitle = videoTitle;
+    videoArray[videoIndex].lectureName = videoTitle; // For compatibility
+    videoArray[videoIndex].paymentStatus = paymentStatus;
+    videoArray[videoIndex].prerequisites = prerequisites || '';
+    videoArray[videoIndex].permissionToShow = permissionToShow === 'true';
+    videoArray[videoIndex].AccessibleAfterViewing = AccessibleAfterViewing || '';
+    videoArray[videoIndex].videoAllowedAttemps = parseInt(videoAllowedAttemps) || 3;
+    videoArray[videoIndex].videoPrice = parseFloat(videoPrice) || 0;
+    videoArray[videoIndex].videoURL = videoURL;
+    videoArray[videoIndex].imgURL = imgURL;
+    videoArray[videoIndex].PDFURL = PDFURL || '';
+    videoArray[videoIndex].scheduledTime = scheduledTime || '';
+    videoArray[videoIndex].videoDescription = videoDescription || '';
+    videoArray[videoIndex].updatedAt = new Date();
+    
+    // Save the chapter with updated video
+    chapter.updatedAt = new Date();
+    await chapter.save();
+    
+    res.redirect(`/teacher/videos/${videoId}?success=video_updated`);
+  } catch (error) {
+    console.error('Video edit error:', error);
+    res.redirect(`/teacher/videos/${req.params.videoId}/edit?error=update_failed`);
+  }
+};
 
-// =================================================== END Handle Videos ================================================ // 
+const video_delete = async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+    
+    // Find the video in all chapters
+    let chapter = null;
+    let videoType = '';
+    let videoIndex = -1;
+    
+    const chapters = await Chapter.find({ isActive: true });
+    
+    for (const chapterData of chapters) {
+      // Check lectures
+      const lectureIndex = chapterData.chapterLectures?.findIndex(v => v._id.toString() === videoId);
+      if (lectureIndex !== -1) {
+        chapter = chapterData;
+        videoType = 'lecture';
+        videoIndex = lectureIndex;
+        break;
+      }
+      
+      // Check summaries
+      const summaryIndex = chapterData.chapterSummaries?.findIndex(v => v._id.toString() === videoId);
+      if (summaryIndex !== -1) {
+        chapter = chapterData;
+        videoType = 'summary';
+        videoIndex = summaryIndex;
+        break;
+      }
+      
+      // Check solvings
+      const solvingIndex = chapterData.chapterSolvings?.findIndex(v => v._id.toString() === videoId);
+      if (solvingIndex !== -1) {
+        chapter = chapterData;
+        videoType = 'solving';
+        videoIndex = solvingIndex;
+        break;
+      }
+    }
+    
+    if (!chapter || videoIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Video not found' });
+    }
+    
+    // Remove the video from the appropriate array
+    if (videoType === 'lecture') {
+      chapter.chapterLectures.splice(videoIndex, 1);
+    } else if (videoType === 'summary') {
+      chapter.chapterSummaries.splice(videoIndex, 1);
+    } else if (videoType === 'solving') {
+      chapter.chapterSolvings.splice(videoIndex, 1);
+    }
+    
+    // Save the chapter with the video removed
+    chapter.updatedAt = new Date();
+    await chapter.save();
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Video delete error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
+const video_analytics = (req, res) => res.send('Feature coming soon');
+const pdfs_get = (req, res) => res.send('Feature coming soon');
+const pdf_create_get = (req, res) => res.send('Feature coming soon');
+const pdf_create_post = (req, res) => res.send('Feature coming soon');
+const pdf_edit_get = (req, res) => res.send('Feature coming soon');
+const pdf_edit_post = (req, res) => res.send('Feature coming soon');
+const pdf_delete = (req, res) => res.send('Feature coming soon');
+const chapter_pdf_create_get = (req, res) => res.send('Feature coming soon');
+const chapter_pdf_create_post = (req, res) => res.send('Feature coming soon');
+const attendance_get = (req, res) => res.send('Feature coming soon');
+const attendance_create_get = (req, res) => res.send('Feature coming soon');
+const attendance_create_post = (req, res) => res.send('Feature coming soon');
+const attendance_manage_get = (req, res) => res.send('Feature coming soon');
+const attendance_mark = (req, res) => res.send('Feature coming soon');
+const attendance_delete = (req, res) => res.send('Feature coming soon');
+const attendance_export = (req, res) => res.send('Feature coming soon');
+const analytics_get = (req, res) => res.send('Feature coming soon');
+const analytics_students = (req, res) => res.send('Feature coming soon');
+const analytics_videos = (req, res) => res.send('Feature coming soon');
+const analytics_quizzes = (req, res) => res.send('Feature coming soon');
+const analytics_revenue = (req, res) => res.send('Feature coming soon');
+const communication_get = (req, res) => res.send('Feature coming soon');
+const whatsapp_get = (req, res) => res.send('Feature coming soon');
+const whatsapp_send = (req, res) => res.send('Feature coming soon');
+const send_grades = (req, res) => res.send('Feature coming soon');
+const settings_get = (req, res) => res.send('Feature coming soon');
+const settings_post = (req, res) => res.send('Feature coming soon');
+const api_chapters_get = (req, res) => res.send('Feature coming soon');
+const api_videos_get = async (req, res) => {
+  try {
+    const { chapterId } = req.query;
+    
+    if (!chapterId) {
+      return res.status(400).json({ success: false, message: 'Chapter ID is required' });
+    }
+    
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).json({ success: false, message: 'Chapter not found' });
+    }
+    
+    // Collect all videos from the chapter
+    const videos = [];
+    
+    if (chapter.chapterLectures && chapter.chapterLectures.length > 0) {
+      videos.push(...chapter.chapterLectures.map(video => ({
+        ...video.toObject(),
+        type: 'lecture'
+      })));
+    }
+    
+    if (chapter.chapterSummaries && chapter.chapterSummaries.length > 0) {
+      videos.push(...chapter.chapterSummaries.map(video => ({
+        ...video.toObject(),
+        type: 'summary'
+      })));
+    }
+    
+    if (chapter.chapterSolvings && chapter.chapterSolvings.length > 0) {
+      videos.push(...chapter.chapterSolvings.map(video => ({
+        ...video.toObject(),
+        type: 'solving'
+      })));
+    }
+    
+    res.json({ success: true, videos });
+  } catch (error) {
+    console.error('API videos error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+const api_students_by_grade = (req, res) => res.send('Feature coming soon');
+const api_dashboard_analytics = (req, res) => res.send('Feature coming soon');
 
+// ==================  Quiz Management  ====================== //
 
+const quizzes_get = async (req, res) => {
+  try {
+    const { grade, chapter, search, page = 1 } = req.query;
+    const perPage = 10;
+    
+    let query = {};
+    if (grade) query.Grade = grade;
+    if (chapter) query.chapterId = chapter;
+    if (search) {
+      query.quizName = { $regex: search, $options: 'i' };
+    }
+    
+    const quizzes = await Quiz.find(query)
+      .sort({ createdAt: -1 })
+      .limit(perPage)
+      .skip((page - 1) * perPage);
+    
+    const totalQuizzes = await Quiz.countDocuments(query);
+    
+    // Get chapters for filter
+    const chapters = await Chapter.find({ isActive: true }, 'chapterName chapterGrade');
+    
+    // Add statistics to each quiz
+    const quizzesWithStats = await Promise.all(
+      quizzes.map(async (quiz) => {
+        const students = await User.find({
+          isTeacher: false,
+          'quizesInfo._id': quiz._id
+        });
+        
+        const attemptedStudents = students.filter(student => 
+          student.quizesInfo.some(quizInfo => 
+            quizInfo._id.toString() === quiz._id.toString() && quizInfo.isEnterd
+          )
+        );
+        
+        const averageScore = attemptedStudents.length > 0 
+          ? attemptedStudents.reduce((sum, student) => {
+              const quizInfo = student.quizesInfo.find(q => q._id.toString() === quiz._id.toString());
+              return sum + (quizInfo?.Score || 0);
+            }, 0) / attemptedStudents.length 
+          : 0;
+        
+        const questionsShown = quiz.questionsToShow || quiz.questionsCount;
+        return {
+          ...quiz.toObject(),
+          stats: {
+            totalAttempts: attemptedStudents.length,
+            averageScore: Math.round(averageScore * 100) / 100,
+            averageScoreDisplay: `${Math.round(averageScore)}/${questionsShown}`
+          }
+        };
+      })
+    );
+    
+    res.render('teacher/quizzes', {
+      title: 'إدارة الاختبارات',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      quizzes: quizzesWithStats,
+      chapters,
+      totalQuizzes,
+      activeQuizzes: quizzesWithStats.length,
+      totalAttempts: quizzesWithStats.reduce((sum, q) => sum + q.stats.totalAttempts, 0),
+      averageScore: quizzesWithStats.length > 0 
+        ? quizzesWithStats.reduce((sum, q) => sum + q.stats.averageScore, 0) / quizzesWithStats.length 
+        : 0,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalQuizzes / perPage),
+      filters: { grade, chapter, search }
+    });
+  } catch (error) {
+    console.error('Quizzes error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
+const quiz_create_get = async (req, res) => {
+  try {
+    const chapters = await Chapter.find({ isActive: true }, 'chapterName chapterGrade');
+    
+    // Get videos for the "video will be opened" dropdown
+    let videos = [];
+    if (chapters.length > 0) {
+      for (const chapter of chapters) {
+        // Collect all videos from this chapter
+        const chapterVideos = [
+          ...(chapter.chapterLectures || []).map(v => ({ 
+            _id: v._id, 
+            videoTitle: v.videoTitle || v.lectureName,
+            chapterName: chapter.chapterName,
+            type: 'lecture'
+          })),
+          ...(chapter.chapterSummaries || []).map(v => ({ 
+            _id: v._id, 
+            videoTitle: v.videoTitle || v.lectureName,
+            chapterName: chapter.chapterName,
+            type: 'summary'
+          })),
+          ...(chapter.chapterSolvings || []).map(v => ({ 
+            _id: v._id, 
+            videoTitle: v.videoTitle || v.lectureName,
+            chapterName: chapter.chapterName,
+            type: 'solving'
+          }))
+        ];
+        videos = [...videos, ...chapterVideos];
+      }
+    }
+    
+    res.render('teacher/quiz-create', {
+      title: 'إنشاء اختبار جديد',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      chapters,
+      videos,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Quiz create get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
-
-// =================================================== Student Requests ================================================ // 
-
-
-
-
-let query
-const studentsRequests_get = async (req, res) => {
+const quiz_create_post = async (req, res) => {
   try {
     const {
+      quizName,
       Grade,
-      studentPlace,
-
-    } = req.query
-    let grade = Grade || "Grade1"
-    let StudentPlace = studentPlace || "All"
-    // Define the base query object
-    query = { Grade: grade };
-
-    // If studentPlace is not "All", include it in the query
-
-    if (StudentPlace !== "All") {
-      query.place = StudentPlace;
-    }
-
-    let perPage = 50;
-    let page = req.query.page || 1;
-
-    await User.find(query, { Username: 1, Code: 1, createdAt: 1, updatedAt: 1, subscribe: 1 })
-      .sort({ 'subscribe': 1, 'createdAt': 1 })
-      .skip(perPage * page - perPage)
-      .limit(perPage)
-      .exec()
-
-      .then(async (result) => {
-
-        const count = await User.countDocuments({});
-        const nextPage = parseInt(page) + 1;
-        const hasNextPage = nextPage <= Math.ceil(count / perPage);
-        const hasPreviousPage = page > 1; // Check if current page is greater than 1
-
-        res.render("teacher/studentsRequests",
-          {
-            title: "StudentsRequests",
-            path: req.path,
-            modalData: null,
-            modalDelete :null,
-            studentsRequests: result,
-            studentPlace: StudentPlace,
-            Grade: grade,
-            isSearching: false,
-            nextPage: hasNextPage ? nextPage : null,
-            previousPage: hasPreviousPage ? page - 1 : null // Calculate previous page
-          });
-
-      })
-  } catch (error) {
-    console.log(error)
-  }
-
-};
-
-
-const searchForUser = async (req, res) => {
-  const { searchBy, searchInput } = req.body
-  try {
-
-    await User.find({ [`${searchBy}`]: searchInput }, { Username: 1, Code: 1, createdAt: 1, updatedAt: 1, subscribe: 1 })
-      .then((result) => {
-        res.render("teacher/studentsRequests",
-          {
-            title: "StudentsRequests",
-            path: req.path,
-            modalData: null,
-            modalDelete :null,
-            studentsRequests: result,
-            studentPlace: query.place || 'All',
-            Grade: query.Grade,
-            isSearching: true,
-            nextPage: null,
-            previousPage: null // Calculate previous page
-          });
-      })
-  } catch (error) {
-
-  }
-
-}
-
-
-const converStudentRequestsToExcel = async (req, res) => {
-  try {
-    // Fetch user data
-    const users = await User.find(query, { Username: 1, Email: 1, gov: 1, Markez: 1, gender: 1, phone: 1, WhatsApp: 1, parentPhone: 1, place: 1, Code: 1, createdAt: 1, updatedAt: 1, subscribe: 1 });
-
-    // Create a new Excel workbook
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet('Users Data');
-
-    const headerRow = worksheet.addRow(['#', 'User Name', 'Student Code', 'Student Phone',  'Parent Phone', 'Government', 'Markez', 'createdAt', 'subscribe']);
-    headerRow.font = { bold: true };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-
-    // Add user data to the worksheet with alternating row colors
-    let c = 0;
-    users.forEach(user => {
-      c++;
-      const row = worksheet.addRow([c, user.Username, user.Code, user.phone, user.WhatsApp, user.parentPhone, user.gov, user.Markez, user.createdAt.toLocaleDateString(), user.subscribe]);
-
-      // Apply different fill color based on subscription status
-      if (!user.subscribe) {
-        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0000' } }; // Red fill for non-subscribed users
-      } else if (c % 2 === 0) {
-        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } }; // Alternate fill color for subscribed users
-      }
-    });
-
-
-    const excelBuffer = await workbook.xlsx.writeBuffer();
-
-    // Set response headers for file download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename="UsersData.xlsx"`);
-
-    // Send Excel file as response
-    res.send(excelBuffer);
-
-  } catch (error) {
-    console.error("Error occurred:", error);
-    res.status(500).send("An error occurred while generating Excel file.");
-  }
-}
-
-
-const getSingleUserAllData = async (req, res) => {
-  try {
-    const studentID = req.params.studentID
-    await User.findOne({ '_id': studentID }, { Username: 1, Email: 1, gov: 1, Markez: 1, gender: 1, phone: 1, WhatsApp: 1, parentPhone: 1, place: 1, Code: 1, createdAt: 1, updatedAt: 1, subscribe: 1,PasswordNotHashed:1 })
-      .then((result) => {
-        res.render("teacher/studentsRequests",
-          {
-            title: "StudentsRequests",
-            path: req.path,
-            modalData: result,
-            modalDelete:null,
-            studentsRequests: null,
-            studentPlace: query.place || 'All',
-            Grade: query.Grade,
-            isSearching: false,
-            nextPage: null,
-            previousPage: null // Calculate previous page
-          });
-      })
-  } catch (error) {
-
-  }
-}
-
-
-const updateUserData = async (req, res) => {
-  try {
-    const { Username, Email, phone, parentPhone, WhatsApp, gov, Markez, subscribe } = req.body;
-    const studentID = req.params.studentID;
-    let Subscribe
-    if (subscribe == "true") {
-      Subscribe = true
-    } else {
-      Subscribe = false
-    }
-    // Assuming you have a User model and you're using Mongoose
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: studentID },
-      { Username: Username, Email: Email, phone: phone, parentPhone: parentPhone, WhatsApp: WhatsApp, gov: gov, Markez: Markez, subscribe: Subscribe },
-      { new: true } // To return the updated document
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Redirect to the desired page after successful update
-    res.status(201).redirect(`/teacher/studentsRequests?Grade=${query.Grade}&studentPlace=All`);
-  } catch (error) {
-    // Handle errors appropriately
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-
-const confirmDeleteStudent = async (req, res) => {
-  try {
-    const studentID = req.params.studentID;
-    res.render("teacher/studentsRequests",
-      {
-        title: "StudentsRequests",
-        path: req.path,
-        modalData: null,
-        modalDelete:studentID ,
-        studentsRequests: null,
-        studentPlace: query.place || 'All',
-        Grade: query.Grade,
-        isSearching: false,
-        nextPage: null,
-        previousPage: null // Calculate previous page
-      });
-  }
-
-
-  catch (error) {
-  }
-
-}
-
-
-const DeleteStudent = async (req, res) => {
-  try {
-    const studentID = req.params.studentID;
-    if (!studentID) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-    if(studentID =="668138aeebc1138a4277c47a" || studentID =='668138edebc1138a4277c47c' || studentID =='66813909ebc1138a4277c47e'){
-      return res.status(400).json({ error: 'You can not delete this user' });
-      
-    }
-    await User.findByIdAndDelete(studentID).then((result) => {
-      res.status(200).redirect(`/teacher/studentsRequests?Grade=${query.Grade}&studentPlace=All`);
-    })
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-// =================================================== END Student Requests ================================================ // 
-
-
-
-
-// ===================================================  MyStudent ================================================ // 
-
-
-const searchToGetOneUserAllData = async (req, res) => {
-  const { searchBy, searchInput } = req.query
-
-
-  try {
-    await User.findOne({ [`${searchBy}`]: searchInput })
-      .then((result) => {
-        res.render("teacher/myStudent",
-          {
-            title: "Mystudent",
-            path: req.path,
-            userData: result
-          });
-
-      })
-
-  } catch (error) {
-
-  }
-}
-
-const convertToExcelAllUserData = async (req, res) => {
-  const { studetCode } = req.params
-  console.log(studetCode)
-  try {
-
-    await User.findOne({ "Code": +studetCode })
-      .then(async (user) => {
-        // Create a new Excel workbook
-        const workbook = new Excel.Workbook();
-        const worksheet = workbook.addWorksheet('Users Data');
-        const Header = worksheet.addRow([`بيانات الطالب ${user.Username} `]);
-        Header.getCell(1).alignment = { horizontal: 'center' }; // Center align the text
-        Header.font = { bold: true, size: 16 };
-        Header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-        worksheet.mergeCells('A1:H1');
-        worksheet.addRow()
-        const headerRowUserBasicInfo = worksheet.addRow(['اسم الطالب', 'كود الطالب ', 'رقم هاتف الطالب', 'رقم هاتف ولي الامر']);
-        headerRowUserBasicInfo.font = { bold: true };
-        headerRowUserBasicInfo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-
-        // Add user data to the worksheet with alternating row colors
-
-        const rowUserBasicInfo = worksheet.addRow([user.Username, user.Code, user.phone, user.parentPhone]);
-        rowUserBasicInfo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-
-
-        const headerRowUserVideoInfo = worksheet.addRow(['#', 'اسم الفيديو', 'عدد مرات المشاهده', 'عدد المشاهدات المتبقيه ', 'تاريخ اول مشاهده ', 'تاريخ اخر مشاهده ', 'رفع الواجب ', 'حل الامتحان ', 'حاله الشراء ']);
-        headerRowUserVideoInfo.font = { bold: true };
-        headerRowUserVideoInfo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '9fea0c' } };
-        let c = 0;
-
-        user['videosInfo'].forEach(data => {
-          c++;
-          let homeWork, Exam
-          if (data.prerequisites == "WithOutExamAndHW") {
-            homeWork = "لا يوجد"
-            Exam = "لا يوجد"
-          } else if (data.prerequisites == "WithExamaAndHw") {
-            homeWork = data.isHWIsUploaded ? "تم الرفع" : "لم يُرفع"
-            Exam = data.isUserEnterQuiz ? "تم الدخول" : "لم يدخل"
-
-          } else if (data.prerequisites == "WithHw") {
-            homeWork = data.isHWIsUploaded ? "تم الرفع" : "لم يُرفع"
-
-          } else {
-
-            Exam = data.isUserEnterQuiz ? "تم الدخول" : "لم يدخل"
-          }
-
-
-          const headerRowUserVideoInfo = worksheet.addRow([c, data.videoName, data.numberOfWatches, data.videoAllowedAttemps, new Date(data.fristWatch).toLocaleDateString()|| "لم يشاهد بعد",  new Date(data.lastWatch).toLocaleDateString()|| "لم يشاهد بعد", homeWork, Exam, data.isVideoPrepaid ? data.videoPurchaseStatus ? "تم الشراء" : "لم يتم الشراء" : "الفيديو مجاني"]);
-
-          if (c % 2 === 0) {
-            headerRowUserVideoInfo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-          }
-
-
-        })
-        const headerRowUserQuizInfo = worksheet.addRow(['#', 'اسم الامتحان', 'تاريخ الحل ', 'مده الحل ', ' درجه الامتحان ', 'حاله الشراء ']);
-        headerRowUserQuizInfo.font = { bold: true };
-        headerRowUserQuizInfo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '10a1c2' } };
-
-        let cq = 0
-        user['quizesInfo'].forEach(data => {
-          cq++
-          const headerRowUserQuizInfo = worksheet.addRow([cq, data.quizName, new Date(data.solvedAt).toLocaleDateString()|| "لم يحل", data.solveTime || "لم يحل", data.questionsCount + "/" + data.Score, data.isQuizPrepaid ? data.quizPurchaseStatus ? "تم الشراء" : "لم يتم الشراء" : "الامتحان مجاني"]);
-          if (cq % 2 === 0) {
-            headerRowUserQuizInfo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-          }
-
-
-        })
-
-        const excelBuffer = await workbook.xlsx.writeBuffer();
-
-        // Set response headers for file download
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=users_data.xlsx');
-
-        // Send Excel file as response
-        res.send(excelBuffer)
-      }).catch((error) => {
-        console.log(error)
-      })
-
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-// =================================================== END MyStudent ================================================ // 
-
-
-
-
-
-
-// =================================================== Add Quiz ================================================ // 
-
-let grade
-let quizQuestions = [];
-let getQuizAllData
-const addQuiz_get = async (req, res) => {
-  const videoData = []
-  const quizData = []
-  getQuizAllData = null
-  quizQuestions = []
-  const { Grade } = req.query
-  grade = Grade
-  await Chapter.find({
-    chapterGrade: Grade
-  }).then(async (result) => {
-
-    result.forEach((cahpter) => {
-      videoData.push({
-        chapterLectures: cahpter.chapterLectures
-      })
-
-    })
-
-    await Quiz.find({
-      Grade: Grade
-    }).then((result) => {
-
-      result.forEach((quiz) => {
-        quizData.push({
-          quizName: quiz.quizName,
-          _id: quiz._id
-        })
-      })
-
-    })
-
-  })
-
-  res.render("teacher/addQuiz", { title: "AddQuiz", path: req.path, questions: quizQuestions, videoData: videoData, quizData: quizData, Grade: Grade, getQuizAllData: getQuizAllData || null });
-};
-
-const addQuestion = (req, res) => {
-
-  const {
-    Qtitle,
-    answer1,
-    answer2,
-    answer3,
-    answer4,
-    ranswer,
-    questionPhoto,
+      chapterId,
+      timeOfQuiz,
+      prepaidStatus,
+      quizPrice,
+      videoWillbeOpen,
+      questionsToShow,
+      isQuizActive,
+      permissionToShow,
+      showAnswersAfterQuiz,
+      questions
+    } = req.body;
     
-  } = req.body;
-
-  const Code = Math.floor(Math.random() * 1000) + 6000;
-
-  let question = {};
-
-  question = {
-    questionPhoto:questionPhoto,
-    qNumber: quizQuestions.length + 1,
-    title: Qtitle,
-    answer1: answer1,
-    answer2: answer2,
-    answer3: answer3,
-    answer4: answer4,
-    ranswer: ranswer,
-    code: +Code
-  };
-
-  quizQuestions.push(question);
-  res.render("teacher/addQuiz", { title: "AddQuiz", path: req.path, questions: quizQuestions, videoData: null, quizData: null, Grade: null, getQuizAllData: getQuizAllData || null });
-
-};
-
-const deleteQuestion = (req, res) => {
-  const id = req.params.code;
-  console.log(id)
-  // Find the index of the question with the matching code
-  const indexToDelete = quizQuestions.findIndex((question) => question.code === parseInt(id));
-
-  if (indexToDelete !== -1) {
-    // If a question with the matching code is found, remove it from the array
-    quizQuestions.splice(indexToDelete, 1);
-  }
-
-  res.render("teacher/addQuiz", { title: "AddQuiz", path: req.path, questions: quizQuestions, videoData: null, quizData: null, Grade: null, getQuizAllData: getQuizAllData || null });
-}
-
-const updateQuestion = (req, res) => {
-  const {
-    Qtitle,
-    answer1,
-    answer2,
-    answer3,
-    answer4,
-    ranswer,
-    code,
-    questionPhoto,
-  } = req.body;
-
-  // Find the index of the question with the matching code
-  const indexToUpdate = quizQuestions.findIndex((question) => question.code === parseInt(code));
-
-  if (indexToUpdate !== -1) {
-    // If a question with the matching code is found, update its properties
-    quizQuestions[indexToUpdate] = {
-      questionPhoto:questionPhoto,
-      title: Qtitle,
-      qNumber : quizQuestions[indexToUpdate].qNumber,
-      answer1: answer1,
-      answer2: answer2,
-      answer3: answer3,
-      answer4: answer4,
-      ranswer: ranswer,
-      code: +code,
-    };
-  }
-
-  res.render("teacher/addQuiz", { title: "AddQuiz", path: req.path, questions: quizQuestions, videoData: null, quizData: null, Grade: null, getQuizAllData: getQuizAllData || null });
-
-};
-
-const getQuizAlldata = async (req, res) => {
-
-
-  try {
-    const { quizId } = req.query
-   
-    await Quiz.findOne({ '_id': quizId })
-      .then((result) => {
-
-        quizQuestions = result['Questions']
-        getQuizAllData = result
-        res.render("teacher/addQuiz", { title: "AddQuiz", path: req.path, questions: result['Questions'], videoData: null, quizData: null, Grade: null, getQuizAllData: getQuizAllData || null });
-
-      })
-  } catch (error) {
-
-  }
-}
-
-const deleteQuiz = (req, res) => {
-  try {
-    const { quizID } = req.params
-    console.log( quizID)
-    let QuizID = new mongoose.Types.ObjectId(quizID);
-    User.updateMany(
-      { "quizesInfo._id": QuizID }, // Match users where the quiz is present in quizesInfo array
-      { $pull: { quizesInfo: { _id: QuizID } } } // Pull the quiz from quizesInfo array
-    ).then((result) => {
-      console.log(result)
-      Quiz.findByIdAndDelete({ '_id': quizID }).then(() => {  
-        res.redirect('/teacher/addQuiz')
-      }).catch
-      ((error) => {
-        res.send(error.message)
-      })
-     
-
-    })
-
-  } catch (error) {
-
-  }
-}
-
-const updateQuiz = (req, res) => {
-  try {
-    const { quizID } = req.params
-    const { quizStatus, permissionToShow, quizName, timeOfQuiz } = req.body
-    console.log(quizID, quizStatus, permissionToShow)
-    let updatedDate = {}
-    if (quizStatus == "Active") {
-      updatedDate['isQuizActive'] = true
-    } else {
-      updatedDate['isQuizActive'] = false
-    }
-
-    if (permissionToShow == "apper") {
-      updatedDate['permissionToShow'] = true
-    } else {
-      updatedDate['permissionToShow'] = false
-
-    }
-    updatedDate['Questions'] = quizQuestions
-    updatedDate['quizName'] = quizName
-    updatedDate['timeOfQuiz'] = timeOfQuiz
-    Quiz.findByIdAndUpdate({ '_id': quizID }, updatedDate)
-      .then(() => {
-
-        
-        res.redirect('/teacher/addQuiz')
-      })
-  } catch (error) {
-
-  }
-}
-
-const quizSubmit = (req, res) => {
-  const errors = {};
-  const {
-    videoWillbeOpen,
-    Grade,
-    timeOfQuiz,
-    quizName,
-    prepaidStatus,
-
-  } = req.body;
-
-  if (!Grade) {
-    errors.gradeError = "- يرجي اختيار الصف الدراسي"
-  }
-  if (!quizName) {
-    errors.nameError = "- يرجي إدخال عنوان الامتحان";
-  }
-  // if (!questionsCount) {
-  //   errors.countError = "- يرجي تعبئة حقل عدد الأسئلة ";
-  // }
-  if (quizQuestions.length == 0) {
-    errors.timeError = "يجب اضافه سؤال واحد علي الاقل"
-
-  }
-  if (!(timeOfQuiz)) {
-    errors.timeError = "- يرجي تعبئه حقل وقت الامتحان"
-  }
-
-  if (Object.keys(errors).length > 0) {
-    return res.render("teacher/addQuiz", { title: "AddQuiz", path: req.path, questions: quizQuestions, errors: errors, videsPrerequested: null, quizData: null, Grade: null,getQuizAllData:getQuizAllData,videoData:null });
-
-  }
-
-
- 
-
-
-
-  const quiz = new Quiz({
-    quizName: quizName,
-    questionsCount: +quizQuestions.length,
-    timeOfQuiz: timeOfQuiz,
-    videoWillbeOpen: videoWillbeOpen || null,
-    Grade: Grade,
-    isQuizActive: true,
-    permissionToShow: true,
-    Questions: quizQuestions,
-    prepaidStatus: prepaidStatus == "Pay" ? true : false
-  });
-
-  quiz
-    .save()
-    .then((result) => {
-      User.updateMany({ Grade: Grade },
-        {
-          $push: {
-            quizesInfo: {
-              _id: result._id,
-              quizName: quizName,
-              isEnterd: false,
-              inProgress: false,
-              solvedAt: null,
-              solveTime: null,
-              isQuizPrepaid: prepaidStatus == "Pay" ? true : false,
-              quizPurchaseStatus: prepaidStatus == "Pay" ? false : true,
-              answers: [],
-              questionsCount: +quizQuestions.length,
-              Score: 0,
-            }
-          }
-        },
-        {
-          upsert: true
-        }
-      ).then((result) => {
-        console.log(result)
+    // Parse questions if it's a string
+    let parsedQuestions = questions;
+    if (typeof questions === 'string') {
       try {
-
-
-        const message = `
-        تم اضافة امتحان جديد علي المنصه 
-اسم الامتحان : ${quizName}
-مده الامتحان : ${timeOfQuiz}
-عدد الاسئله : ${+quizQuestions.length} 
-        `;
-
-
-
-const twilio = require('twilio');
-const client = new twilio('AC9dc144cf25dc8648bd045f464adf6a7a', 'da561a4e33fdb8806cf71e1d6474a83e');
-
-// Define the WhatsApp group ID and message
-const groupID = 'YOUR_WHATSAPP_GROUP_ID';
-
-// Send the message to the WhatsApp group
-client.messages.create({
-    from: 'whatsapp:+14155238886', // Twilio WhatsApp number
-    body: message,
-    to: `120363224062729273` // WhatsApp group ID
-})
-.then(message => console.log(`Message sent: ${message.sid}`))
-.catch(error => console.error(error));
-
-      } catch (error) {
-        console.log(error)
+        parsedQuestions = JSON.parse(questions);
+      } catch (e) {
+        console.error('Error parsing questions JSON:', e);
+        return res.redirect('/teacher/quizzes/create?error=invalid_questions_format');
       }
-
-      quizQuestions = []
-        res.redirect("/teacher/addQuiz")
-      })
-
-
-
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("An error occurred while saving the quiz.");
-    });
-
-
-}
-
-// =========================================== END Add Quiz =================================================== //
-
-
-
-
-// =================================================== Handle Quizzes ================================================ // 
-
-let quizGrade
-let QuizId
-const handleQuizzes = (req, res) => {
-  quizGrade = null
-  QuizId = null
-  res.render("teacher/handleQuizzes", { title: "handleQuizzes", path: req.path, quizzesNamesData: null, studetsData: null, quizID: null, nextPage: null, previousPage: null, isSearching: false });
-
-}
-
-const getQuizzesNames = async (req, res) => {
-  try {
-    const { Grade } = req.query
-    quizGrade = Grade
-    await Quiz.find({ 'Grade': Grade }, { quizName: 1 })
-      .then((result) => {
-        console.log(result)
-        res.render("teacher/handleQuizzes", { title: "handleQuizzes", path: req.path, quizzesNamesData: result, studetsData: null, quizID: null, nextPage: null, previousPage: null, isSearching: false });
-      })
-  } catch (error) {
-
-  }
-}
-
-const getStudentsDataOfQuiz = async (req, res) => {
-  try {
-    const { quizID } = req.query
-    let perPage = 50;
-    let page = req.query.page || 1;
-
-    const objectId = new mongoose.Types.ObjectId(quizID);
-    QuizId = objectId
-
-    await User.aggregate([
-      {
-        $match: {
-          "Grade": quizGrade,
-          "quizesInfo": {
-            $elemMatch: {
-              "_id": objectId,
-              "isEnterd": true
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          "Username": 1,
-          "Code": 1,
-          "quizesInfo": 1,
-          "quizesInfo": {
-            $filter: {
-              input: "$quizesInfo",
-              as: "quiz",
-              cond: {
-                $eq: ["$$quiz._id", QuizId]
-              }
-            }
-          }
-        }
-      },
-      {
-        $sort: {
-          "quizesInfo.Score": -1
-        }
-      }
-    ])
-      .skip(perPage * page - perPage)
-      .limit(perPage)
-      .exec()
-      .then(async (result) => {
-
-        console.log(result)
-        const count = await User.countDocuments({});
-        const nextPage = parseInt(page) + 1;
-        const hasNextPage = nextPage <= Math.ceil(count / perPage);
-        const hasPreviousPage = page > 1; // Check if current page is greater than 1
-        res.render("teacher/handleQuizzes", {
-          title: "handleQuizzes", path: req.path,
-          quizzesNamesData: null,
-          studetsData: result,
-          quizID: quizID,
-          nextPage: hasNextPage ? nextPage : null,
-          previousPage: hasPreviousPage ? page - 1 : null,
-          isSearching: false
-        });
-      })
-  } catch (error) {
-
-  }
-}
-
-
-const searchForUserInQuiz = async (req, res) => {
-  const { searchBy, searchInput } = req.query
-  try {
-    console.log(searchBy, searchInput, QuizId)
-
-    await User.aggregate([
-      {
-        $match: {
-          [`${searchBy}`]: searchBy == "Code" ? +searchInput : searchInput,
-          "quizesInfo": {
-            $elemMatch: {
-              "_id": QuizId,
-              "isEnterd": true
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          "Username": 1,
-          "Code": 1,
-          "quizesInfo": {
-            $filter: {
-              input: "$quizesInfo",
-              as: "quiz",
-              cond: {
-                $eq: ["$$quiz._id", QuizId]
-              }
-            }
-          }
-        }
-      },
-      {
-        $sort: {
-          "createdAt": 1
-        }
-      }
-    ])
-
-
-      .then((result) => {
-        console.log(result)
-
-        res.render("teacher/handleQuizzes", { title: "handleQuizzes", path: req.path, quizzesNamesData: null, studetsData: result, quizID: null, nextPage: null, previousPage: null, isSearching: true });
-
-      })
-  } catch (error) {
-
-  }
-
-}
-
-const convertToExcelQuiz = async (req, res) => {
-  try {
-
-    const users = await User.aggregate([
-      {
-        $match: {
-          "Grade": quizGrade,
-          "quizesInfo": {
-            $elemMatch: {
-              "_id": QuizId,
-              "isEnterd": true
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          "Username": 1,
-          "Code": 1,
-          "quizesInfo": 1,
-          "phone": 1,
-          "parentPhone": 1,
-          "quizesInfo": {
-            $filter: {
-              input: "$quizesInfo",
-              as: "quiz",
-              cond: {
-                $eq: ["$$quiz._id", QuizId]
-              }
-            }
-          }
-        }
-      },
-      {
-        $sort: {
-          "createdAt": 1
-        }
-      }
-    ])
-
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet('Users Data');
-
-    const headerRow = worksheet.addRow(['#', 'User Name', 'Student Code', 'Student Phone', 'Parent Phone', "Quiz Grade"]);
-    headerRow.font = { bold: true };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-
-    // Add user data to the worksheet with alternating row colors
-    let c = 0;
-    users.forEach(user => {
-      c++;
-      const row = worksheet.addRow([c, user.Username, user.Code, user.phone, user.parentPhone, user['quizesInfo'][0]['Score']]);
-      // Apply alternating row colors
-      if (c % 2 === 0) {
-        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-      }
-    });
-
-    const excelBuffer = await workbook.xlsx.writeBuffer();
-
-    // Set response headers for file download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=users_data.xlsx');
-
-    // Send Excel file as response
-    res.send(excelBuffer)
-
-
-  } catch (error) {
-    console.error('Error generating Excel file:', error);
-    res.status(500).send('Error generating Excel file');
-  }
-};
-
-const changeEnterToQuiz = async (req, res) => {
-  try {
-    const quizID = req.params.quizID
-    const UserId = req.query.UserId
-    console.log(QuizId, UserId)
-    const user = await User.findById(UserId);
-    if (!user) {
-      throw new Error('User not found');
     }
-
-    const quiz = user.quizesInfo.find(q => q._id.equals(QuizId));
-    if (!quiz) {
-      throw new Error('Quiz not found');
-    }
-
-
-    const newTotalScore = user.totalScore - quiz.Score;
-
-    User.findOneAndUpdate(
-      {
-        _id: UserId,
-
-      },
-      {
-
-
-        'quizesInfo.$[elem].isEnterd': false,
-        'quizesInfo.$[elem].inProgress': false,
-        'quizesInfo.$[elem].solvedAt': null,
-        'quizesInfo.$[elem].solveTime': null,
-        'quizesInfo.$[elem].answers': [],
-        'quizesInfo.$[elem].Score': 0,
-        'quizesInfo.$[elem].endTime': null,
-        totalScore: newTotalScore,
+    
+    // Normalize question field names for consistency
+    if (Array.isArray(parsedQuestions)) {
+      parsedQuestions = parsedQuestions.map((question, index) => {
+        // Generate unique ID for each question
+        const questionId = question.id || Date.now().toString() + Math.random().toString(36).substr(2, 9);
         
-
-
-      },
-      {
-        new: true,
-        arrayFilters: [{ 'elem._id': QuizId }]
-      }
-    ).then((result) => {
-      console.log(result)
-      res.redirect(`/teacher/getStudentsDataOfQuiz?quizID=${QuizId}`)
-    })
+        // Convert from frontend format to Quiz schema format
+        const normalizedQuestion = {
+          id: questionId,
+          title: question.question || question.title || question.questionText || '',
+          questionPhoto: question.image || question.questionPhoto || '',
+          answer1: question.answers && question.answers[0] ? question.answers[0] : (question.answer1 || ''),
+          answer2: question.answers && question.answers[1] ? question.answers[1] : (question.answer2 || ''),
+          answer3: question.answers && question.answers[2] ? question.answers[2] : (question.answer3 || ''),
+          answer4: question.answers && question.answers[3] ? question.answers[3] : (question.answer4 || ''),
+          ranswer: (question.correctAnswer !== undefined ? question.correctAnswer + 1 : (question.ranswer || 1))
+        };
+        
+        // Ensure both image and questionPhoto fields exist for backward compatibility
+        if (normalizedQuestion.questionPhoto && !normalizedQuestion.image) {
+          normalizedQuestion.image = normalizedQuestion.questionPhoto;
+        }
+        if (normalizedQuestion.image && !normalizedQuestion.questionPhoto) {
+          normalizedQuestion.questionPhoto = normalizedQuestion.image;
+        }
+        
+        return normalizedQuestion;
+      });
+    }
+    
+    // Validation
+    if (!quizName || !Grade || !timeOfQuiz || !parsedQuestions || parsedQuestions.length === 0) {
+      return res.redirect('/teacher/quizzes/create?error=missing_fields');
+    }
+    
+    // Ensure questionsToShow is not greater than the number of questions
+    const questionCount = parsedQuestions.length;
+    const showCount = parseInt(questionsToShow) || questionCount;
+    if (showCount > questionCount) {
+      return res.redirect('/teacher/quizzes/create?error=too_many_questions_to_show');
+    }
+    
+    const quiz = new Quiz({
+      quizName,
+      Grade,
+      chapterId: chapterId || null,
+      questionsCount: questionCount,
+      questionsToShow: showCount, // Store how many questions to show to students
+      timeOfQuiz: parseInt(timeOfQuiz),
+      prepaidStatus: prepaidStatus === 'true',
+      quizPrice: parseFloat(quizPrice) || 0,
+      isQuizActive: isQuizActive === 'true',
+      permissionToShow: permissionToShow === 'true',
+      showAnswersAfterQuiz: showAnswersAfterQuiz === 'true',
+      Questions: parsedQuestions,
+      videoWillbeOpen: videoWillbeOpen || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    
+    await quiz.save();
+    
+    // Add quiz info to all students of the same grade
+    const quizInfo = {
+      _id: quiz._id,
+      quizName: quiz.quizName,
+      chapterId: quiz.chapterId,
+      isEnterd: false,
+      inProgress: false,
+      Score: 0,
+      answers: [],
+      endTime: null,
+      quizPurchaseStatus: !quiz.prepaidStatus
+    };
+    
+    await User.updateMany(
+      { isTeacher: false, Grade: Grade },
+      { $push: { quizesInfo: quizInfo } }
+    );
+    
+    // Redirect based on where the quiz was created from
+    if (chapterId) {
+      res.redirect(`/teacher/chapters/${chapterId}?success=quiz_created`);
+    } else {
+    res.redirect('/teacher/quizzes?success=quiz_created');
+    }
   } catch (error) {
-
+    console.error('Quiz create error:', error);
+    const redirectUrl = req.body.chapterId 
+      ? `/teacher/chapters/${req.body.chapterId}/quizzes/create?error=creation_failed` 
+      : '/teacher/quizzes/create?error=creation_failed';
+    res.redirect(redirectUrl);
   }
-}
-
-// =================================================== END Handle Quizzes ================================================ // 
-
-
-
-// =================================================== Codes ================================================ // 
-
-const Codes_get = (req, res) => {
-  res.render("teacher/Codes", { title: "Codes", path: req.path, data: null, Grade: null, type: null });
 };
 
+// ==================  Student Management  ====================== //
 
-let Type
-const getChptersOrVideosData = async (req, res) => {
-
+const students_get = async (req, res) => {
   try {
-    const { type, Grade } = req.query
-    Type = type
-    const data = []
+    const { grade, status, search, page = 1 } = req.query;
+    const perPage = 20;
+    
+    let query = { isTeacher: false };
+    if (grade) query.Grade = grade;
+    if (status === 'active') query.subscribe = true;
+    if (status === 'pending') query.subscribe = false;
+    if (search) {
+      query.$or = [
+        { Username: { $regex: search, $options: 'i' } },
+        { Code: isNaN(search) ? undefined : parseInt(search) }
+      ].filter(Boolean);
+    }
+    
+    const students = await User.find(query)
+      .sort({ createdAt: -1 })
+      .limit(perPage)
+      .skip((page - 1) * perPage)
+      .select('Username Code Grade gov phone parentPhone subscribe totalScore examsEnterd createdAt');
+    
+    const totalStudents = await User.countDocuments(query);
+    
+    res.render('teacher/students', {
+      title: 'إدارة الطلاب',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      students,
+      totalStudents,
+      activeStudents: students.filter(s => s.subscribe).length,
+      pendingRequests: students.filter(s => !s.subscribe).length,
+      averageProgress: students.length > 0 
+        ? students.reduce((sum, s) => sum + (s.totalScore || 0), 0) / students.length 
+        : 0,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalStudents / perPage),
+      filters: { grade, status, search }
+    });
+  } catch (error) {
+    console.error('Students error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
-    if(Type == "Chapter" || Type == "Video") {
-      await Chapter.find({ 'chapterGrade': Grade }, { chapterName: 1, chapterAccessibility: 1, chapterLectures: 1, chapterSummaries: 1, chapterSolvings: 1 })
-      .then((result) => {
-        result.forEach((resData) => {
-          if (type == "Chapter") {
-            if (resData.chapterAccessibility == "EnterInPay") {
-              data.push({ Name: resData.chapterName, _id: resData._id })
+const student_requests_get = async (req, res) => {
+  try {
+    const { grade, search, page = 1 } = req.query;
+    const perPage = 20;
+    
+    let query = { isTeacher: false, subscribe: false };
+    if (grade) query.Grade = grade;
+    if (search) {
+      query.$or = [
+        { Username: { $regex: search, $options: 'i' } },
+        { Code: isNaN(search) ? undefined : parseInt(search) }
+      ].filter(Boolean);
+    }
+    
+    const students = await User.find(query)
+      .sort({ createdAt: -1 })
+      .limit(perPage)
+      .skip((page - 1) * perPage)
+      .select('Username Code Grade gov phone parentPhone createdAt');
+    
+    const totalStudents = await User.countDocuments(query);
+    
+    res.render('teacher/student-requests', {
+      title: 'طلبات الطلاب',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      students,
+      totalStudents,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalStudents / perPage),
+      filters: { grade, search }
+    });
+  } catch (error) {
+    console.error('Student requests error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const student_detail_get = async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    const student = await User.findById(studentId);
+    
+    if (!student || student.isTeacher) {
+      return res.status(404).send('Student not found');
+    }
+    
+    // Get chapters this student has access to
+    const chapters = await Chapter.find({
+      _id: { $in: student.chaptersPaid || [] }
+    }, 'chapterName chapterGrade');
+    
+    // Get quizzes this student has taken
+    const takenQuizzes = student.quizesInfo
+      .filter(quiz => quiz.isEnterd)
+      .map(quiz => ({
+        quizId: quiz._id,
+        quizName: quiz.quizName,
+        score: quiz.Score,
+        endTime: quiz.endTime
+      }));
+    
+    // Get videos this student has watched
+    const watchedVideos = student.videosInfo
+      .filter(video => video.numberOfWatches > 0)
+      .map(video => ({
+        videoId: video._id,
+        videoName: video.videoName,
+        numberOfWatches: video.numberOfWatches,
+        lastWatch: video.lastWatch
+      }));
+    
+    res.render('teacher/student-detail', {
+      title: `${student.Username} - تفاصيل الطالب`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      student,
+      chapters,
+      takenQuizzes,
+      watchedVideos
+    });
+  } catch (error) {
+    console.error('Student detail error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const student_approve = async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    
+    const student = await User.findById(studentId);
+    if (!student || student.isTeacher) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    student.subscribe = true;
+    await student.save();
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Student approve error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const student_reject = async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    
+    const student = await User.findById(studentId);
+    if (!student || student.isTeacher) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    // Instead of deleting, we can mark as rejected
+    student.subscribe = false;
+    student.isRejected = true;
+    await student.save();
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Student reject error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const student_edit = async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    const {
+      Username,
+      Grade,
+      gov,
+      Markez,
+      phone,
+      parentPhone,
+      place,
+      gender,
+      ARorEN,
+      subscribe
+    } = req.body;
+    
+    const updateData = {
+      Username,
+      Grade,
+      gov,
+      Markez,
+      phone,
+      parentPhone,
+      place,
+      gender,
+      ARorEN,
+      subscribe: subscribe === 'true'
+    };
+    
+    await User.findByIdAndUpdate(studentId, updateData);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Student edit error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const student_delete = async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+    
+    // Delete the student from the database
+    await User.findByIdAndDelete(studentId);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Student delete error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const student_remove_chapter = async (req, res) => {
+  try {
+    const { studentId, chapterId } = req.params;
+    
+    // Find the student
+    const student = await User.findById(studentId);
+    if (!student || student.isTeacher) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    
+    // Remove the chapter from the student's chaptersPaid array
+    if (student.chaptersPaid && student.chaptersPaid.includes(chapterId)) {
+      student.chaptersPaid = student.chaptersPaid.filter(id => id.toString() !== chapterId);
+      await student.save();
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Student remove chapter error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const students_search = async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json({ success: false, message: 'Search query too short' });
+    }
+    
+    const students = await User.find({
+      isTeacher: false,
+      $or: [
+        { Username: { $regex: query, $options: 'i' } },
+        { Code: isNaN(query) ? undefined : parseInt(query) }
+      ].filter(Boolean)
+    })
+    .limit(10)
+    .select('Username Code Grade subscribe');
+    
+    res.json({ success: true, students });
+  } catch (error) {
+    console.error('Students search error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const students_export = async (req, res) => {
+  try {
+    const { grade, status } = req.query;
+    
+    let query = { isTeacher: false };
+    if (grade) query.Grade = grade;
+    if (status === 'active') query.subscribe = true;
+    if (status === 'pending') query.subscribe = false;
+    
+    const students = await User.find(query)
+      .sort({ createdAt: -1 })
+      .select('Username Code Grade gov phone parentPhone subscribe totalScore createdAt');
+    
+    // Create Excel workbook
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet('Students');
+    
+    // Add headers
+    worksheet.columns = [
+      { header: 'اسم الطالب', key: 'name', width: 30 },
+      { header: 'كود الطالب', key: 'code', width: 15 },
+      { header: 'الصف', key: 'grade', width: 15 },
+      { header: 'المحافظة', key: 'gov', width: 20 },
+      { header: 'رقم الهاتف', key: 'phone', width: 20 },
+      { header: 'رقم ولي الأمر', key: 'parentPhone', width: 20 },
+      { header: 'حالة الاشتراك', key: 'status', width: 15 },
+      { header: 'الدرجة الكلية', key: 'score', width: 15 },
+      { header: 'تاريخ التسجيل', key: 'date', width: 20 }
+    ];
+    
+    // Add data rows
+    students.forEach(student => {
+      worksheet.addRow({
+        name: student.Username,
+        code: student.Code,
+        grade: student.Grade,
+        gov: student.gov,
+        phone: student.phone,
+        parentPhone: student.parentPhone,
+        status: student.subscribe ? 'مشترك' : 'غير مشترك',
+        score: student.totalScore || 0,
+        date: student.createdAt ? student.createdAt.toLocaleDateString() : ''
+      });
+    });
+    
+    // Set headers for download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
+    
+    // Write to response
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Students export error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+// ==================  Code Management  ====================== //
+
+const codes_get = async (req, res) => {
+  try {
+    const { search, type, status, grade, page = 1 } = req.query;
+    const perPage = 20;
+    
+    // Build query
+    let query = {};
+    
+    if (search) {
+      // Check if search is a number (for usedBy field)
+      const searchNumber = parseInt(search);
+      if (!isNaN(searchNumber)) {
+        // If search is a number, search in usedBy field
+        query.usedBy = searchNumber;
+      } else {
+        // If search is not a number, search in Code field only
+        query.Code = { $regex: search, $options: 'i' };
+      }
+    }
+    
+    if (type) {
+      query.codeType = type;
+    }
+    
+    if (status === 'used') {
+      query.isUsed = true;
+    } else if (status === 'unused') {
+      query.isUsed = false;
+    }
+    
+    if (grade) {
+      query.codeGrade = grade;
+    }
+    
+    // Get statistics for codes
+    const codeStats = await Code.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalCodes: { $sum: 1 },
+          usedCodes: { $sum: { $cond: [{ $eq: ['$isUsed', true] }, 1, 0] } },
+          chapterCodes: { $sum: { $cond: [{ $eq: ['$codeType', 'Chapter'] }, 1, 0] } },
+          videoCodes: { $sum: { $cond: [{ $eq: ['$codeType', 'Video'] }, 1, 0] } },
+          quizCodes: { $sum: { $cond: [{ $eq: ['$codeType', 'Quiz'] }, 1, 0] } },
+          pdfCodes: { $sum: { $cond: [{ $eq: ['$codeType', 'PDF'] }, 1, 0] } },
+          generalCodes: { $sum: { $cond: [{ $eq: ['$isGeneralCode', true] }, 1, 0] } }
+        }
+      }
+    ]);
+    
+    // Get chapters for code generation
+    const chapters = await Chapter.find({ isActive: true }).select('chapterName chapterGrade');
+    
+    // Get quizzes for code generation
+    const quizzes = await Quiz.find({ isQuizActive: true }).select('quizName Grade');
+    
+    // Get codes with pagination
+    const codes = await Code.find(query)
+      .sort({ createdAt: -1 })
+      .limit(perPage)
+      .skip((page - 1) * perPage);
+    
+    const totalCodes = await Code.countDocuments(query);
+    
+    const stats = codeStats[0] || { 
+      totalCodes: 0, 
+      usedCodes: 0, 
+      chapterCodes: 0, 
+      videoCodes: 0, 
+      quizCodes: 0, 
+      pdfCodes: 0, 
+      generalCodes: 0 
+    };
+    
+    res.render('teacher/Codes', {
+      title: 'إدارة الأكواد',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      stats: {
+        totalCodes: stats.totalCodes,
+        usedCodes: stats.usedCodes,
+        availableCodes: stats.totalCodes - stats.usedCodes,
+        chapterCodes: stats.chapterCodes,
+        videoCodes: stats.videoCodes,
+        quizCodes: stats.quizCodes,
+        pdfCodes: stats.pdfCodes,
+        generalCodes: stats.generalCodes
+      },
+      chapters,
+      quizzes,
+      codes,
+      totalCodes,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalCodes / perPage),
+      filters: { search, type, status, grade },
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Codes error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const codes_create_get = async (req, res) => {
+  try {
+    // Get chapters for code generation
+    const chapters = await Chapter.find({ isActive: true }).select('chapterName chapterGrade');
+    
+    // Get quizzes for code generation
+    const quizzes = await Quiz.find({ isQuizActive: true }).select('quizName Grade');
+    
+    res.render('teacher/codes-create', {
+      title: 'إنشاء أكواد',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      chapters,
+      quizzes,
+      generatedCodes: [],
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Codes create get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const codes_create_post = async (req, res) => {
+  try {
+    const {
+      codeType,
+      count,
+      grade,
+      isGeneral,
+      chapterId,
+      contentId
+    } = req.body;
+
+    // Validation
+    if (!codeType || !count || !grade) {
+      return res.status(400).json({
+        success: false,
+        message: 'يرجى ملء جميع الحقول المطلوبة'
+      });
+    }
+
+    const codesCount = parseInt(count);
+    if (codesCount < 1 || codesCount > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'عدد الأكواد يجب أن يكون بين 1 و 100'
+      });
+    }
+
+    // Generate numeric-only codes (12 digits)
+    const generatedCodes = [];
+    const usedCodes = new Set();
+
+    for (let i = 0; i < codesCount; i++) {
+      let code;
+      do {
+        // Generate 12-digit numeric code
+        code = Math.floor(Math.random() * 900000000000) + 100000000000; // 12 digits
+        code = code.toString();
+      } while (usedCodes.has(code));
+
+      usedCodes.add(code);
+
+      // Determine content details based on code type
+      let contentName = 'عام';
+      let chapterName = '';
+
+      if (!isGeneral || isGeneral === 'false') {
+        if (chapterId) {
+          const chapter = await Chapter.findById(chapterId);
+          if (chapter) {
+            chapterName = chapter.chapterName;
+          }
+        }
+
+        if (contentId) {
+          if (codeType === 'Video') {
+            const video = await Video.findById(contentId);
+            if (video) {
+              contentName = video.videoTitle || video.lectureName;
             }
-          } else if(type == "Video") {
-            resData['chapterLectures'].forEach((lec) => {
-              if (lec.paymentStatus == "Pay") {
-                data.push({ Name: lec.videoTitle, _id: lec._id })
-              }
-            })
-            resData['chapterSummaries'].forEach((sum) => {
-              if (sum.paymentStatus == "Pay") {
-                data.push({ Name: sum.videoTitle, _id: sum._id })
-              }
-            })
-            resData['chapterSolvings'].forEach((solv) => {
-              if (solv.paymentStatus == "Pay") {
-                data.push({ Name: solv.videoTitle, _id: solv._id })
-              }
-            })
+          } else if (codeType === 'Quiz') {
+            const quiz = await Quiz.findById(contentId);
+            if (quiz) {
+              contentName = quiz.quizName;
+            }
+          } else if (codeType === 'PDF') {
+            const pdf = await PDFs.findById(contentId);
+            if (pdf) {
+              contentName = pdf.pdfName;
+            }
           }
-
-
-        })
-
-   
-        res.render("teacher/Codes", { title: "Codes", path: req.path, data: data, Grade: Grade, type: type });
-
-      })
-    }else{
-       await Quiz.find({ 'Grade': Grade },{quizName:1,_id:1,prepaidStatus:1}) .then((result) => { 
-        result.forEach((quiz) => {
-          if (quiz.prepaidStatus) {
-            data.push({ Name: quiz.quizName, _id: quiz._id })
-
-          }
-        })
-        res.render("teacher/Codes", { title: "Codes", path: req.path, data: data, Grade: Grade, type: type });
-
-       })
-
-     
-    }
-   
-
- 
-  } catch (error) {
-
-  }
-}
-
-const createSpecificCodes = async (req, res) => {
-  try {
-    req.io.emit('creatingSCodes', { nCodesFinished: 0 ,numberOfCodes:0 });
-
-    const { IDOfVideoOrChapter, numberOfCodes } = req.body;
-
-    // Validate the inputs
-    if (!IDOfVideoOrChapter || !numberOfCodes || !Type) {
-      return res.status(400).json({ message: "Name and number of codes are required." });
-    }
-
-    // Generate the specified number of codes
-    const generatedCodes = [];
-    for (let i = 0; i < +numberOfCodes; i++) {
-      const code = generateCode(); // Function to generate code
-      generatedCodes.push(code);
-    }
-
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet('Codes Data');
-
-    const headerRow = worksheet.addRow(['#', 'Code']);
-    headerRow.font = { bold: true };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-    let c = 0;
-    for (const code of generatedCodes) {
-      // console.log(code)
-
-      await Code.create({ Code: code, isUsed: false, codeType: Type, codeFor: IDOfVideoOrChapter, usedBy: null, usedIn: null }).then((result) => {
-        console.log(result)
-      });
-
-      c++;
-      req.io.emit('creatingSCodes', { nCodesFinished: c ,numberOfCodes:numberOfCodes });
-      const row = worksheet.addRow([c, code]);
-      // Apply alternating row colors
-      if (c % 2 === 0) {
-        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
+        }
       }
 
+      // Create code object
+      const codeObj = {
+        Code: code,
+        codeType: codeType,
+        codeGrade: grade,
+        isGeneral: isGeneral === 'true',
+        isAllGrades: grade === 'AllGrades', // Add flag for all grades
+        chapterId: chapterId || null,
+        contentId: contentId || null,
+        contentName: contentName,
+        chapterName: chapterName,
+        usedBy: null,
+        createdAt: new Date()
+      };
+
+      generatedCodes.push(codeObj);
     }
 
-    // Add user data to the worksheet with alternating row colors
+    // Save codes to database
+    const savedCodes = await Code.insertMany(generatedCodes);
 
-    const excelBuffer = await workbook.xlsx.writeBuffer();
-
-    // Set response headers for file download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Codes_data.xlsx');
-
-    // Send Excel file as response
-    res.send(excelBuffer)
+    // Return JSON response for AJAX
+    return res.json({
+      success: true,
+      message: `تم إنشاء ${codesCount} كود بنجاح`,
+      codes: savedCodes
+    });
 
   } catch (error) {
-    return res.status(400).json({ message: `back and Re make the request again please ${error}` });
-
+    console.error('Code creation error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'حدث خطأ أثناء إنشاء الأكواد'
+    });
   }
-}
+};
 
-
-const createGeneralCodes = async (req, res) => {
+const codes_upload_excel = async (req, res) => {
   try {
-    req.io.emit('creatingCodes', { code: 0 });
-    const { numberOfCodes } = req.body;
-
-    // Validate the inputs
-    if (!numberOfCodes) {
-      return res.status(400).json({ message: "Name and number of codes are required." });
-    }
-
-    // Generate the specified number of codes
-    const generatedCodes = [];
-    for (let i = 0; i < +numberOfCodes; i++) {
-      const code = generateCode(); // Function to generate code
-      generatedCodes.push(code);
-    }
-
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet('Codes Data');
-
-    const headerRow = worksheet.addRow(['#', 'Code']);
-    headerRow.font = { bold: true };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-    let c = 0;
-    for (const code of generatedCodes) {
-      // console.log(code)
-
-      await Code.create({ Code: code, isUsed: false, codeType: "General", codeFor: null, usedBy: null, usedIn: null }).then((result) => {
-        console.log(result)
+    const ExcelJS = require('exceljs');
+    const { codeType, grade, isGeneral, chapterId, contentId } = req.body;
+    
+    // Check if file was uploaded
+    if (!req.files || !req.files.excelFile) {
+      return res.status(400).json({
+        success: false,
+        message: 'يرجى رفع ملف Excel'
       });
+    }
 
-      c++;
-      req.io.emit('creatingCodes', {nCodesFinished: c ,numberOfCodes:numberOfCodes });
-      const row = worksheet.addRow([c, code]);
-      // Apply alternating row colors
-      if (c % 2 === 0) {
-        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
+    const excelFile = req.files.excelFile;
+    
+    // Validate file type
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel'
+    ];
+    
+    if (!validTypes.includes(excelFile.mimetype) && !excelFile.name.match(/\.(xlsx|xls)$/)) {
+      return res.status(400).json({
+        success: false,
+        message: 'يرجى رفع ملف Excel صحيح (.xlsx أو .xls)'
+      });
+    }
+
+    // Validation
+    if (!codeType || !grade) {
+      return res.status(400).json({
+        success: false,
+        message: 'يرجى ملء جميع الحقول المطلوبة'
+      });
+    }
+
+    // Read Excel file
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(excelFile.data);
+    
+    const worksheet = workbook.getWorksheet(1); // Get first worksheet
+    if (!worksheet) {
+      return res.status(400).json({
+        success: false,
+        message: 'لم يتم العثور على بيانات في ملف Excel'
+      });
+    }
+
+    // Find the code column
+    let codeColumnIndex = -1;
+    const headerRow = worksheet.getRow(1);
+    
+    // Look for code column headers (Arabic or English)
+    const possibleHeaders = ['الكود', 'Code', 'كود', 'code', 'الكود', 'الرمز'];
+    
+    headerRow.eachCell((cell, colNumber) => {
+      const cellValue = cell.value ? cell.value.toString().trim() : '';
+      if (possibleHeaders.includes(cellValue)) {
+        codeColumnIndex = colNumber;
+      }
+    });
+
+    if (codeColumnIndex === -1) {
+      return res.status(400).json({
+        success: false,
+        message: 'لم يتم العثور على عمود "الكود" أو "Code" في ملف Excel'
+      });
+    }
+
+    // Extract codes from Excel
+    const extractedCodes = [];
+    const usedCodes = new Set();
+    
+    // Get existing codes from database to avoid duplicates
+    const existingCodes = await Code.find({}, 'Code');
+    existingCodes.forEach(code => usedCodes.add(code.Code));
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // Skip header row
+      
+      const codeCell = row.getCell(codeColumnIndex);
+      const codeValue = codeCell.value;
+      
+      if (codeValue) {
+        const code = codeValue.toString().trim();
+        
+        // Validate code format (should be numeric and 12 digits)
+        if (code && /^\d{12}$/.test(code)) {
+          // Check if code already exists
+          if (!usedCodes.has(code)) {
+            usedCodes.add(code);
+            extractedCodes.push(code);
+          }
+        }
+      }
+    });
+
+    if (extractedCodes.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'لم يتم العثور على أكواد صحيحة في ملف Excel'
+      });
+    }
+
+    // Determine content details based on code type
+    let contentName = 'عام';
+    let chapterName = '';
+
+    if (!isGeneral || isGeneral === 'false') {
+      if (chapterId) {
+        const chapter = await Chapter.findById(chapterId);
+        if (chapter) {
+          chapterName = chapter.chapterName;
+        }
       }
 
-
-
+      if (contentId) {
+        if (codeType === 'Video') {
+          const video = await Video.findById(contentId);
+          if (video) {
+            contentName = video.videoTitle || video.lectureName;
+          }
+        } else if (codeType === 'Quiz') {
+          const quiz = await Quiz.findById(contentId);
+          if (quiz) {
+            contentName = quiz.quizName;
+          }
+        } else if (codeType === 'PDF') {
+          const pdf = await PDFs.findById(contentId);
+          if (pdf) {
+            contentName = pdf.pdfName;
+          }
+        }
+      }
     }
 
-    // Add user data to the worksheet with alternating row colors
+    // Create code objects
+    const codesToSave = extractedCodes.map(code => ({
+      Code: code,
+      codeType: codeType,
+      codeGrade: grade,
+      isGeneral: isGeneral === 'true',
+      isAllGrades: grade === 'AllGrades',
+      chapterId: chapterId || null,
+      contentId: contentId || null,
+      contentName: contentName,
+      chapterName: chapterName,
+      usedBy: null,
+      createdAt: new Date()
+    }));
 
-    const excelBuffer = await workbook.xlsx.writeBuffer();
+    // Save codes to database
+    const savedCodes = await Code.insertMany(codesToSave);
 
-    // Set response headers for file download
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=Codes_data.xlsx');
-
-    // Send Excel file as response
-    res.send(excelBuffer)
-
+    return res.json({
+      success: true,
+      message: `تم رفع ${savedCodes.length} كود بنجاح`,
+      codes: savedCodes
+    });
 
   } catch (error) {
-    return res.status(400).json({ message: `back and Re make the request again please ${error}` });
-
+    console.error('Excel upload error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'حدث خطأ أثناء رفع ملف Excel'
+    });
   }
-}
+};
 
-function generateCode() {
-  // Generate a UUID
-  const uuid = uuidv4();
+const codes_manage_get = async (req, res) => {
+  try {
+    const { type, status, grade, search, page = 1 } = req.query;
+    const perPage = 50;
+    
+    let query = {};
+    
+    if (type) {
+      query.codeType = type;
+    }
+    
+    if (status === 'used') {
+      query.isUsed = true;
+    } else if (status === 'unused') {
+      query.isUsed = false;
+    }
+    
+    if (grade) {
+      query.codeGrade = grade;
+    }
+    
+    if (search) {
+      // Check if search is a number (for usedBy field)
+      const searchNumber = parseInt(search);
+      if (!isNaN(searchNumber)) {
+        // If search is a number, search in usedBy field
+        query.usedBy = searchNumber;
+      } else {
+        // If search is not a number, search in Code field only
+        query.Code = { $regex: search, $options: 'i' };
+      }
+    }
+    
+    const codes = await Code.find(query)
+      .sort({ createdAt: -1 })
+      .limit(perPage)
+      .skip((page - 1) * perPage);
+    
+    const totalCodes = await Code.countDocuments(query);
+    
+    res.render('teacher/codes-manage', {
+      title: 'إدارة الأكواد',
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      codes,
+      totalCodes,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalCodes / perPage),
+      filters: { type, status, grade, search }
+    });
+  } catch (error) {
+    console.error('Codes manage error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
-  // Extract only the numbers from the UUID
-  const numbers = uuid.replace(/\D/g, '');
+const codes_search = async (req, res) => {
+  try {
+    const { search, type, status, grade } = req.query;
+    
+    let query = {};
+    
+    if (search) {
+      // Check if search is a number (for usedBy field)
+      const searchNumber = parseInt(search);
+      if (!isNaN(searchNumber)) {
+        // If search is a number, search in usedBy field
+        query.usedBy = searchNumber;
+      } else {
+        // If search is not a number, search in Code field only
+        query.Code = { $regex: search, $options: 'i' };
+      }
+    }
+    
+    if (type) {
+      query.codeType = type;
+    }
+    
+    if (status === 'used') {
+      query.isUsed = true;
+    } else if (status === 'unused') {
+      query.isUsed = false;
+    }
+    
+    if (grade) {
+      query.codeGrade = grade;
+    }
+    
+    const codes = await Code.find(query)
+      .sort({ createdAt: -1 })
+      .limit(100);
+    
+    res.json({ success: true, codes });
+  } catch (error) {
+    console.error('Codes search error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
-  // Take the first 10 digits
-  const code = numbers.substring(0, 12);
+const codes_export = async (req, res) => {
+  try {
+    const { search, type, status, grade } = req.query;
+    
+    let query = {};
+    
+    if (search) {
+      // Check if search is a number (for usedBy field)
+      const searchNumber = parseInt(search);
+      if (!isNaN(searchNumber)) {
+        // If search is a number, search in usedBy field
+        query.usedBy = searchNumber;
+      } else {
+        // If search is not a number, search in Code field only
+        query.Code = { $regex: search, $options: 'i' };
+      }
+    }
+    
+    if (type) {
+      query.codeType = type;
+    }
+    
+    if (status === 'used') {
+      query.isUsed = true;
+    } else if (status === 'unused') {
+      query.isUsed = false;
+    }
+    
+    if (grade) {
+      query.codeGrade = grade;
+    }
+    
+    const codes = await Code.find(query)
+      .sort({ createdAt: -1 });
+    
+    // Create CSV content
+    let csvContent = 'الكود,النوع,الصف,المحتوى المرتبط,الحالة,مستخدم بواسطة,تاريخ الإنشاء,تاريخ الاستخدام\n';
+    
+    codes.forEach(code => {
+      const codeType = code.codeType === 'Chapter' ? 'فصل' : 
+                      code.codeType === 'Video' ? 'فيديو' : 
+                      code.codeType === 'Quiz' ? 'اختبار' : 
+                      code.codeType === 'PDF' ? 'PDF' : code.codeType;
+      
+      const status = code.isUsed ? 'مستخدم' : 'متاح';
+      const usedBy = code.usedBy || 'غير مستخدم';
+      const createdAt = new Date(code.createdAt).toLocaleString('ar-EG');
+      const usageDate = code.usageDate ? new Date(code.usageDate).toLocaleString('ar-EG') : 'غير مستخدم';
+      const content = code.contentName || code.chapterName || 'غير محدد';
+      
+      csvContent += `"${code.Code}","${codeType}","${code.codeGrade || 'غير محدد'}","${content}","${status}","${usedBy}","${createdAt}","${usageDate}"\n`;
+    });
+    
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="codes-export.csv"');
+    res.send(csvContent);
+  } catch (error) {
+    console.error('Codes export error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
+// ==================  Code Management Functions  ====================== //
+
+const code_delete = async (req, res) => {
+  try {
+    const codeId = req.params.codeId;
+    
+    await Code.findByIdAndDelete(codeId);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Code delete error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const generate_chapter_codes = async (req, res) => {
+  try {
+    const { chapterId, codesCount = 10, grade } = req.body;
+    
+    // Validate chapter exists
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).json({ success: false, message: 'Chapter not found' });
+    }
+    
+    const codeGrade = grade || chapter.chapterGrade;
+    const codes = [];
+    
+    // Generate codes
+    for (let i = 0; i < codesCount; i++) {
+      const codeString = generateUniqueCode();
+      
+      const code = new Code({
+        Code: codeString,
+        codeType: 'Chapter',
+        codeGrade: codeGrade,
+        chapterName: chapter.chapterName,
+        chapterId: chapter._id,
+        isUsed: false,
+        createdAt: new Date()
+      });
+      
+      await code.save();
+      codes.push(code);
+    }
+    
+    res.redirect('/teacher/codes?success=codes_generated');
+  } catch (error) {
+    console.error('Generate chapter codes error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const generate_video_codes = async (req, res) => {
+  try {
+    const { videoId, chapterId, codesCount = 10 } = req.body;
+    
+    // Validate chapter exists
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).json({ success: false, message: 'Chapter not found' });
+    }
+    
+    // Find video in chapter
+    let video = null;
+    if (chapter.chapterLectures) {
+      video = chapter.chapterLectures.find(lecture => lecture._id.toString() === videoId);
+    }
+    if (!video && chapter.chapterSummaries) {
+      video = chapter.chapterSummaries.find(summary => summary._id.toString() === videoId);
+    }
+    if (!video && chapter.chapterSolvings) {
+      video = chapter.chapterSolvings.find(solving => solving._id.toString() === videoId);
+    }
+    
+    if (!video) {
+      return res.status(404).json({ success: false, message: 'Video not found' });
+    }
+    
+    const codes = [];
+    
+    // Generate codes
+    for (let i = 0; i < codesCount; i++) {
+      const codeString = generateUniqueCode();
+      
+      const code = new Code({
+        Code: codeString,
+        codeType: 'Video',
+        codeGrade: chapter.chapterGrade,
+        chapterName: chapter.chapterName,
+        chapterId: chapter._id,
+        contentId: videoId,
+        contentName: video.videoTitle || video.lectureName,
+        isUsed: false,
+        createdAt: new Date()
+      });
+      
+      await code.save();
+      codes.push(code);
+    }
+    
+    res.redirect(`/teacher/videos/${videoId}?success=codes_generated`);
+  } catch (error) {
+    console.error('Generate video codes error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const generate_quiz_codes = async (req, res) => {
+  try {
+    const { quizId, codesCount = 10 } = req.body;
+    
+    // Validate quiz exists
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: 'Quiz not found' });
+    }
+    
+    const codes = [];
+    
+    // Generate codes
+    for (let i = 0; i < codesCount; i++) {
+      const codeString = generateUniqueCode();
+      
+      const code = new Code({
+        Code: codeString,
+        codeType: 'Quiz',
+        codeGrade: quiz.Grade,
+        contentId: quiz._id,
+        contentName: quiz.quizName,
+        chapterId: quiz.chapterId,
+        isUsed: false,
+        createdAt: new Date()
+      });
+      
+      await code.save();
+      codes.push(code);
+    }
+    
+    res.redirect('/teacher/quizzes?success=codes_generated');
+  } catch (error) {
+    console.error('Generate quiz codes error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const generate_general_codes = async (req, res) => {
+  try {
+    const { codeType, grade, codesCount = 10 } = req.body;
+    
+    if (!codeType || !grade || !['GeneralChapter', 'GeneralVideo', 'GeneralQuiz'].includes(codeType)) {
+      return res.status(400).json({ success: false, message: 'Invalid parameters' });
+    }
+    
+    const codes = [];
+    
+    // Generate codes
+    for (let i = 0; i < codesCount; i++) {
+      const codeString = generateUniqueCode();
+      
+      const code = new Code({
+        Code: codeString,
+        codeType: codeType,
+        codeGrade: grade,
+        isGeneralCode: true,
+        isUsed: false,
+        createdAt: new Date()
+      });
+      
+      await code.save();
+      codes.push(code);
+    }
+    
+    res.redirect('/teacher/codes?success=general_codes_generated');
+  } catch (error) {
+    console.error('Generate general codes error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+// Helper function to generate unique code
+function generateUniqueCode() {
+  // Generate a random string of 8 characters
+  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
   return code;
 }
 
+// ==================  Chapter Quiz Management  ====================== //
 
-
-// =================================================== END Codes ================================================ // 
-
-
-
-
-// =================================================== Handel Codes ================================================ // 
-let t, g, n
-const handelCodes_get = async (req, res) => {
+const chapter_quiz_create_get = async (req, res) => {
   try {
-    const { type, Grade, name, excel } = req.query
-    t = type
-    g = Grade
-    n = name
-    let perPage = 50;
-    let page = req.query.page || 1;
-
-    const workbook = new Excel.Workbook();
-    const worksheet = workbook.addWorksheet('Codes Data');
-
-    const headerRow = worksheet.addRow(['#', 'الكود', 'حاله الاستخدام', 'كود المستخدم', '	استخدم في ', "تاريخ الاستخدام"]);
-    headerRow.font = { bold: true };
-    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF00' } };
-
-    const data = []
-    await Chapter.find({ 'chapterGrade': Grade }, { chapterName: 1, chapterAccessibility: 1, chapterLectures: 1, chapterSummaries: 1, chapterSolvings: 1 })
-      .then((result) => {
-        result.forEach((resData) => {
-          if (type == "Chapter") {
-            if (resData.chapterAccessibility == "EnterInPay") {
-              data.push({ Name: resData.chapterName, _id: resData._id })
-            }
-          } else {
-            resData['chapterLectures'].forEach((lec) => {
-              if (lec.paymentStatus == "Pay") {
-                data.push({ Name: lec.videoTitle, _id: lec._id })
-              }
-            })
-            resData['chapterSummaries'].forEach((sum) => {
-              if (sum.paymentStatus == "Pay") {
-                data.push({ Name: sum.videoTitle, _id: sum._id })
-              }
-            })
-            resData['chapterSolvings'].forEach((solv) => {
-              if (solv.paymentStatus == "Pay") {
-                data.push({ Name: solv.videoTitle, _id: solv._id })
-              }
-            })
-          }
-        })
-
-
-      })
-
-
-
-    if (excel) {
-      if (type == "General") {
-        await Code.find({ 'codeType': type }).sort({ isUsed: 1 })
-        
-          .then(async (Codes) => {
-            let c = 0;
-            Codes.forEach(code => {
-              c++;
-              const row = worksheet.addRow([c, code.Code, code.isUsed ? "مستخدم" :"غير مستخدم" ,code.usedBy || "غير مستخدم", code.usedIn || "غير مستخدم", code.createdAt.toLocaleDateString() === code.updatedAt.toLocaleDateString() ? "غير مستخدم" : code.updatedAt.toLocaleDateString()]);
-              // Apply alternating row colors
-              if (c % 2 === 0) {
-                row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-              }
-            });
-        
-            const excelBuffer = await workbook.xlsx.writeBuffer();
-            // Set response headers for file download
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=users_data.xlsx');
-
-            // Send Excel file as response
-            res.send(excelBuffer)
-          })
-
-
-      } else if (type == "Video" || type == "Chapter") {
-        res.render("teacher/handelCodes", { title: "Codes", path: req.path, namesData: data, CodesData: null, type: type, Grade: Grade, name: null, nextPage: null, previousPage: null, currentPage: null });
-
-      } else {
-
-        if (name) {
-          await Code.find({ "codeFor": name }).sort({ isUsed: 1 })
-          
-            .then(async (Codes) => {
-              let c = 0;
-              Codes.forEach(code => {
-                c++;
-                const row = worksheet.addRow([c, code.Code, code.isUsed ? "مستخدم" :"غير مستخدم" ,code.usedBy || "غير مستخدم", code.usedIn || "غير مستخدم", code.createdAt.toLocaleDateString() === code.updatedAt.toLocaleDateString() ? "غير مستخدم" : code.updatedAt.toLocaleDateString()]);
-                // Apply alternating row colors
-                if (c % 2 === 0) {
-                  row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DDDDDD' } };
-                }
-              });
-          
-              const excelBuffer = await workbook.xlsx.writeBuffer();
-              // Set response headers for file download
-              res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-              res.setHeader('Content-Disposition', 'attachment; filename=users_data.xlsx');
-  
-              // Send Excel file as response
-              res.send(excelBuffer)
-         
-            })
-
-        } else {
-          res.render("teacher/handelCodes", { title: "handel Codes", path: req.path, namesData: null, CodesData: null, type: null, Grade: null, name: null, nextPage: null, previousPage: null, currentPage: null });
-        }
-
-      }
-
-    } else {
-
-
-      if (type == "General") {
-        await Code.find({ 'codeType': type }).sort({ isUsed: 1 })
-          .skip(perPage * page - perPage)
-          .limit(perPage)
-          .exec()
-          .then(async (result) => {
-            const count = await Code.countDocuments({});
-            const nextPage = parseInt(page) + 1;
-            const hasNextPage = nextPage <= Math.ceil(count / perPage);
-            const hasPreviousPage = page > 1;
-            res.render("teacher/handelCodes", { title: "Codes", path: req.path, namesData: null, CodesData: result, type: type, Grade: null, name: null, nextPage: hasNextPage ? nextPage : null, previousPage: hasPreviousPage ? page - 1 : null, currentPage: page });
-          })
-
-
-      } else if (type == "Video" || type == "Chapter") {
-        res.render("teacher/handelCodes", { title: "Codes", path: req.path, namesData: data, CodesData: null, type: type, Grade: Grade, name: null, nextPage: null, previousPage: null, currentPage: null });
-
-      } else {
-
-        if (name) {
-          await Code.find({ "codeFor": name }).sort({ isUsed: 1 })
-            .skip(perPage * page - perPage)
-            .limit(perPage)
-            .exec()
-            .then(async (result) => {
-
-              const count = await Code.countDocuments({});
-              const nextPage = parseInt(page) + 1;
-              const hasNextPage = nextPage <= Math.ceil(count / perPage);
-              const hasPreviousPage = page > 1;
-
-              res.render("teacher/handelCodes", { title: "Codes", path: req.path, namesData: null, CodesData: result, type: null, Grade: null, name: name, nextPage: hasNextPage ? nextPage : null, previousPage: hasPreviousPage ? page - 1 : null, currentPage: page });
-            })
-
-        } else {
-          res.render("teacher/handelCodes", { title: "handel Codes", path: req.path, namesData: null, CodesData: null, type: null, Grade: null, name: null, nextPage: null, previousPage: null, currentPage: null });
-        }
-
-      }
-
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId);
+    
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
     }
-
-
+    
+    // Get videos from this chapter for the "video will be opened" dropdown
+    const videos = [
+      ...(chapter.chapterLectures || []).map(v => ({ 
+        _id: v._id, 
+        videoTitle: v.videoTitle || v.lectureName,
+        chapterName: chapter.chapterName,
+        type: 'lecture'
+      })),
+      ...(chapter.chapterSummaries || []).map(v => ({ 
+        _id: v._id, 
+        videoTitle: v.videoTitle || v.lectureName,
+        chapterName: chapter.chapterName,
+        type: 'summary'
+      })),
+      ...(chapter.chapterSolvings || []).map(v => ({ 
+        _id: v._id, 
+        videoTitle: v.videoTitle || v.lectureName,
+        chapterName: chapter.chapterName,
+        type: 'solving'
+      }))
+    ];
+    
+    // Get existing quizzes for this chapter
+    const existingQuizzes = await Quiz.find({ chapterId: chapterId })
+      .select('quizName questionsCount questionsToShow timeOfQuiz prepaidStatus')
+      .sort({ createdAt: -1 });
+    
+    res.render('teacher/quiz-create', {
+      title: `إنشاء اختبار جديد - ${chapter.chapterName}`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      chapter,
+      videos,
+      existingQuizzes,
+      error: req.query.error,
+      success: req.query.success
+    });
   } catch (error) {
-    return res.status(400).json({ message: `back and Re make the request again please ${error}` });
+    console.error('Chapter quiz create get error:', error);
+    res.status(500).send('Internal Server Error');
   }
-
 };
 
-
-const searchToGetCode = async (req, res) => {
+const chapter_quiz_create_post = async (req, res) => {
   try {
-    const { searchInput } = req.query
-    await Code.find({ Code: searchInput })
-      .then((result) => {
-        res.render("teacher/handelCodes", { title: "Codes", path: req.path, namesData: null, CodesData: result, type: t || null, Grade: g || null, name: n || null, nextPage: null, previousPage: null,currentPage:null });
-
-      })
+    const chapterId = req.params.chapterId;
+    const {
+      quizName,
+      timeOfQuiz,
+      prepaidStatus,
+      quizPrice,
+      videoWillbeOpen,
+      questionsToShow,
+      isQuizActive,
+      permissionToShow,
+      showAnswersAfterQuiz,
+      questions
+    } = req.body;
+    
+    // Validate chapter exists
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
+    }
+    
+    // Parse questions if it's a string
+    let parsedQuestions = questions;
+    if (typeof questions === 'string') {
+      try {
+        parsedQuestions = JSON.parse(questions);
+      } catch (e) {
+        console.error('Error parsing questions JSON:', e);
+        return res.redirect(`/teacher/chapters/${chapterId}/quizzes/create?error=invalid_questions_format`);
+      }
+    }
+    
+    // Normalize question field names for consistency
+    if (Array.isArray(parsedQuestions)) {
+      parsedQuestions = parsedQuestions.map(question => {
+        const normalizedQuestion = { ...question };
+        // Ensure both image and questionPhoto fields exist for backward compatibility
+        if (normalizedQuestion.questionPhoto && !normalizedQuestion.image) {
+          normalizedQuestion.image = normalizedQuestion.questionPhoto;
+        }
+        if (normalizedQuestion.image && !normalizedQuestion.questionPhoto) {
+          normalizedQuestion.questionPhoto = normalizedQuestion.image;
+        }
+        return normalizedQuestion;
+      });
+    }
+    
+    // Validation
+    if (!quizName || !timeOfQuiz || !parsedQuestions || parsedQuestions.length === 0) {
+      return res.redirect(`/teacher/chapters/${chapterId}/quizzes/create?error=missing_fields`);
+    }
+    
+    // Ensure questionsToShow is not greater than the number of questions
+    const questionCount = parsedQuestions.length;
+    const showCount = parseInt(questionsToShow) || questionCount;
+    if (showCount > questionCount) {
+      return res.redirect(`/teacher/chapters/${chapterId}/quizzes/create?error=too_many_questions_to_show`);
+    }
+    
+    const quiz = new Quiz({
+      quizName,
+      Grade: chapter.chapterGrade,
+      chapterId: chapterId,
+      questionsCount: questionCount,
+      questionsToShow: showCount, // Store how many questions to show to students
+      timeOfQuiz: parseInt(timeOfQuiz),
+      prepaidStatus: prepaidStatus === 'true',
+      quizPrice: parseFloat(quizPrice) || 0,
+      isQuizActive: isQuizActive === 'true',
+      permissionToShow: permissionToShow === 'true',
+      showAnswersAfterQuiz: showAnswersAfterQuiz === 'true',
+      Questions: parsedQuestions,
+      videoWillbeOpen: videoWillbeOpen || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    
+    await quiz.save();
+    
+    // Add quiz info to all students of the same grade
+    const quizInfo = {
+      _id: quiz._id,
+      quizName: quiz.quizName,
+      chapterId: quiz.chapterId,
+      isEnterd: false,
+      inProgress: false,
+      Score: 0,
+      answers: [],
+      endTime: null,
+      quizPurchaseStatus: !quiz.prepaidStatus
+    };
+    
+    await User.updateMany(
+      { isTeacher: false, Grade: chapter.chapterGrade },
+      { $push: { quizesInfo: quizInfo } }
+    );
+    
+    res.redirect(`/teacher/chapters/${chapterId}?success=quiz_created`);
   } catch (error) {
-
+    console.error('Chapter quiz create error:', error);
+    res.redirect(`/teacher/chapters/${req.params.chapterId}/quizzes/create?error=creation_failed`);
   }
-}
+};
 
+// ==================  Logout  ====================== //
 
-
-// ================================================== END Handel Codes ================================================ // 
-
-
-const logOut = async (req, res) => {
-  // Clearing the token cookie
+const logout = async (req, res) => {
   res.clearCookie('token');
-  // Redirecting to the login page or any other desired page
-  res.redirect('../login');
-}
+  res.redirect('/login');
+};
 
+const increase_student_watches = async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+    const studentId = req.params.studentId;
+    const { additionalWatches } = req.body;
+    
+    // Validate input
+    if (!additionalWatches || isNaN(additionalWatches) || additionalWatches <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'يرجى تحديد عدد المشاهدات الإضافية بشكل صحيح'
+      });
+    }
+    
+    // Find the student
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'لم يتم العثور على الطالب'
+      });
+    }
+    
+    // Find the video info in the student's videosInfo array
+    const videoInfoIndex = student.videosInfo.findIndex(
+      v => v._id.toString() === videoId.toString()
+    );
+    
+    if (videoInfoIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'لم يتم العثور على معلومات الفيديو للطالب'
+      });
+    }
+    
+    // Increase the videoAllowedAttemps
+    const currentAllowedAttempts = student.videosInfo[videoInfoIndex].videoAllowedAttemps || 3;
+    student.videosInfo[videoInfoIndex].videoAllowedAttemps = currentAllowedAttempts + parseInt(additionalWatches);
+    
+    // Save the updated student record
+    await student.save();
+    
+    return res.json({
+      success: true,
+      message: `تم زيادة عدد المشاهدات المسموح بها للطالب بنجاح (+${additionalWatches})`,
+      newAllowedAttempts: student.videosInfo[videoInfoIndex].videoAllowedAttemps
+    });
+  } catch (error) {
+    console.error('Increase student watches error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'حدث خطأ أثناء زيادة عدد المشاهدات المسموح بها'
+    });
+  }
+};
 
+const quiz_detail_get = async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 100; // Limit to 100 students per page
+    const skip = (page - 1) * limit;
+    
+    const quiz = await Quiz.findById(quizId);
+    
+    if (!quiz) {
+      return res.status(404).send('Quiz not found');
+    }
+    
+    // Get chapter info if quiz is associated with a chapter
+    let chapter = null;
+    if (quiz.chapterId) {
+      chapter = await Chapter.findById(quiz.chapterId).select('chapterName chapterGrade');
+    }
+    
+    // Get total count of students who have this quiz in their quizesInfo
+    const totalStudents = await User.countDocuments({
+      isTeacher: false,
+      'quizesInfo._id': quiz._id
+    });
+    
+    // Get students with pagination
+    const students = await User.find({
+      isTeacher: false,
+      'quizesInfo._id': quiz._id
+    }).select('Username Code Grade totalScore quizesInfo phone parentPhone')
+      .skip(skip)
+      .limit(limit);
+    
+    // Process student data
+    const studentsWithQuizInfo = students.map(student => {
+      const quizInfo = student.quizesInfo.find(q => q._id.toString() === quiz._id.toString());
+      const actualScore = quizInfo ? quizInfo.Score : 0;
+      const questionsShown = quiz.questionsToShow || quiz.questionsCount;
+      return {
+        studentId: student._id,
+        studentName: student.Username,
+        studentCode: student.Code,
+        grade: student.Grade,
+        phoneNumber: student.phone,
+        parentPhoneNumber: student.parentPhone,
+        totalScore: student.totalScore || 0,
+        quizAttempted: quizInfo ? quizInfo.isEnterd : false,
+        quizScore: actualScore,
+        quizScoreDisplay: `${actualScore}/${questionsShown}`,
+        quizInProgress: quizInfo ? quizInfo.inProgress : false,
+        quizEndTime: quizInfo ? quizInfo.endTime : null,
+        quizPurchaseStatus: quizInfo ? quizInfo.quizPurchaseStatus : false
+      };
+    }).filter(result => !result.quizInProgress); // Only show completed quizzes
+    
+    // Calculate statistics
+    const totalStudentsCount = studentsWithQuizInfo.length;
+    const attemptedStudents = studentsWithQuizInfo.filter(s => s.quizAttempted);
+    const completedStudents = attemptedStudents.filter(s => !s.quizInProgress);
+    const inProgressStudents = studentsWithQuizInfo.filter(s => s.quizInProgress);
+    const notAttemptedStudents = studentsWithQuizInfo.filter(s => !s.quizAttempted);
+    
+    // Calculate average score (actual score, not percentage)
+    const averageScore = completedStudents.length > 0 
+      ? completedStudents.reduce((sum, s) => sum + s.quizScore, 0) / completedStudents.length 
+      : 0;
+    
+    // Get top 3 performers
+    const topPerformers = completedStudents
+      .sort((a, b) => b.quizScore - a.quizScore)
+      .slice(0, 3);
+    
+    // Get score distribution based on percentage of questions shown
+    const questionsShown = quiz.questionsToShow || quiz.questionsCount;
+    const scoreDistribution = {
+      excellent: completedStudents.filter(s => (s.quizScore / questionsShown) >= 0.9).length,
+      good: completedStudents.filter(s => (s.quizScore / questionsShown) >= 0.8 && (s.quizScore / questionsShown) < 0.9).length,
+      average: completedStudents.filter(s => (s.quizScore / questionsShown) >= 0.7 && (s.quizScore / questionsShown) < 0.8).length,
+      belowAverage: completedStudents.filter(s => (s.quizScore / questionsShown) >= 0.6 && (s.quizScore / questionsShown) < 0.7).length,
+      failed: completedStudents.filter(s => (s.quizScore / questionsShown) < 0.6).length
+    };
+    
+    // Pagination info
+    const totalPages = Math.ceil(totalStudents / limit);
+    
+    res.render('teacher/quiz-detail', {
+      title: `${quiz.quizName} - تفاصيل الاختبار`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      quiz,
+      chapter,
+      students: studentsWithQuizInfo,
+      stats: {
+        totalStudents: totalStudentsCount,
+        attemptedStudents: attemptedStudents.length,
+        completedStudents: completedStudents.length,
+        inProgressStudents: inProgressStudents.length,
+        notAttemptedStudents: notAttemptedStudents.length,
+        averageScore: Math.round(averageScore * 100) / 100,
+        averageScoreDisplay: `${Math.round(averageScore)}/${quiz.questionsToShow || quiz.questionsCount}`,
+        completionRate: totalStudentsCount > 0 ? Math.round((completedStudents.length / totalStudentsCount) * 100) : 0,
+        questionsShown: quiz.questionsToShow || quiz.questionsCount
+      },
+      topPerformers,
+      scoreDistribution,
+      currentPage: page,
+      totalPages,
+      totalStudents,
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Quiz detail error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
+const quiz_edit_get = async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    const quiz = await Quiz.findById(quizId);
+    
+    if (!quiz) {
+      return res.status(404).send('Quiz not found');
+    }
+    
+    // Get chapters for dropdown
+    const chapters = await Chapter.find({ isActive: true }).select('chapterName chapterGrade');
+    
+    // Get videos for the "video will be opened" dropdown
+    let videos = [];
+    if (chapters.length > 0) {
+      for (const chapter of chapters) {
+        // Collect all videos from this chapter
+        const chapterVideos = [
+          ...(chapter.chapterLectures || []).map(v => ({ 
+            _id: v._id, 
+            videoTitle: v.videoTitle || v.lectureName,
+            chapterName: chapter.chapterName,
+            type: 'lecture'
+          })),
+          ...(chapter.chapterSummaries || []).map(v => ({ 
+            _id: v._id, 
+            videoTitle: v.videoTitle || v.lectureName,
+            chapterName: chapter.chapterName,
+            type: 'summary'
+          })),
+          ...(chapter.chapterSolvings || []).map(v => ({ 
+            _id: v._id, 
+            videoTitle: v.videoTitle || v.lectureName,
+            chapterName: chapter.chapterName,
+            type: 'solving'
+          }))
+        ];
+        videos = [...videos, ...chapterVideos];
+      }
+    }
+    
+    res.render('teacher/quiz-edit', {
+      title: `تعديل ${quiz.quizName}`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      quiz,
+      chapters,
+      videos,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Quiz edit get error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
+const quiz_edit_post = async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    const {
+      quizName,
+      Grade,
+      chapterId,
+      timeOfQuiz,
+      prepaidStatus,
+      quizPrice,
+      videoWillbeOpen,
+      questionsToShow,
+      isQuizActive,
+      permissionToShow,
+      showAnswersAfterQuiz,
+      questions
+    } = req.body;
+    
+    // Parse questions if it's a string
+    let parsedQuestions = questions;
+    if (typeof questions === 'string') {
+      try {
+        parsedQuestions = JSON.parse(questions);
+      } catch (e) {
+        console.error('Error parsing questions JSON:', e);
+        return res.redirect(`/teacher/quizzes/${quizId}/edit?error=invalid_questions_format`);
+      }
+    }
+    
+    // Validation
+    if (!quizName || !Grade || !timeOfQuiz || !parsedQuestions || parsedQuestions.length === 0) {
+      return res.redirect(`/teacher/quizzes/${quizId}/edit?error=missing_fields`);
+    }
+    
+    // Ensure questionsToShow is not greater than the number of questions
+    const questionCount = parsedQuestions.length;
+    const showCount = parseInt(questionsToShow) || questionCount;
+    if (showCount > questionCount) {
+      return res.redirect(`/teacher/quizzes/${quizId}/edit?error=too_many_questions_to_show`);
+    }
+    
+    // Normalize question field names for consistency
+    if (Array.isArray(parsedQuestions)) {
+      parsedQuestions = parsedQuestions.map((question, index) => {
+        // Generate unique ID for each question
+        const questionId = question.id || Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        
+        // Convert from frontend format to Quiz schema format
+        const normalizedQuestion = {
+          id: questionId,
+          title: question.question || question.title || question.questionText || '',
+          questionPhoto: question.image || question.questionPhoto || '',
+          answer1: question.answers && question.answers[0] ? question.answers[0] : (question.answer1 || ''),
+          answer2: question.answers && question.answers[1] ? question.answers[1] : (question.answer2 || ''),
+          answer3: question.answers && question.answers[2] ? question.answers[2] : (question.answer3 || ''),
+          answer4: question.answers && question.answers[3] ? question.answers[3] : (question.answer4 || ''),
+          ranswer: (question.correctAnswer !== undefined ? question.correctAnswer + 1 : (question.ranswer || 1))
+        };
+        
+        // Ensure both image and questionPhoto fields exist for backward compatibility
+        if (normalizedQuestion.questionPhoto && !normalizedQuestion.image) {
+          normalizedQuestion.image = normalizedQuestion.questionPhoto;
+        }
+        if (normalizedQuestion.image && !normalizedQuestion.questionPhoto) {
+          normalizedQuestion.questionPhoto = normalizedQuestion.image;
+        }
+        
+        return normalizedQuestion;
+      });
+    }
+    
+    const updateData = {
+      quizName,
+      Grade,
+      chapterId: chapterId || null,
+      questionsCount: questionCount,
+      questionsToShow: showCount,
+      timeOfQuiz: parseInt(timeOfQuiz),
+      prepaidStatus: prepaidStatus === 'true',
+      quizPrice: parseFloat(quizPrice) || 0,
+      isQuizActive: isQuizActive === 'true',
+      permissionToShow: permissionToShow === 'true',
+      showAnswersAfterQuiz: showAnswersAfterQuiz === 'true',
+      Questions: parsedQuestions,
+      videoWillbeOpen: videoWillbeOpen || null,
+      updatedAt: new Date()
+    };
+    
+    await Quiz.findByIdAndUpdate(quizId, updateData);
+    
+    res.redirect(`/teacher/quizzes/${quizId}?success=quiz_updated`);
+  } catch (error) {
+    console.error('Quiz edit error:', error);
+    res.redirect(`/teacher/quizzes/${req.params.quizId}/edit?error=update_failed`);
+  }
+};
+
+const quiz_delete = async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    
+    // Delete the quiz
+    await Quiz.findByIdAndDelete(quizId);
+    
+    // Remove quiz info from all students
+    await User.updateMany(
+      { 'quizesInfo._id': quizId },
+      { $pull: { quizesInfo: { _id: quizId } } }
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Quiz delete error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const quiz_results_get = async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    const quiz = await Quiz.findById(quizId);
+    
+    if (!quiz) {
+      return res.status(404).send('Quiz not found');
+    }
+    
+    // Get chapter info if quiz is associated with a chapter
+    let chapter = null;
+    if (quiz.chapterId) {
+      chapter = await Chapter.findById(quiz.chapterId).select('chapterName chapterGrade');
+    }
+    
+    // Get all students who have attempted this quiz
+    const students = await User.find({
+      isTeacher: false,
+      'quizesInfo._id': quiz._id,
+      'quizesInfo.isEnterd': true
+    }).select('Username Code Grade totalScore quizesInfo');
+    
+    // Process student results
+    const questionsShown = quiz.questionsToShow || quiz.questionsCount;
+    const studentResults = students.map(student => {
+      const quizInfo = student.quizesInfo.find(q => q._id.toString() === quiz._id.toString());
+      const actualScore = quizInfo ? quizInfo.Score : 0;
+      return {
+        studentId: student._id,
+        studentName: student.Username,
+        studentCode: student.Code,
+        grade: student.Grade,
+        totalScore: student.totalScore || 0,
+        quizScore: actualScore,
+        quizScoreDisplay: `${actualScore}/${questionsShown}`,
+        quizEndTime: quizInfo ? quizInfo.endTime : null,
+        quizAnswers: quizInfo ? quizInfo.answers : [],
+        quizInProgress: quizInfo ? quizInfo.inProgress : false
+      };
+    }).filter(result => !result.quizInProgress); // Only show completed quizzes
+    
+    // Sort by score (highest first)
+    studentResults.sort((a, b) => b.quizScore - a.quizScore);
+    
+    // Calculate statistics
+    const totalAttempts = studentResults.length;
+    const averageScore = totalAttempts > 0 
+      ? studentResults.reduce((sum, s) => sum + s.quizScore, 0) / totalAttempts 
+      : 0;
+    
+    const highestScore = totalAttempts > 0 ? Math.max(...studentResults.map(s => s.quizScore)) : 0;
+    const lowestScore = totalAttempts > 0 ? Math.min(...studentResults.map(s => s.quizScore)) : 0;
+    
+    // Calculate pass rate (students with 60% or higher)
+    const passingStudents = studentResults.filter(s => (s.quizScore / questionsShown) >= 0.6).length;
+    const passRate = totalAttempts > 0 ? Math.round((passingStudents / totalAttempts) * 100) : 0;
+    
+    // Get score distribution based on percentage of questions shown
+    const scoreDistribution = {
+      excellent: studentResults.filter(s => (s.quizScore / questionsShown) >= 0.9).length,
+      good: studentResults.filter(s => (s.quizScore / questionsShown) >= 0.8 && (s.quizScore / questionsShown) < 0.9).length,
+      average: studentResults.filter(s => (s.quizScore / questionsShown) >= 0.7 && (s.quizScore / questionsShown) < 0.8).length,
+      belowAverage: studentResults.filter(s => (s.quizScore / questionsShown) >= 0.6 && (s.quizScore / questionsShown) < 0.7).length,
+      failed: studentResults.filter(s => (s.quizScore / questionsShown) < 0.6).length
+    };
+    
+    // Get top 10 performers
+    const topPerformers = studentResults.slice(0, 10);
+    
+    // Calculate question analysis
+    const questionAnalysis = [];
+    if (quiz.Questions && quiz.Questions.length > 0) {
+      for (let i = 0; i < quiz.Questions.length; i++) {
+        const question = quiz.Questions[i];
+        let correctAnswers = 0;
+        let totalAnswers = 0;
+        
+        studentResults.forEach(student => {
+          if (student.quizAnswers && student.quizAnswers[i] !== undefined) {
+            totalAnswers++;
+            if (student.quizAnswers[i] === question.correctAnswer) {
+              correctAnswers++;
+            }
+          }
+        });
+        
+        questionAnalysis.push({
+          questionNumber: i + 1,
+          questionText: question.questionText || question.question,
+          correctAnswers,
+          totalAnswers,
+          successRate: totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0
+        });
+      }
+    }
+    
+    res.render('teacher/quiz-results', {
+      title: `${quiz.quizName} - نتائج الاختبار`,
+      path: req.path,
+      teacherData: req.userData || req.teacherData,
+      quiz,
+      chapter,
+      studentResults,
+      stats: {
+        totalAttempts,
+        averageScore: Math.round(averageScore * 100) / 100,
+        averageScoreDisplay: `${Math.round(averageScore)}/${questionsShown}`,
+        highestScore,
+        highestScoreDisplay: `${highestScore}/${questionsShown}`,
+        lowestScore,
+        lowestScoreDisplay: `${lowestScore}/${questionsShown}`,
+        completionRate: totalAttempts > 0 ? Math.round((totalAttempts / totalAttempts) * 100) : 0,
+        passRate,
+        questionsShown
+      },
+      scoreDistribution,
+      topPerformers,
+      questionAnalysis,
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('Quiz results error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+const quiz_export = async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    const quiz = await Quiz.findById(quizId);
+    
+    if (!quiz) {
+      return res.status(404).send('Quiz not found');
+    }
+    
+    // Get all students who have attempted this quiz
+    const students = await User.find({
+      isTeacher: false,
+      'quizesInfo._id': quiz._id,
+      'quizesInfo.isEnterd': true
+    }).select('Username Code Grade totalScore quizesInfo phone parentPhone');
+    
+    // Process student results
+    const questionsShown = quiz.questionsToShow || quiz.questionsCount;
+    const studentResults = students.map(student => {
+      const quizInfo = student.quizesInfo.find(q => q._id.toString() === quiz._id.toString());
+      const actualScore = quizInfo ? quizInfo.Score : 0;
+      return {
+        studentName: student.Username,
+        studentCode: student.Code,
+        grade: student.Grade,
+        phoneNumber: student.phone || '',
+        parentPhoneNumber: student.parentPhone || '',
+        totalScore: student.totalScore || 0,
+        quizScore: actualScore,
+        quizScoreDisplay: `${actualScore}/${questionsShown}`,
+        quizEndTime: quizInfo ? quizInfo.endTime : null,
+        quizInProgress: quizInfo ? quizInfo.inProgress : false
+      };
+    }).filter(result => !result.quizInProgress);
+    
+    // Sort by score (highest first)
+    studentResults.sort((a, b) => b.quizScore - a.quizScore);
+    
+    // Create Excel workbook
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet('Quiz Results');
+    
+    // Add headers
+    worksheet.columns = [
+      { header: 'الترتيب', key: 'rank', width: 10 },
+      { header: 'اسم الطالب', key: 'name', width: 30 },
+      { header: 'كود الطالب', key: 'code', width: 15 },
+      { header: 'الصف', key: 'grade', width: 15 },
+      { header: 'رقم الهاتف', key: 'phoneNumber', width: 15 },
+      { header: 'هاتف الوالد', key: 'parentPhoneNumber', width: 15 },
+      { header: `درجة الاختبار (من ${questionsShown})`, key: 'quizScore', width: 20 },
+      { header: 'الدرجة الكلية', key: 'totalScore', width: 15 },
+      { header: 'وقت الانتهاء', key: 'endTime', width: 20 }
+    ];
+    
+    // Add data rows
+    studentResults.forEach((student, index) => {
+      worksheet.addRow({
+        rank: index + 1,
+        name: student.studentName,
+        code: student.studentCode,
+        grade: student.grade,
+        phoneNumber: student.phoneNumber,
+        parentPhoneNumber: student.parentPhoneNumber,
+        quizScore: student.quizScore,
+        totalScore: student.totalScore,
+        endTime: student.quizEndTime ? student.quizEndTime.toLocaleString() : ''
+      });
+    });
+    
+    // Set headers for download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=quiz-results-${quiz.quizName}.xlsx`);
+    
+    // Write to response
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Quiz export error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+// Delete unused codes
+const deleteUnusedCodes = async (req, res) => {
+  try {
+    const result = await Code.deleteMany({ isUsed: false });
+    
+    res.json({ 
+      success: true, 
+      deletedCount: result.deletedCount,
+      message: `تم حذف ${result.deletedCount} كود غير مستخدم`
+    });
+  } catch (error) {
+    console.error('Delete unused codes error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// API routes for dynamic content loading
+const api_videos_by_chapter = async (req, res) => {
+  try {
+    const { chapterId } = req.params;
+    
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).json({ success: false, message: 'Chapter not found' });
+    }
+    
+    const videos = [];
+    
+    // Get videos from chapter lectures
+    if (chapter.chapterLectures) {
+      chapter.chapterLectures.forEach(lecture => {
+        videos.push({
+          _id: lecture._id,
+          title: lecture.videoTitle || lecture.lectureName,
+          type: 'lecture'
+        });
+      });
+    }
+    
+    // Get videos from chapter summaries
+    if (chapter.chapterSummaries) {
+      chapter.chapterSummaries.forEach(summary => {
+        videos.push({
+          _id: summary._id,
+          title: summary.videoTitle || summary.lectureName,
+          type: 'summary'
+        });
+      });
+    }
+    
+    // Get videos from chapter solvings
+    if (chapter.chapterSolvings) {
+      chapter.chapterSolvings.forEach(solving => {
+        videos.push({
+          _id: solving._id,
+          title: solving.videoTitle || solving.lectureName,
+          type: 'solving'
+        });
+      });
+    }
+    
+    res.json({ success: true, videos });
+  } catch (error) {
+    console.error('API videos by chapter error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const api_quizzes_by_grade = async (req, res) => {
+  try {
+    const { grade } = req.params;
+    
+    const quizzes = await Quiz.find({ 
+      Grade: grade, 
+      isQuizActive: true 
+    }).select('quizName _id');
+    
+    res.json({ success: true, quizzes });
+  } catch (error) {
+    console.error('API quizzes by grade error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Utility function to sync video access for chapter owners
+const sync_video_access_for_chapter_owners = async (req, res) => {
+  try {
+    const chapterId = req.params.chapterId;
+    
+    // Find the chapter
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      return res.status(404).json({ success: false, message: 'Chapter not found' });
+    }
+    
+    // Get all videos in the chapter
+    const allVideos = [
+      ...(chapter.chapterLectures || []),
+      ...(chapter.chapterSummaries || []),
+      ...(chapter.chapterSolvings || [])
+    ];
+    
+    // Find all students who have purchased this chapter
+    const chapterOwners = await User.find({
+      isTeacher: false,
+      chaptersPaid: chapterId
+    });
+    
+    let updatedCount = 0;
+    
+    // For each video, ensure chapter owners have access
+    for (const video of allVideos) {
+      for (const student of chapterOwners) {
+        // Check if student already has access to this video
+        const hasAccess = student.hasVideoAccess(video._id);
+        
+        if (!hasAccess) {
+          // Grant access to the video
+          await student.grantVideoAccessToChapterOwners(video._id, chapterId);
+          updatedCount++;
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Updated ${updatedCount} video access records for ${chapterOwners.length} chapter owners`,
+      chapterOwners: chapterOwners.length,
+      videosCount: allVideos.length,
+      updatedCount: updatedCount
+    });
+  } catch (error) {
+    console.error('Sync video access error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
 module.exports = {
+  // Dashboard
   dash_get,
-  addVideo_get,
-  addQuiz_get,
-  myStudent_get,
-  homeWork_get,
-  handelCodes_get,
-  Codes_get,
-  studentsRequests_get,
-  confirmDeleteStudent,
-  DeleteStudent,
-  addQuestion,
-  deleteQuestion,
-  updateQuestion,
-  getQuizAlldata,
-  deleteQuiz,
-  updateQuiz,
-  quizSubmit,
-  handleQuizzes,
-  getQuizzesNames,
-  getStudentsDataOfQuiz,
-  searchForUserInQuiz,
-  convertToExcelQuiz,
-
-
-  addVideo_post,
-  // uploadVideo,
-  chapter_post,
-  getAllChapters,
   
-
-
-  handleVideos_get,
-  getAllChaptersInHandle,
-  getChapterDataToEdit,
-  editChapterData,
-  getSingleVideoAllData,
-  updateVideoData,
-  addViewsToStudent,
-  convertToExcel,
-  searchForUser,
-  converStudentRequestsToExcel,
-  getSingleUserAllData,
-  updateUserData,
-
-  searchToGetOneUserAllData,
-  convertToExcelAllUserData,
-  changeEnterToQuiz,
-  // convertToPDFAllUserData
-
-  // getVideosToQuiz
-
-  // Codes
-  getChptersOrVideosData,
-  createSpecificCodes,
-  createGeneralCodes,
-
-  searchToGetCode,
-
-
-  logOut,
+  // Chapter Management
+  chapters_get,
+  chapter_create_get,
+  chapter_create_post,
+  chapter_detail_get,
+  chapter_edit_get,
+  chapter_edit_post,
+  chapter_delete,
+  
+  // Video Management
+  videos_get,
+  video_create_get,
+  video_create_post,
+  video_detail_get,
+  video_edit_get,
+  video_edit_post,
+  video_delete,
+  video_analytics,
+  
+  // Quiz Management
+  quizzes_get,
+  quiz_create_get,
+  quiz_create_post,
+  quiz_detail_get,
+  quiz_edit_get,
+  quiz_edit_post,
+  quiz_delete,
+  quiz_results_get,
+  quiz_export,
+  chapter_quiz_create_get,
+  chapter_quiz_create_post,
+  
+  // PDF Management
+  pdfs_get,
+  pdf_create_get,
+  pdf_create_post,
+  pdf_edit_get,
+  pdf_edit_post,
+  pdf_delete,
+  chapter_pdf_create_get,
+  chapter_pdf_create_post,
+  
+  // Student Management
+  students_get,
+  student_requests_get,
+  student_detail_get,
+  student_approve,
+  student_reject,
+  student_edit,
+  student_delete,
+  student_remove_chapter,
+  students_search,
+  students_export,
+  
+  // Code Management
+  codes_get,
+  codes_create_get,
+  codes_create_post,
+  codes_upload_excel,
+  codes_manage_get,
+  codes_search,
+  codes_export,
+  code_delete,
+  generate_chapter_codes,
+  generate_video_codes,
+  generate_quiz_codes,
+  generate_general_codes,
+  
+  // Attendance Management
+  attendance_get,
+  attendance_create_get,
+  attendance_create_post,
+  attendance_manage_get,
+  attendance_mark,
+  attendance_delete,
+  attendance_export,
+  
+  // Analytics
+  analytics_get,
+  analytics_students,
+  analytics_videos,
+  analytics_quizzes,
+  analytics_revenue,
+  
+  // Communication
+  communication_get,
+  whatsapp_get,
+  whatsapp_send,
+  send_grades,
+  
+  // Settings
+  settings_get,
+  settings_post,
+  
+  // API
+  api_chapters_get,
+  api_videos_get,
+  api_students_by_grade,
+  api_dashboard_analytics,
+  
+  // Auth
+  logout,
+  increase_student_watches,
+  
+  // Delete unused codes
+  deleteUnusedCodes,
+  
+  // API routes for dynamic content loading
+  api_videos_by_chapter,
+  api_quizzes_by_grade,
+  
+  // Utility functions
+  sync_video_access_for_chapter_owners
 };

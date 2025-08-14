@@ -1,115 +1,1179 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <%- include("./partials/head.ejs") %>
-  <body>
-
-    <%- include("./partials/preloader.ejs") %>
-      
-
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-2">
-          <%- include("./partials/aside.ejs") %>
-        </div>
-        <div class="col-lg-10">
-          <main>
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="left float-start">
-                  <%- include("./partials/top.ejs") %>
-                
-
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-              
-                <div class="alert alert-danger" id="alert" style="display: none;">
-                  <h1>الكود خاطئ</h1>
-                  <h2>الأسباب ممكن تكون: </h2>
-                  <ol type="a">
-                    <li><h2>الكود مستخدم من قبل</h2></li>
-                    <li><h2>الكود مش بتاع الحصة أو الباب ده</h2></li>
-                    <li><h2>الكود مكتوب غلط</h2></li>
-                  </ol>
-                </div>
-          
-                <div class="row courses" id="Videos">
-                    <% if (chapters) { %>
-                     <% chapters.forEach(chapter => { %>
-                      <div class="col-md-4">
-                        <article class="course " >
-                            <div class="price-tag">
-                                <i class="fa-solid fa-tag"></i>
-                              
-                                <% if (chapter.chapterAccessibility === "EnterInPay") { %>
-                                  <span>L.E</span> <h3><%=chapter.chapterPrice  %></h3>
-                                <% } else { %>
-                                  <h3>الدخول مجاني</h3>
-                                <% } %>
-                       
-                            </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الفصول الدراسية - منصة الشهادة</title>
   
-                            <div class="course__info " style="margin-top:3.8rem !important;">
-                                <h3><%= chapter.chapterName %></h3>
-                                <hr>
-                                <% if (chapter.chapterAccessibility === "EnterInPay") { %> 
-                                    
-                                    <% if (!chapter.isPaid) { %>
-                                      <form action="/student/buyChapter/<%= chapter._id %>" method="post">
-
-                                        <input type="text"  name="code" placeholder="ادخل الكود" required>
-                                        <button type="submit" class="btn btn-primary" >استخدام الكود</button> 
-                                      </form>
-                                    <% } else{ %>
-                                      <a href="/student/videos/lecture/<%= chapter._id %>">  <button  class="btn btn-primary" >دخول</button></a>
-
-                                    <% } %>
-                              
-                                <% } else { %>
-                            <a href="/student/videos/lecture/<%= chapter._id %>">  <button  class="btn btn-primary" >دخول</button></a>
-                                <% } %>
-                            </div>
-
-
-                        </article>
-                    </div>  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <style>
+    .chapters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
     
-                     <% }) %>
-                    <% } %> 
+    .chapter-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+      border: 1px solid #f0f2f5;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+    
+    .chapter-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+      border-color: #e3e6ea;
+    }
+    
+    .chapter-header {
+      position: relative;
+      height: 160px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .chapter-header.paid {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .chapter-header.purchased {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .chapter-header.free {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    
+    .chapter-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    }
+    
+    .chapter-icon {
+      font-size: 4rem;
+      color: white;
+      opacity: 0.9;
+      z-index: 1;
+      position: relative;
+    }
+    
+    .chapter-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      color: #1a1a1a;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 2;
+    }
+    
+    .chapter-badge.paid {
+      background: rgba(245, 158, 11, 0.95);
+      color: white;
+      border: none;
+    }
+    
+    .chapter-badge.purchased {
+      background: rgba(16, 185, 129, 0.95);
+      color: white;
+      border: none;
+    }
+    
+    .chapter-grade {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      padding: 0.375rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 2;
+    }
+    
+    .chapter-content {
+      padding: 2rem;
+    }
+    
+    .chapter-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .chapter-description {
+      color: #6b7280;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .chapter-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      padding: 1.25rem;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .stat-item {
+      text-align: center;
+      position: relative;
+    }
+    
+    .stat-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -0.5rem;
+      top: 20%;
+      bottom: 20%;
+      width: 1px;
+      background: #e2e8f0;
+    }
+    
+    .stat-value {
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #3b82f6;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .chapter-price {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      padding: 1.25rem;
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .chapter-price::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="1.5" fill="white" opacity="0.1"/><circle cx="40" cy="60" r="1" fill="white" opacity="0.1"/></svg>');
+    }
+    
+    .price-value {
+      font-size: 2rem;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .chapter-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: 14px;
+      font-weight: 600;
+      border: none;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    
+    .btn-outline {
+      background: white;
+      border: 2px solid #e5e7eb;
+      color: #6b7280;
+    }
+    
+    .btn-outline:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      background: #f8fafc;
+    }
+    
+    .btn-sm {
+      padding: 0.625rem 1rem;
+      font-size: 0.8rem;
+    }
+    
+    .code-input-container {
+      display: none;
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .code-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      transition: border-color 0.3s ease;
+    }
+    
+    .code-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .content-tabs {
+      display: none;
+      margin-top: 1.5rem;
+      border-top: 2px solid #e5e7eb;
+      padding-top: 1.5rem;
+    }
+    
+    .tabs-nav {
+      display: flex;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 0.375rem;
+      margin-bottom: 1.25rem;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .tab-button {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      border: none;
+      background: none;
+      color: #64748b;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+    }
+    
+    .tab-button.active {
+      background: white;
+      color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+    
+    .tab-content {
+      display: none;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .tab-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .tab-content::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    
+    .tab-content::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    
+    .content-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid #f1f5f9;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .content-item:hover {
+      background: #f8fafc;
+      border-color: #3b82f6;
+      transform: translateX(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .content-left {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    
+    .content-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      font-size: 1.2rem;
+    }
+    
+    .content-icon.video {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+    
+    .content-icon.summary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+    
+    .content-icon.solving {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+    
+    .content-details {
+      flex: 1;
+    }
+    
+    .content-title {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.375rem;
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+    
+    .content-meta {
+      font-size: 0.75rem;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
 
+    
+    .content-price {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.25rem 0.625rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    
+    .content-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    
+    .btn-buy-video {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .btn-buy-video:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      color: white;
+    }
+    
+    .btn-enter-chapter {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .btn-enter-chapter:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      color: white;
+    }
+    
+    .search-container {
+      margin-bottom: 2rem;
+    }
+    
+    .search-input {
+      width: 100%;
+      max-width: 500px;
+      padding: 1.125rem 1.5rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 50px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .search-input::placeholder {
+      color: #9ca3af;
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #e5e7eb;
+      background: white;
+      color: #6b7280;
+      border-radius: 30px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-btn.active {
+      border-color: #3b82f6;
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.4;
+    }
+    
+    .content-preview-toggle {
+      width: 100%;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .chapters-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .chapter-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+      
+      .filter-buttons {
+        justify-content: center;
+      }
+      
+      .chapter-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .content-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      .content-left {
+        margin-bottom: 0.5rem;
+      }
+      
+      .content-actions {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+  <body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+          <i class="fas fa-graduation-cap"></i>
+          منصة الشهادة
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="/student/dash" class="nav-link">
+            <i class="material-icons-outlined nav-icon">dashboard</i>
+            <span>لوحة التحكم</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/chapters" class="nav-link active">
+            <i class="material-icons-outlined nav-icon">library_books</i>
+            <span>الأبواب التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/exams" class="nav-link">
+            <i class="material-icons-outlined nav-icon">quiz</i>
+            <span>الامتحانات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/PDFs" class="nav-link">
+            <i class="material-icons-outlined nav-icon">description</i>
+            <span>المواد التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/ranking" class="nav-link">
+            <i class="material-icons-outlined nav-icon">leaderboard</i>
+            <span>التصنيف</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/settings" class="nav-link">
+            <i class="material-icons-outlined nav-icon">settings</i>
+            <span>الإعدادات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/logOut" class="nav-link">
+            <i class="material-icons-outlined nav-icon">logout</i>
+            <span>تسجيل الخروج</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
 
-              
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <header class="dashboard-header slide-in-up">
+        <div class="welcome-message">الأبواب التعليمية</div>
+        <div class="welcome-subtitle">اختر الباب الذي تريد دراسته واستكشف محتواه التعليمي في اللغة العربية</div>
+      </header>
 
-
-   
-                
-                </div>
-              </div>
-            </div>
-          </main>
+      <!-- Search and Filters -->
+      <div class="search-container slide-in-up">
+        <input type="text" class="search-input" placeholder="ابحث عن باب تعليمي..." id="searchInput">
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">جميع الأبواب</button>
+          <button class="filter-btn" data-filter="free">مجاني</button>
+          <button class="filter-btn" data-filter="paid">مدفوع</button>
+          <button class="filter-btn" data-filter="purchased">مُشترك</button>
         </div>
       </div>
-    </div>
 
+      <!-- Chapters Grid -->
+      <div class="chapters-grid slide-in-up" id="chaptersGrid">
+        <% chapters.forEach(chapter => { %>
+        <div class="chapter-card" data-filter="<%= chapter.isPaid ? 'purchased' : (chapter.chapterAccessibility === 'EnterInFree' ? 'free' : 'paid') %>">
+          <div class="chapter-header <%= chapter.isPaid ? 'purchased' : (chapter.chapterAccessibility === 'EnterInFree' ? 'free' : 'paid') %>">
+            <div class="chapter-badge <%= chapter.isPaid ? 'purchased' : (chapter.chapterAccessibility === 'EnterInFree' ? '' : 'paid') %>">
+              <%= chapter.isPaid ? 'مُشترك' : (chapter.chapterAccessibility === 'EnterInFree' ? 'مجاني' : 'مدفوع') %>
+            </div>
+            <div class="chapter-grade"><%= chapter.chapterGrade %></div>
+            <i class="chapter-icon fas fa-book-open"></i>
+          </div>
+          
+          <div class="chapter-content">
+            <h3 class="chapter-title"><%= chapter.chapterName %></h3>
+            <p class="chapter-description"><%= chapter.chapterDescription || 'استكشف محتوى هذا الباب التعليمي المتميز في اللغة العربية' %></p>
+            
+            <div class="chapter-stats">
+              <div class="stat-item">
+                <span class="stat-value"><%= chapter.chapterLectures?.length || 0 %></span>
+                <div class="stat-label">دروس</div>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value"><%= chapter.chapterSummaries?.length || 0 %></span>
+                <div class="stat-label">ملخصات</div>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value"><%= chapter.chapterSolvings?.length || 0 %></span>
+                <div class="stat-label">تطبيقات</div>
+              </div>
+            </div>
+  
+            <% if (chapter.chapterAccessibility !== 'EnterInFree' && !chapter.isPaid) { %>
+            <div class="chapter-price">
+              <div class="price-value"><%= chapter.chapterPrice %> جنيه مصري</div>
+            </div>
+            <% } %>
+                              
+            <div class="chapter-actions">
+              <% if (chapter.isPaid || chapter.chapterAccessibility === 'EnterInFree') { %>
+                <a href="/student/chapter/<%= chapter._id %>" class="btn btn-success" style="flex: 1;">
+                  <i class="fas fa-play" style="margin-left: 8px;"></i>
+                  ابدأ الدراسة
+                </a>
+              <% } else { %>
+                <button class="btn btn-primary" style="flex: 1;" onclick="toggleCodeInput('<%= chapter._id %>')">
+                  <i class="fas fa-key" style="margin-left: 8px;"></i>
+                  شراء الفصل كاملاً
+                </button>
+              <% } %>
+              <button class="btn btn-outline btn-sm" onclick="toggleContent('<%= chapter._id %>')">
+                <i class="fas fa-eye"></i>
+                مشاهدة المحتوى
+              </button>
+            </div>
 
-    <script src="/assest/bootstrap.min.js"></script>
-    <script src="/assest/bootstrap.bundle.min.js"></script>
+            <!-- Code Input -->
+            <div class="code-input-container" id="codeInput_<%= chapter._id %>">
+              <form action="/student/chapters/<%= chapter._id %>/buy" method="POST">
+                <input type="text" name="code" class="code-input" placeholder="أدخل كود شراء الفصل" required>
+                <button type="submit" class="btn btn-warning" style="width: 100%;">
+                  <i class="fas fa-check"></i>
+                  تفعيل الدخول للفصل
+                </button>
+              </form>
+            </div>
+            
+            <!-- Content Preview -->
+            <div class="content-tabs" id="contentTabs_<%= chapter._id %>">
+              <div class="tabs-nav">
+                <button class="tab-button active" onclick="switchTab('<%= chapter._id %>', 'lectures')">الدروس</button>
+                <button class="tab-button" onclick="switchTab('<%= chapter._id %>', 'summaries')">الملخصات</button>
+                <button class="tab-button" onclick="switchTab('<%= chapter._id %>', 'solvings')">التطبيقات</button>
+              </div>  
     
-    <script>
-      // Check if the URL contains the error parameter
-const urlParams = new URLSearchParams(window.location.search);
-const isError = urlParams.get('error');
+              <div class="tab-content active" id="lectures_<%= chapter._id %>">
+                <% if (chapter.chapterLectures && chapter.chapterLectures.length > 0) { %>
+                  <% chapter.chapterLectures.forEach((lecture, index) => { %>
+                  <div class="content-item">
+                    <div class="content-left">
+                      <div class="content-icon video">
+                        <i class="fas fa-play"></i>
+                      </div>
+                      <div class="content-details">
+                        <div class="content-title"><%= lecture.videoName || lecture.lectureName || `الدرس ${index + 1}` %></div>
+                        <div class="content-meta">
+                          <span>فيديو تعليمي</span>
+                          <% 
+                            // Check if user has access to this specific video
+                            const hasVideoAccess = userData.videosPaid && userData.videosPaid.includes(lecture._id.toString());
+                            const hasChapterAccess = chapter.isPaid;
+                            const hasAccess = lecture.paymentStatus === 'Free' || hasVideoAccess || hasChapterAccess;
+                          %>
+                          <% if (!hasAccess && lecture.paymentStatus !== 'Free') { %>
+                          <span class="content-price"><%= lecture.lecturePrice || lecture.price || '25' %> ج</span>
+                          <% } %>
+                          <% if (hasAccess) { %>
+                          <span class="content-price" style="background: #d4f6d4; color: #166534;">مملوك</span>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="content-actions">
+                      <% if (!hasAccess && lecture.paymentStatus !== 'Free') { %>
+                        <button class="btn-buy-video" onclick="showVideoCodeModal('<%= lecture._id %>', '<%= lecture.lectureName || lecture.videoName %>', '<%= chapter._id %>')">
+                          <i class="fas fa-shopping-cart"></i>
+                          شراء الفيديو
+                        </button>
+                      <% } %>
+                      <a href="/student/chapter/<%= chapter._id %>" class="btn-enter-chapter">
+                        <i class="fas fa-sign-in-alt"></i>
+                        دخول
+                      </a>
+                    </div>
+                  </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="empty-state">
+                    <i class="fas fa-video"></i>
+                    <p>لا توجد دروس متاحة حالياً</p>
+                  </div>
+                <% } %> 
+              </div>
+              
+              <div class="tab-content" id="summaries_<%= chapter._id %>">
+                <% if (chapter.chapterSummaries && chapter.chapterSummaries.length > 0) { %>
+                  <% chapter.chapterSummaries.forEach((summary, index) => { %>
+                  <div class="content-item">
+                    <div class="content-left">
+                      <div class="content-icon summary">
+                        <i class="fas fa-bookmark"></i>
+                      </div>
+                      <div class="content-details">
+                        <div class="content-title"><%= summary.videoName || summary.lectureName || `الملخص ${index + 1}` %></div>
+                        <div class="content-meta">
+                          <span>ملخص ومراجعة</span>
+                          <% 
+                            // Check if user has access to this specific video
+                            const hasVideoAccess = userData.videosPaid && userData.videosPaid.includes(summary._id.toString());
+                            const hasChapterAccess = chapter.isPaid;
+                            const hasAccess = summary.paymentStatus === 'Free' || hasVideoAccess || hasChapterAccess;
+                          %>
+                          <% if (!hasAccess && summary.paymentStatus !== 'Free') { %>
+                          <span class="content-price"><%= summary.lecturePrice || summary.price || '15' %> ج</span>
+                          <% } %>
+                          <% if (hasAccess) { %>
+                          <span class="content-price" style="background: #d4f6d4; color: #166534;">مملوك</span>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="content-actions">
+                      <% if (!hasAccess && summary.paymentStatus !== 'Free') { %>
+                        <button class="btn-buy-video" onclick="showVideoCodeModal('<%= summary._id %>', '<%= summary.lectureName || summary.videoName %>', '<%= chapter._id %>')">
+                          <i class="fas fa-shopping-cart"></i>
+                          شراء الفيديو
+                        </button>
+                      <% } %>
+                      <a href="/student/chapter/<%= chapter._id %>" class="btn-enter-chapter">
+                        <i class="fas fa-sign-in-alt"></i>
+                        دخول
+                      </a>
+                    </div>
+                  </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="empty-state">
+                    <i class="fas fa-bookmark"></i>
+                    <p>لا توجد ملخصات متاحة حالياً</p>
+                  </div>
+                <% } %>
+              </div>
+              
+              <div class="tab-content" id="solvings_<%= chapter._id %>">
+                <% if (chapter.chapterSolvings && chapter.chapterSolvings.length > 0) { %>
+                  <% chapter.chapterSolvings.forEach((solving, index) => { %>
+                  <div class="content-item">
+                    <div class="content-left">
+                      <div class="content-icon solving">
+                        <i class="fas fa-calculator"></i>
+                      </div>
+                      <div class="content-details">
+                        <div class="content-title"><%= solving.videoName || solving.lectureName || `التطبيق ${index + 1}` %></div>
+                        <div class="content-meta">
+                          <span>حلول وتطبيقات</span>
+                          <% 
+                            // Check if user has access to this specific video
+                            const hasVideoAccess = userData.videosPaid && userData.videosPaid.includes(solving._id.toString());
+                            const hasChapterAccess = chapter.isPaid;
+                            const hasAccess = solving.paymentStatus === 'Free' || hasVideoAccess || hasChapterAccess;
+                          %>
+                          <% if (!hasAccess && solving.paymentStatus !== 'Free') { %>
+                          <span class="content-price"><%= solving.lecturePrice || solving.price || '20' %> ج</span>
+                          <% } %>
+                          <% if (hasAccess) { %>
+                          <span class="content-price" style="background: #d4f6d4; color: #166534;">مملوك</span>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="content-actions">
+                      <% if (!hasAccess && solving.paymentStatus !== 'Free') { %>
+                        <button class="btn-buy-video" onclick="showVideoCodeModal('<%= solving._id %>', '<%= solving.lectureName || solving.videoName %>', '<%= chapter._id %>')">
+                          <i class="fas fa-shopping-cart"></i>
+                          شراء الفيديو
+                        </button>
+                      <% } %>
+                      <a href="/student/chapter/<%= chapter._id %>" class="btn-enter-chapter">
+                        <i class="fas fa-sign-in-alt"></i>
+                        دخول
+                      </a>
+                    </div>
+                  </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="empty-state">
+                    <i class="fas fa-calculator"></i>
+                    <p>لا توجد تطبيقات متاحة حالياً</p>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      
+      <!-- Empty state when no chapters match filter -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <i class="fas fa-search"></i>
+        <h3>لا توجد نتائج</h3>
+        <p>لم يتم العثور على أبواب تعليمية تطابق البحث</p>
+      </div>
+    </main>
+  </div>
 
-  if (isError) {
-    document.getElementById('alert').style.display = 'block';
-    setTimeout(()=> {
-      document.getElementById('alert').style.display = 'none';
-    }, 20000); // Set the timeout to 5000 milliseconds (5 seconds)
-  } else {
-    document.getElementById('alert').style.display = 'none';
-  }
-    </script>
+  <!-- Video Purchase Modal -->
+  <div class="code-input-modal" id="videoCodeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+      <h4 id="videoModalTitle" style="margin-bottom: 1rem;">شراء فيديو</h4>
+      <form id="videoCodeForm">
+        <input type="hidden" id="videoId">
+        <input type="hidden" id="videoChapterId">
+        <input type="text" id="videoCodeInput" placeholder="أدخل كود شراء الفيديو" required style="width: 100%; padding: 0.875rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; text-align: center; margin-bottom: 1rem; font-family: 'Courier New', monospace; letter-spacing: 2px;">
+        <div style="display: flex; gap: 0.75rem;">
+          <button type="button" onclick="hideVideoCodeModal()" style="flex: 1; padding: 0.75rem; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">إلغاء</button>
+          <button type="submit" style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; cursor: pointer;">شراء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1001; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <i class="fas fa-bars"></i>
+  </button>
+    
+  <script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const chapters = document.querySelectorAll('.chapter-card');
+      let visibleCount = 0;
+      
+      chapters.forEach(chapter => {
+        const title = chapter.querySelector('.chapter-title').textContent.toLowerCase();
+        const description = chapter.querySelector('.chapter-description').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+          chapter.style.display = 'block';
+          visibleCount++;
+        } else {
+          chapter.style.display = 'none';
+        }
+      });
+      
+      // Show empty state if no results
+      document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update active filter button
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        const filter = this.getAttribute('data-filter');
+        const chapters = document.querySelectorAll('.chapter-card');
+        let visibleCount = 0;
+        
+        chapters.forEach(chapter => {
+          if (filter === 'all' || chapter.getAttribute('data-filter') === filter) {
+            chapter.style.display = 'block';
+            visibleCount++;
+          } else {
+            chapter.style.display = 'none';
+          }
+        });
+        
+        // Show empty state if no results
+        document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+      });
+    });
+
+    // Toggle code input for chapter purchase
+    function toggleCodeInput(chapterId) {
+      const codeInput = document.getElementById(`codeInput_${chapterId}`);
+      if (codeInput.style.display === 'none' || codeInput.style.display === '') {
+        codeInput.style.display = 'block';
+        setTimeout(() => {
+          codeInput.querySelector('input').focus();
+        }, 100);
+      } else {
+        codeInput.style.display = 'none';
+      }
+    }
+
+    // Toggle content preview
+    function toggleContent(chapterId) {
+      const contentTabs = document.getElementById(`contentTabs_${chapterId}`);
+      if (contentTabs.style.display === 'none' || contentTabs.style.display === '') {
+        contentTabs.style.display = 'block';
+      } else {
+        contentTabs.style.display = 'none';
+      }
+    }
+
+    // Switch tabs
+    function switchTab(chapterId, tabName) {
+      const tabButtons = document.querySelectorAll(`#contentTabs_${chapterId} .tab-button`);
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const tabContents = document.querySelectorAll(`#contentTabs_${chapterId} .tab-content`);
+      tabContents.forEach(content => content.classList.remove('active'));
+      document.getElementById(`${tabName}_${chapterId}`).classList.add('active');
+    }
+
+    // Show video code modal
+    function showVideoCodeModal(videoId, videoName, chapterId) {
+      document.getElementById('videoId').value = videoId;
+      document.getElementById('videoChapterId').value = chapterId;
+      document.getElementById('videoModalTitle').textContent = `شراء: ${videoName}`;
+      document.getElementById('videoCodeModal').style.display = 'flex';
+      document.getElementById('videoCodeInput').focus();
+    }
+
+    // Hide video code modal
+    function hideVideoCodeModal() {
+      document.getElementById('videoCodeModal').style.display = 'none';
+      document.getElementById('videoCodeForm').reset();
+    }
+
+    // Handle video purchase
+    document.getElementById('videoCodeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const videoId = document.getElementById('videoId').value;
+      const chapterId = document.getElementById('videoChapterId').value;
+      const code = document.getElementById('videoCodeInput').value;
+      
+      try {
+        const formData = new FormData();
+        formData.append('code', code);
+        
+        const response = await fetch(`/student/chapter/${chapterId}/video/${videoId}/buy`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('تم شراء الفيديو بنجاح!');
+          window.location.reload();
+        } else {
+          alert(result.message || 'فشل في عملية الشراء');
+        }
+      } catch (error) {
+        console.error('Purchase error:', error);
+        alert('حدث خطأ في عملية الشراء');
+      }
+      
+      hideVideoCodeModal();
+    });
+
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    // Mobile responsive handling
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        document.querySelector('.mobile-menu-toggle').style.display = 'block';
+      } else {
+        document.querySelector('.mobile-menu-toggle').style.display = 'none';
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(event) {
+      const sidebar = document.querySelector('.sidebar');
+      const toggleBtn = document.querySelector('.mobile-menu-toggle');
+      
+      if (window.innerWidth <= 1024 && 
+          !sidebar.contains(event.target) && 
+          !toggleBtn.contains(event.target) &&
+          sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // Close video modal on ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        hideVideoCodeModal();
+      }
+    });
+
+    // Close video modal on background click
+    document.getElementById('videoCodeModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideVideoCodeModal();
+      }
+    });
+
+    // Add loading animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.querySelectorAll('.slide-in-up');
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+        }, index * 100);
+      });
+    });
+  </script>
+
+  <style>
+    .slide-in-up {
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+    }
+    
+    @media (max-width: 1024px) {
+      .mobile-menu-toggle {
+        display: block !important;
+      }
+      
+      .chapters-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
   </body>
 </html>

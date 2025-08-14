@@ -1,171 +1,413 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-    <%- include("./partials/head.ejs") %>
-  <body>
-    <%- include("./partials/preloader.ejs") %>
-
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-2">
-
-            <%- include("./partials/aside.ejs") %>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+          <i class="fas fa-graduation-cap"></i>
+          منصة الشهادة
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="/student/dash" class="nav-link active">
+            <i class="material-icons-outlined nav-icon">dashboard</i>
+            <span>لوحة التحكم</span>
+          </a>
         </div>
         
-        <div class="col-lg-10">
-          <main>
+                 <div class="nav-item">
+           <a href="/student/chapters" class="nav-link">
+             <i class="material-icons-outlined nav-icon">library_books</i>
+             <span>الأبواب التعليمية</span>
+           </a>
+         </div>
+        
+        <div class="nav-item">
+          <a href="/student/exams" class="nav-link">
+            <i class="material-icons-outlined nav-icon">quiz</i>
+            <span>الامتحانات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/PDFs" class="nav-link">
+            <i class="material-icons-outlined nav-icon">description</i>
+            <span>المواد التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/ranking" class="nav-link">
+            <i class="material-icons-outlined nav-icon">leaderboard</i>
+            <span>التصنيف</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/settings" class="nav-link">
+            <i class="material-icons-outlined nav-icon">settings</i>
+            <span>الإعدادات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/logOut" class="nav-link">
+            <i class="material-icons-outlined nav-icon">logout</i>
+            <span>تسجيل الخروج</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
 
-            <div class="row">
-              <div class="col-lg-8">
-                <div class="insights">
-                  <div class="sales">
-                    <span class="material-icons-sharp">analytics</span>
-                    <div class="middle">
-                      <div class="right">
-                        <h3>مجموع الامتحانات التي قمت بالدخول اليها</h3>
-                        <h1 id="examsEnterd"><%=userData.examsEnterd %></h1>
-                      </div>
-                    </div>
-                    <small class="text-muted">last 24 hours</small>
-                  </div>
-                  <div class="expenses">
-                    <span class="material-icons-sharp">bar_chart</span>
-                    <div class="middle">
-                      <div class="right">
-                        <h3>عدد الاسئله التي تعرضت لها حتي الان</h3>
-                        <h1 ><%= userData.totalQuestions %></h1>
-                      </div>
-                    </div>
-                    <small class="text-muted">last 24 hours</small>
-                  </div>
-                  <div class="income">
-                    <span class="material-icons-sharp">stacked_line_chart</span>
-                    <div class="middle">
-                      <div class="right">
-                        <h3>الفيدوهات المشترك بها</h3>
-                        <h1 id="videosSubscripe"><%= userData.totalSubscribed %></h1>
-                      </div>
-                    </div>
-                    <small class="text-muted">last 24 hours</small>
-                  </div>
-                </div>
-                <div class="col-12 float-end">
-                  <div class="recent-orders">
-                    <h2 style="margin: 1.5rem">رسم يوضح المستوي</h2>
-                    <div class="chart">
-                      <canvas id="myChart" height="200"></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="left">
-                  <%- include("./partials/top.ejs") %>
-                  
-                  <div class="recent-updates" onclick='window.location.href="/student/ranking"'>
-                    <h2></h2>
-                    <div class="updates">
-                      <div class="third">
-                        <div class="profile-photo">
-                          
-                          <% if (rankedUsers[2] && rankedUsers[2].userPhoto) { %>
-                            <img src="<%= rankedUsers[2].userPhoto %>" id="second" alt="profile photo" />
-                        <% } else { %>
-                          <img src="" id="second" alt="profile photo" />
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Header -->
+      <header class="dashboard-header slide-in-up">
+        <div class="welcome-message">
+          أهلاً بك، <%= userData.Username %>!
+        </div>
+        <div class="welcome-subtitle">
+          مرحباً بك في لوحة التحكم الخاصة بك. تابع تقدمك ونشاطك التعليمي
+        </div>
+      </header>
 
-                        <% } %>
-                        </div>
-                        <div class="text">
-                       
-                          <h3 style="color: #000000; ">3<span style="color: #000000; ">ST</span></h3>
-                        </div>
-                      </div>
-                      <div class="first">
-                        <i class="fa-solid fa-crown"></i>
-                        <div class="profile-photo">
-                          <% if (rankedUsers[0] && rankedUsers[0].userPhoto) { %>
-                            <img src="<%= rankedUsers[0].userPhoto %>" id="second" alt="profile photo" />
-                        <% } else { %>
-
-                          <img src="" id="second" alt="profile photo" />
-
-                        <% } %>
-                     
-                        </div>
-                        <div class="text">
-                          <h3>1<span>ST</span></h3>
-                        </div>
-                      </div>
-                      <div class="second">
-                        <div class="profile-photo">
-                          <% if (rankedUsers[1] && rankedUsers[1].userPhoto) { %>
-                            <img src="<%= rankedUsers[1].userPhoto %>" id="second" alt="profile photo" />
-                        <% } else { %>
-                          <img src="" id="second" alt="profile photo" />
-
-                        <% } %>
-              
-                        </div>
-                        <div class="text">
-                     
-                          <h3 style="color: #000000; ">2<span style="color: #000000; ">ST</span></h3>
-                        </div>
-                      </div>
-                    
-                    </div>
-                  </div>
-
-
-                  <div class="sales-analytics">
-                    <h2>قريبا سيتم فتح قسم المسابقات تأهبو !</h2>
-                    <div class="item online">
-                      <div class="icon">
-                        <span class="material-symbols-sharp"
-                          >military_tech</span
-                        >
-                      </div>
-                      <div class="left">
-                        <div class="info">
-                          <h2>عدد مرات الفوز</h2>
-                          <small class="text-muted">last 24 Hours</small>
-                        </div>
-                        <!-- <h4 class="success">+39%</h4> -->
-                        <h3>0</h3>
-                      </div>
-                    </div>
-                    <div class="item offline">
-                      <div class="icon">
-                        <span class="material-symbols-sharp">quiz</span>
-                      </div>
-                      <div class="left">
-                        <div class="info">
-                          <h2>عدد المسابقات</h2>
-                          <small class="text-muted">last 24 Hours</small>
-                        </div>
-                        <h3>0</h3>
-                      </div>
-                    </div>
-                    <div class="item add-product">
-                      <div>
-                        <span class="material-symbols-sharp">swords</span>
-                        <h2>دخول المسابقه</h2>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <!-- Stats Grid -->
+      <div class="stats-grid slide-in-up">
+        <!-- Exams Stats -->
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-title">إجمالي الامتحانات</div>
+            <div class="stat-icon primary">
+              <i class="material-icons-outlined">quiz</i>
             </div>
+          </div>
+          <div class="stat-value"><%= userData.examsEnterd %></div>
+          <div class="stat-description">عدد الامتحانات التي دخلتها</div>
+        </div>
 
+        <!-- Questions Stats -->
+        <div class="stat-card secondary">
+          <div class="stat-header">
+            <div class="stat-title">إجمالي الأسئلة</div>
+            <div class="stat-icon secondary">
+              <i class="material-icons-outlined">help_outline</i>
+            </div>
+          </div>
+          <div class="stat-value"><%= userData.totalQuestions %></div>
+          <div class="stat-description">عدد الأسئلة التي تعرضت لها</div>
+        </div>
 
+                 <!-- Videos Stats -->
+         <div class="stat-card warning">
+           <div class="stat-header">
+             <div class="stat-title">الدروس المشتركة</div>
+             <div class="stat-icon warning">
+               <i class="material-icons-outlined">play_circle</i>
+             </div>
+           </div>
+           <div class="stat-value"><%= userData.totalSubscribed %></div>
+           <div class="stat-description">عدد الدروس المتاحة لك</div>
+         </div>
 
-          </main>
+        <!-- Score Stats -->
+        <div class="stat-card info">
+          <div class="stat-header">
+            <div class="stat-title">إجمالي النقاط</div>
+            <div class="stat-icon info">
+              <i class="material-icons-outlined">stars</i>
+            </div>
+          </div>
+          <div class="stat-value"><%= userData.totalScore %></div>
+          <div class="stat-description">نقاطك الإجمالية</div>
         </div>
       </div>
-    </div>
 
-    <script src="assest/bootstrap.bundle.min.js"></script>
-    <script src="assest/bootstrap.min.js"></script>
+      <!-- Charts and Ranking Container -->
+      <div class="charts-container slide-in-up">
+        <!-- Performance Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">أداء الامتحانات</div>
+            <div class="chart-subtitle">رسم بياني يوضح مستوى أدائك في الامتحانات</div>
+          </div>
+          <div style="position: relative; height: 300px;">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
 
-  
+        <!-- Top Students Ranking -->
+        <div class="ranking-card">
+          <div class="ranking-header">
+            <div class="ranking-title">الطلاب المتفوقون</div>
+          </div>
+          
+          <div class="ranking-podium">
+            <% if (rankedUsers && rankedUsers.length > 0) { %>
+              <!-- First Place -->
+              <div class="podium-position first">
+                <i class="fas fa-crown" style="color: #ffd700; margin-bottom: 8px; font-size: 1.2rem;"></i>
+                <div class="podium-avatar">
+                  <% if (rankedUsers[0] && rankedUsers[0].userPhoto) { %>
+                    <img src="<%= rankedUsers[0].userPhoto %>" alt="<%= rankedUsers[0].Username %>" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                  <% } else { %>
+                    <i class="material-icons-outlined">person</i>
+                  <% } %>
+                </div>
+                <div class="podium-rank">1</div>
+                <div class="podium-name"><%= rankedUsers[0].Username %></div>
+                <div class="podium-score"><%= rankedUsers[0].totalScore %> نقطة</div>
+              </div>
 
-  </body>
+              <!-- Second Place -->
+              <% if (rankedUsers.length >= 2) { %>
+                <div class="podium-position second">
+                  <div class="podium-avatar">
+                    <% if (rankedUsers[1] && rankedUsers[1].userPhoto) { %>
+                      <img src="<%= rankedUsers[1].userPhoto %>" alt="<%= rankedUsers[1].Username %>" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    <% } else { %>
+                      <i class="material-icons-outlined">person</i>
+                    <% } %>
+                  </div>
+                  <div class="podium-rank">2</div>
+                  <div class="podium-name"><%= rankedUsers[1].Username %></div>
+                  <div class="podium-score"><%= rankedUsers[1].totalScore %> نقطة</div>
+                </div>
+              <% } %>
+
+              <!-- Third Place -->
+              <% if (rankedUsers.length >= 3) { %>
+                <div class="podium-position third">
+                  <div class="podium-avatar">
+                    <% if (rankedUsers[2] && rankedUsers[2].userPhoto) { %>
+                      <img src="<%= rankedUsers[2].userPhoto %>" alt="<%= rankedUsers[2].Username %>" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    <% } else { %>
+                      <i class="material-icons-outlined">person</i>
+                    <% } %>
+                  </div>
+                  <div class="podium-rank">3</div>
+                  <div class="podium-name"><%= rankedUsers[2].Username %></div>
+                  <div class="podium-score"><%= rankedUsers[2].totalScore %> نقطة</div>
+                </div>
+              <% } %>
+            <% } else { %>
+              <!-- Empty State -->
+              <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                <i class="fas fa-trophy" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">لا يوجد طلاب في التصنيف</div>
+                <div style="font-size: 1rem; opacity: 0.8;">ابدأ في حل الامتحانات لتحصل على نقاط</div>
+              </div>
+            <% } %>
+          </div>
+
+          <div style="padding: var(--spacing-xl); text-align: center;">
+            <a href="/student/ranking" class="btn btn-outline">
+              <i class="material-icons-outlined" style="margin-left: 8px;">leaderboard</i>
+              عرض التصنيف الكامل
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card slide-in-up">
+        <div class="card-header">
+          <div class="card-title">إجراءات سريعة</div>
+        </div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                         <a href="/student/chapters" class="btn btn-primary" style="padding: var(--spacing-lg);">
+               <i class="material-icons-outlined" style="margin-left: 8px;">library_books</i>
+               تصفح الأبواب
+             </a>
+            
+            <a href="/student/exams" class="btn btn-secondary" style="padding: var(--spacing-lg);">
+              <i class="material-icons-outlined" style="margin-left: 8px;">quiz</i>
+              ابدأ امتحان
+            </a>
+            
+            <a href="/student/PDFs" class="btn btn-outline" style="padding: var(--spacing-lg);">
+              <i class="material-icons-outlined" style="margin-left: 8px;">description</i>
+              المواد التعليمية
+            </a>
+            
+            <a href="/student/settings" class="btn btn-outline" style="padding: var(--spacing-lg);">
+              <i class="material-icons-outlined" style="margin-left: 8px;">settings</i>
+              الإعدادات
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1001; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <i class="fas fa-bars"></i>
+  </button>
+
+     <script>
+     // Chart configuration
+     const userScore = parseInt('<%= userData.totalScore || 0 %>');
+     const ctx = document.getElementById('performanceChart').getContext('2d');
+     const chart = new Chart(ctx, {
+       type: 'line',
+       data: {
+         labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+         datasets: [{
+           label: 'النقاط',
+           data: [65, 75, 80, 85, 90, userScore],
+           borderColor: '#6366f1',
+           backgroundColor: 'rgba(99, 102, 241, 0.1)',
+           borderWidth: 3,
+           fill: true,
+           tension: 0.4,
+           pointBackgroundColor: '#6366f1',
+           pointBorderColor: '#ffffff',
+           pointBorderWidth: 2,
+           pointRadius: 6
+         }]
+       },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#f3f4f6'
+            },
+            ticks: {
+              color: '#6b7280'
+            }
+          },
+          x: {
+            grid: {
+              color: '#f3f4f6'
+            },
+            ticks: {
+              color: '#6b7280'
+            }
+          }
+        },
+        elements: {
+          point: {
+            hoverRadius: 8
+          }
+        }
+      }
+    });
+
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    // Mobile responsive handling
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        document.querySelector('.mobile-menu-toggle').style.display = 'block';
+      } else {
+        document.querySelector('.mobile-menu-toggle').style.display = 'none';
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call on load
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(event) {
+      const sidebar = document.querySelector('.sidebar');
+      const toggleBtn = document.querySelector('.mobile-menu-toggle');
+      
+      if (window.innerWidth <= 1024 && 
+          !sidebar.contains(event.target) && 
+          !toggleBtn.contains(event.target) &&
+          sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // Add loading animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.querySelectorAll('.slide-in-up');
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+        }, index * 100);
+      });
+    });
+  </script>
+
+  <style>
+    .slide-in-up {
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+    }
+    
+    /* Podium Styles */
+    .podium-name {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+    
+    .podium-score {
+      color: #059669;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 0.25rem;
+      text-align: center;
+    }
+    
+    .podium-position.first .podium-name {
+      color: #92400e;
+    }
+    
+    .podium-position.second .podium-name {
+      color: #374151;
+    }
+    
+    .podium-position.third .podium-name {
+      color: #92400e;
+    }
+    
+    @media (max-width: 1024px) {
+      .mobile-menu-toggle {
+        display: block !important;
+      }
+    }
+  </style>
+</body>
 </html>

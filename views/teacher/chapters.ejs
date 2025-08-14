@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الفصول - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+      <%- include('./partials/nav.ejs') %>
+
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <header class="teacher-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">إدارة الفصول الدراسية</h1>
+        </div>
+        
+        <div class="header-right">
+          <a href="/teacher/chapters/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            إنشاء فصل جديد
+          </a>
+        </div>
+      </header>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <!-- Filters -->
+        <div class="teacher-table-container" style="margin-bottom: 1.5rem;">
+          <div class="table-header">
+            <h3 class="table-title">البحث والفلترة</h3>
+          </div>
+          <div style="padding: 1.5rem;">
+            <form method="GET" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">البحث في الفصول</label>
+                <input type="text" name="search" class="form-input" placeholder="اسم الفصل..." value="<%= filters.search || '' %>">
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">الصف الدراسي</label>
+                <select name="grade" class="form-select">
+                  <option value="">جميع الصفوف</option>
+                  <option value="Grade1" <%= filters.grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                  <option value="Grade2" <%= filters.grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                  <option value="Grade3" <%= filters.grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+                </select>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">اللغة</label>
+                <select name="language" class="form-select">
+                  <option value="">جميع اللغات</option>
+                  <option value="AR" <%= filters.language === 'AR' ? 'selected' : '' %>>العربية</option>
+                  <option value="EN" <%= filters.language === 'EN' ? 'selected' : '' %>>English</option>
+                </select>
+              </div>
+              
+              <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-search"></i>
+                  بحث
+                </button>
+                <a href="/teacher/chapters" class="btn btn-outline">
+                  <i class="fas fa-times"></i>
+                  مسح
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Chapters Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+          <% if (chapters && chapters.length > 0) { %>
+            <% chapters.forEach((chapter) => { %>
+              <div class="dashboard-card" style="transition: all 0.3s ease; cursor: pointer;" onclick="window.location.href='/teacher/chapters/<%= chapter._id %>'">
+                <div style="position: relative;">
+                  <!-- Chapter Image -->
+                  <div style="height: 200px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: var(--radius-lg); margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <% if (chapter.chapterIMG && chapter.chapterIMG !== '/images/default-chapter.jpg') { %>
+                      <img src="<%= chapter.chapterIMG %>" alt="<%= chapter.chapterName %>" style="width: 100%; height: 100%; object-fit: cover;">
+                    <% } else { %>
+                      <i class="fas fa-book" style="font-size: 3rem; color: white; opacity: 0.8;"></i>
+                    <% } %>
+                    
+                    <!-- Status Badge -->
+                    <div style="position: absolute; top: 0.75rem; right: 0.75rem;">
+                      <span class="status-badge <%= chapter.isActive ? 'active' : 'inactive' %>">
+                        <%= chapter.isActive ? 'نشط' : 'غير نشط' %>
+                      </span>
+                    </div>
+                    
+                    <!-- Price Badge -->
+                    <div style="position: absolute; top: 0.75rem; left: 0.75rem;">
+                      <span style="background: <%= chapter.chapterAccessibility === 'EnterInFree' ? 'var(--success-color)' : 'var(--warning-color)' %>; color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-md); font-size: 0.75rem; font-weight: 600;">
+                        <%= chapter.chapterAccessibility === 'EnterInFree' ? 'مجاني' : chapter.chapterPrice + ' جنيه' %>
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- Chapter Info -->
+                  <div>
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; line-height: 1.4;">
+                      <%= chapter.chapterName %>
+                    </h3>
+                    
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                      <span>
+                        <i class="fas fa-graduation-cap" style="margin-left: 0.25rem;"></i>
+                        <%= chapter.chapterGrade === 'Grade1' ? 'الأول الثانوي' : chapter.chapterGrade === 'Grade2' ? 'الثاني الثانوي' : 'الثالث الثانوي' %>
+                      </span>
+                      <span>
+                        <i class="fas fa-globe" style="margin-left: 0.25rem;"></i>
+                        <%= chapter.ARorEN === 'AR' ? 'عربي' : 'إنجليزي' %>
+                      </span>
+                    </div>
+                    
+                    <% if (chapter.chapterDescription) { %>
+                      <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        <%= chapter.chapterDescription %>
+                      </p>
+                    <% } %>
+                    
+                    <!-- Statistics -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                      <div style="text-align: center; padding: 0.75rem; background: var(--background-color); border-radius: var(--radius-md);">
+                        <div style="font-weight: 600; color: var(--primary-color); font-size: 1.25rem;"><%= chapter.stats.totalVideos %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">فيديو</div>
+                      </div>
+                      <div style="text-align: center; padding: 0.75rem; background: var(--background-color); border-radius: var(--radius-md);">
+                        <div style="font-weight: 600; color: var(--success-color); font-size: 1.25rem;"><%= chapter.stats.lecturesCount %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">محاضرة</div>
+                      </div>
+                      <div style="text-align: center; padding: 0.75rem; background: var(--background-color); border-radius: var(--radius-md);">
+                        <div style="font-weight: 600; color: var(--warning-color); font-size: 1.25rem;"><%= chapter.stats.summariesCount %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">ملخص</div>
+                      </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div style="display: flex; gap: 0.5rem;">
+                      <a href="/teacher/chapters/<%= chapter._id %>" class="btn btn-primary btn-sm" style="flex: 1; text-align: center; text-decoration: none;" onclick="event.stopPropagation();">
+                        <i class="fas fa-eye"></i>
+                        عرض
+                      </a>
+                      <a href="/teacher/chapters/<%= chapter._id %>/edit" class="btn btn-outline btn-sm" onclick="event.stopPropagation();">
+                        <i class="fas fa-edit"></i>
+                        تعديل
+                      </a>
+                      <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteChapter('<%= chapter._id %>', '<%= chapter.chapterName %>')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <!-- Empty State -->
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+              <i class="fas fa-book" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">لا توجد فصول دراسية</h3>
+              <p style="margin-bottom: 2rem;">ابدأ بإنشاء فصل دراسي جديد لإضافة المحتوى التعليمي</p>
+              <a href="/teacher/chapters/create" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                إنشاء فصل جديد
+              </a>
+            </div>
+          <% } %>
+        </div>
+        
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem;">
+            <% if (currentPage > 1) { %>
+              <a href="?page=<%= currentPage - 1 %>&<%= new URLSearchParams(filters).toString() %>" class="btn btn-outline">
+                <i class="fas fa-chevron-right"></i>
+                السابق
+              </a>
+            <% } %>
+            
+            <div style="display: flex; gap: 0.5rem;">
+              <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                <a href="?page=<%= i %>&<%= new URLSearchParams(filters).toString() %>" 
+                   class="btn <%= i === currentPage ? 'btn-primary' : 'btn-outline' %>" 
+                   style="min-width: 2.5rem; text-align: center;">
+                  <%= i %>
+                </a>
+              <% } %>
+            </div>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="?page=<%= currentPage + 1 %>&<%= new URLSearchParams(filters).toString() %>" class="btn btn-outline">
+                التالي
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            <% } %>
+          </div>
+          
+          <div style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+            عرض <%= chapters.length %> من <%= totalChapters %> فصل دراسي
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الحذف</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+          <p>هل أنت متأكد من حذف الفصل الدراسي "<span id="chapterNameToDelete"></span>"؟</p>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">لا يمكن التراجع عن هذا الإجراء</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">إلغاء</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">حذف</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Sidebar Toggle
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    
+    // Delete Chapter Function
+    function deleteChapter(chapterId, chapterName) {
+      document.getElementById('chapterNameToDelete').textContent = chapterName;
+      document.getElementById('deleteModal').classList.add('show');
+      
+      document.getElementById('confirmDeleteBtn').onclick = function() {
+        fetch(`/teacher/chapters/${chapterId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert('حدث خطأ أثناء حذف الفصل');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('حدث خطأ أثناء حذف الفصل');
+        });
+        
+        closeDeleteModal();
+      };
+    }
+    
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('show');
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDeleteModal();
+      }
+    });
+  </script>
+</body>
+</html> 

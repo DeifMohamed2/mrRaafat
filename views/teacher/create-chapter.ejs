@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء فصل جديد - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <!-- Alert Messages -->
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>حدث خطأ: <%= error %></span>
+          </div>
+        <% } %>
+        
+        <div class="page-header">
+          <h1 class="page-title">إنشاء فصل جديد</h1>
+          <div class="page-actions">
+            <a href="/teacher/chapters" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للفصول
+            </a>
+          </div>
+        </div>
+        
+        <div class="teacher-table-container">
+          <form action="/teacher/chapters/create" method="POST" class="form-grid" enctype="multipart/form-data" id="chapterForm">
+            <div class="form-section">
+              <h3 class="section-title">معلومات الفصل الأساسية</h3>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterName">اسم الفصل*</label>
+                <input type="text" id="chapterName" name="chapterName" class="form-input" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterGrade">المرحلة الدراسية*</label>
+                <select id="chapterGrade" name="chapterGrade" class="form-input" required>
+                  <option value="">اختر المرحلة</option>
+                  <option value="Grade1">الصف الأول الثانوي</option>
+                  <option value="Grade2">الصف الثاني الثانوي</option>
+                  <option value="Grade3">الصف الثالث الثانوي</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="ARorEN">اللغة*</label>
+                <select id="ARorEN" name="ARorEN" class="form-input" required>
+                  <option value="AR">العربية</option>
+                  <option value="EN">الإنجليزية</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterDescription">وصف الفصل</label>
+                <textarea id="chapterDescription" name="chapterDescription" class="form-input" rows="4"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h3 class="section-title">الصورة والإعدادات</h3>
+              
+              <div class="form-group">
+                <label class="form-label">صورة الفصل</label>
+                <div class="image-upload-container" id="imageUploadContainer">
+                  <div class="image-upload-preview" id="imagePreview">
+                    <img src="/images/default-chapter.jpg" alt="صورة افتراضية" id="previewImage">
+                  </div>
+                  <div class="image-upload-controls">
+                    <label for="chapterIMG" class="btn btn-secondary">
+                      <i class="fas fa-upload"></i>
+                      اختر صورة
+                    </label>
+                    <input type="text" id="chapterIMG" name="chapterIMG" class="form-input hidden" value="/images/default-chapter.jpg">
+                    <button type="button" class="btn btn-outline" id="resetImage">
+                      <i class="fas fa-trash"></i>
+                      إزالة
+                    </button>
+                  </div>
+                  <div class="image-upload-hint">
+                    <p>اسحب وأفلت الصورة هنا، أو اضغط لاختيار صورة</p>
+                    <p class="text-muted">الحجم المناسب: 16:9، الحد الأقصى: 2MB</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterAccessibility">نوع الوصول*</label>
+                <select id="chapterAccessibility" name="chapterAccessibility" class="form-input" required>
+                  <option value="EnterInFree">مجاني (يمكن الوصول للمحتوى)</option>
+                  <option value="Pay">مدفوع (يتطلب كود للوصول)</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="priceGroup" style="display: none;">
+                <label class="form-label" for="chapterPrice">السعر (جنيه مصري)</label>
+                <input type="number" id="chapterPrice" name="chapterPrice" class="form-input" value="0" min="0">
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                حفظ الفصل
+              </button>
+              <button type="button" class="btn btn-secondary" id="saveDraft">
+                <i class="fas fa-save"></i>
+                حفظ كمسودة
+              </button>
+              <a href="/teacher/chapters" class="btn btn-outline">إلغاء</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Toggle price field based on accessibility
+    document.getElementById('chapterAccessibility').addEventListener('change', function() {
+      const priceGroup = document.getElementById('priceGroup');
+      if (this.value === 'Pay') {
+        priceGroup.style.display = 'block';
+      } else {
+        priceGroup.style.display = 'none';
+        document.getElementById('chapterPrice').value = 0;
+      }
+    });
+    
+    // Image preview functionality
+    const imageUploadContainer = document.getElementById('imageUploadContainer');
+    const previewImage = document.getElementById('previewImage');
+    const chapterIMGInput = document.getElementById('chapterIMG');
+    
+    // Reset image to default
+    document.getElementById('resetImage').addEventListener('click', function() {
+      previewImage.src = '/images/default-chapter.jpg';
+      chapterIMGInput.value = '/images/default-chapter.jpg';
+    });
+    
+    // Handle drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      imageUploadContainer.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      imageUploadContainer.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      imageUploadContainer.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+      imageUploadContainer.classList.add('highlight');
+    }
+    
+    function unhighlight() {
+      imageUploadContainer.classList.remove('highlight');
+    }
+    
+    imageUploadContainer.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length) {
+        handleFiles(files);
+      }
+    }
+    
+    function handleFiles(files) {
+      if (files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+          // In a real implementation, you would upload the image to your server
+          // and set the chapterIMGInput.value to the URL returned from the server
+          // For now, we'll just use the data URL as a placeholder
+          chapterIMGInput.value = e.target.result.substring(0, 100) + '...'; // Truncated for demo
+        };
+        reader.readAsDataURL(files[0]);
+      }
+    }
+    
+    // Save draft functionality
+    document.getElementById('saveDraft').addEventListener('click', function() {
+      // In a real implementation, you would save the form data to localStorage
+      // or send it to the server as a draft
+      alert('تم حفظ المسودة');
+    });
+  </script>
+</body>
+</html> 

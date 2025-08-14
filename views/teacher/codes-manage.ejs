@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+  <style>
+    .manage-header {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+    
+    .header-subtitle {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    
+    .filters-section {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+    
+    .filter-input {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .filter-select {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-group {
+      position: relative;
+    }
+    
+    .search-input {
+      padding: 0.75rem 1rem;
+      padding-left: 3rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      color: white;
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+      color: white;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .codes-table {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .table-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .table-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .table-content {
+      overflow-x: auto;
+    }
+    
+    .codes-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .codes-table th {
+      background: #f8fafc;
+      padding: 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.9rem;
+    }
+    
+    .codes-table td {
+      padding: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    
+    .codes-table tr:hover {
+      background: #f8fafc;
+    }
+    
+    .code-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .code-badge.primary {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+    }
+    
+    .code-badge.success {
+      background: rgba(74, 222, 128, 0.1);
+      color: #22c55e;
+    }
+    
+    .code-badge.warning {
+      background: rgba(251, 191, 36, 0.1);
+      color: #f59e0b;
+    }
+    
+    .code-badge.info {
+      background: rgba(96, 165, 250, 0.1);
+      color: #3b82f6;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .status-badge.used {
+      background: rgba(248, 113, 113, 0.1);
+      color: #ef4444;
+    }
+    
+    .status-badge.available {
+      background: rgba(74, 222, 128, 0.1);
+      color: #22c55e;
+    }
+    
+    .code-display {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #667eea;
+      background: #f8fafc;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .copy-btn {
+      padding: 0.5rem;
+      border: none;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+      background: #5a67d8;
+      transform: scale(1.05);
+    }
+    
+    .delete-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: #ef4444;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.8rem;
+    }
+    
+    .delete-btn:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.5rem;
+      background: #f8fafc;
+    }
+    
+    .page-link {
+      padding: 0.5rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #374151;
+      transition: all 0.3s ease;
+    }
+    
+    .page-link:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .page-link.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6b7280;
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .table-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+      
+      .table-actions {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title">إدارة الأكواد</h1>
+          <div class="page-actions">
+            <a href="/teacher/codes/create" class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              إنشاء أكواد جديدة
+            </a>
+            <a href="/teacher/codes" class="btn btn-secondary">
+              <i class="fas fa-arrow-right"></i>
+              العودة للأكواد
+            </a>
+          </div>
+        </div>
+        
+        <!-- Manage Header -->
+        <div class="manage-header">
+          <h2 class="header-title">إدارة الأكواد</h2>
+          <p class="header-subtitle">تصفح وأدر جميع الأكواد المتاحة مع إمكانية البحث والفلترة</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+          <div class="filters-grid">
+            <div class="filter-group search-group">
+              <label for="searchInput">البحث</label>
+              <div style="position: relative;">
+                <input type="text" id="searchInput" class="search-input" placeholder="بحث عن كود...">
+                <i class="fas fa-search search-icon"></i>
+              </div>
+            </div>
+            
+            <div class="filter-group">
+              <label for="filterType">نوع الكود</label>
+              <select class="filter-select" id="filterType">
+                <option value="">الكل</option>
+                <option value="Chapter" <%= filters && filters.type === 'Chapter' ? 'selected' : '' %>>فصل</option>
+                <option value="Video" <%= filters && filters.type === 'Video' ? 'selected' : '' %>>فيديو</option>
+                <option value="Quiz" <%= filters && filters.type === 'Quiz' ? 'selected' : '' %>>اختبار</option>
+                <option value="PDF" <%= filters && filters.type === 'PDF' ? 'selected' : '' %>>ملف PDF</option>
+                <option value="GeneralChapter" <%= filters && filters.type === 'GeneralChapter' ? 'selected' : '' %>>فصل عام</option>
+                <option value="GeneralVideo" <%= filters && filters.type === 'GeneralVideo' ? 'selected' : '' %>>فيديو عام</option>
+                <option value="GeneralQuiz" <%= filters && filters.type === 'GeneralQuiz' ? 'selected' : '' %>>اختبار عام</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="filterStatus">الحالة</label>
+              <select class="filter-select" id="filterStatus">
+                <option value="">الكل</option>
+                <option value="used" <%= filters && filters.status === 'used' ? 'selected' : '' %>>مستخدم</option>
+                <option value="unused" <%= filters && filters.status === 'unused' ? 'selected' : '' %>>غير مستخدم</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="filterGrade">الصف</label>
+              <select class="filter-select" id="filterGrade">
+                <option value="">الكل</option>
+                <option value="Grade1" <%= filters && filters.grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                <option value="Grade2" <%= filters && filters.grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                <option value="Grade3" <%= filters && filters.grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+                <option value="AllGrades" <%= filters && filters.grade === 'AllGrades' ? 'selected' : '' %>>جميع الصفوف</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label>&nbsp;</label>
+              <button type="button" id="applyFilters" class="btn btn-primary">
+                <i class="fas fa-filter"></i>
+                تطبيق الفلتر
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Codes Table -->
+        <div class="codes-table">
+          <div class="table-header">
+            <h3 class="table-title">الأكواد المتاحة</h3>
+            <div class="table-actions">
+              <button class="btn btn-secondary" onclick="exportCodes()">
+                <i class="fas fa-download"></i>
+                تصدير
+              </button>
+              <button class="btn btn-danger" onclick="deleteUnusedCodes()">
+                <i class="fas fa-trash"></i>
+                حذف غير المستخدمة
+              </button>
+            </div>
+          </div>
+          
+          <div class="table-content">
+            <% if (codes && codes.length > 0) { %>
+              <table>
+                <thead>
+                  <tr>
+                    <th>الكود</th>
+                    <th>النوع</th>
+                    <th>الصف</th>
+                    <th>المحتوى المرتبط</th>
+                    <th>الحالة</th>
+                    <th>مستخدم بواسطة</th>
+                    <th>تاريخ الإنشاء</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% codes.forEach(code => { %>
+                    <tr>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                          <span class="code-display"><%= code.Code %></span>
+                          <button class="copy-btn" onclick="copyCode('<%= code.Code %>')" title="نسخ الكود">
+                            <i class="fas fa-copy"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <% if (code.codeType === 'Chapter') { %>
+                          <span class="code-badge primary">فصل</span>
+                        <% } else if (code.codeType === 'Video') { %>
+                          <span class="code-badge success">فيديو</span>
+                        <% } else if (code.codeType === 'Quiz') { %>
+                          <span class="code-badge warning">اختبار</span>
+                        <% } else if (code.codeType === 'PDF') { %>
+                          <span class="code-badge info">PDF</span>
+                        <% } else if (code.codeType === 'GeneralChapter') { %>
+                          <span class="code-badge primary">فصل عام</span>
+                        <% } else if (code.codeType === 'GeneralVideo') { %>
+                          <span class="code-badge success">فيديو عام</span>
+                        <% } else if (code.codeType === 'GeneralQuiz') { %>
+                          <span class="code-badge warning">اختبار عام</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (code.codeGrade === 'AllGrades') { %>
+                          جميع الصفوف
+                        <% } else { %>
+                          <%= code.codeGrade || 'غير محدد' %>
+                        <% } %>
+                      </td>
+                      <td><%= code.contentName || code.chapterName || 'غير محدد' %></td>
+                      <td>
+                        <% if (code.isUsed) { %>
+                          <span class="status-badge used">مستخدم</span>
+                        <% } else { %>
+                          <span class="status-badge available">متاح</span>
+                        <% } %>
+                      </td>
+                      <td><%= code.usedBy || 'غير مستخدم' %></td>
+                      <td><%= new Date(code.createdAt).toLocaleString('ar-EG') %></td>
+                      <td>
+                        <% if (!code.isUsed) { %>
+                          <button class="delete-btn delete-code" data-id="<%= code._id %>">
+                            <i class="fas fa-trash"></i> حذف
+                          </button>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            <% } else { %>
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>لا توجد أكواد متاحة</h3>
+                <p>ابدأ بإنشاء أكواد جديدة للطلاب</p>
+                <a href="/teacher/codes/create" class="btn btn-primary">
+                  <i class="fas fa-plus"></i>
+                  إنشاء أكواد جديدة
+                </a>
+              </div>
+            <% } %>
+          </div>
+          
+          <!-- Pagination -->
+          <% if (totalPages > 1) { %>
+            <div class="pagination">
+              <% if (currentPage > 1) { %>
+                <a class="page-link" href="/teacher/codes/manage?page=<%= currentPage - 1 %><%= filters && filters.type ? '&type=' + filters.type : '' %><%= filters && filters.status ? '&status=' + filters.status : '' %><%= filters && filters.grade ? '&grade=' + filters.grade : '' %><%= filters && filters.search ? '&search=' + filters.search : '' %>">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              <% } %>
+              
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <a class="page-link <%= i === currentPage ? 'active' : '' %>" href="/teacher/codes/manage?page=<%= i %><%= filters && filters.type ? '&type=' + filters.type : '' %><%= filters && filters.status ? '&status=' + filters.status : '' %><%= filters && filters.grade ? '&grade=' + filters.grade : '' %><%= filters && filters.search ? '&search=' + filters.search : '' %>">
+                  <%= i %>
+                </a>
+              <% } %>
+              
+              <% if (currentPage < totalPages) { %>
+                <a class="page-link" href="/teacher/codes/manage?page=<%= currentPage + 1 %><%= filters && filters.type ? '&type=' + filters.type : '' %><%= filters && filters.status ? '&status=' + filters.status : '' %><%= filters && filters.grade ? '&grade=' + filters.grade : '' %><%= filters && filters.search ? '&search=' + filters.search : '' %>">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        applyFilters();
+      }
+    });
+    
+    // Apply filters
+    document.getElementById('applyFilters').addEventListener('click', function() {
+      applyFilters();
+    });
+
+    function applyFilters() {
+      const searchValue = document.getElementById('searchInput').value.trim();
+      const typeValue = document.getElementById('filterType').value;
+      const statusValue = document.getElementById('filterStatus').value;
+      const gradeValue = document.getElementById('filterGrade').value;
+      
+      let url = '/teacher/codes/manage?';
+      
+      if (searchValue) {
+        url += 'search=' + encodeURIComponent(searchValue) + '&';
+      }
+      
+      if (typeValue) {
+        url += 'type=' + encodeURIComponent(typeValue) + '&';
+      }
+      
+      if (statusValue) {
+        url += 'status=' + encodeURIComponent(statusValue) + '&';
+      }
+      
+      if (gradeValue) {
+        url += 'grade=' + encodeURIComponent(gradeValue) + '&';
+      }
+      
+      // Remove trailing &
+      if (url.endsWith('&')) {
+        url = url.slice(0, -1);
+      }
+      
+      window.location.href = url;
+    }
+
+    // Copy code function
+    function copyCode(code) {
+      navigator.clipboard.writeText(code).then(function() {
+        showToast('success', 'تم نسخ الكود بنجاح');
+      }, function(err) {
+        console.error('Could not copy text: ', err);
+        showToast('error', 'فشل في نسخ الكود');
+      });
+    }
+
+    // Delete code
+    document.querySelectorAll('.delete-code').forEach(button => {
+      button.addEventListener('click', function() {
+        const codeId = this.getAttribute('data-id');
+        confirmAction(
+          'حذف الكود',
+          'هل أنت متأكد من حذف هذا الكود؟',
+          'حذف',
+          () => {
+            fetch(`/teacher/codes/${codeId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('success', 'تم حذف الكود بنجاح');
+                setTimeout(() => location.reload(), 1000);
+              } else {
+                showToast('error', 'حدث خطأ أثناء حذف الكود');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('error', 'حدث خطأ أثناء حذف الكود');
+            });
+          }
+        );
+      });
+    });
+
+    // Export codes function
+    function exportCodes() {
+      const currentUrl = new URL(window.location);
+      const exportUrl = '/teacher/codes/export' + currentUrl.search;
+      window.open(exportUrl, '_blank');
+    }
+
+    // Delete unused codes function
+    function deleteUnusedCodes() {
+      confirmAction(
+        'حذف الأكواد غير المستخدمة',
+        'هل أنت متأكد من حذف جميع الأكواد غير المستخدمة؟',
+        'حذف الكل',
+        () => {
+          fetch('/teacher/codes/delete-unused', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showToast('success', 'تم حذف الأكواد غير المستخدمة بنجاح');
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast('error', 'حدث خطأ أثناء حذف الأكواد');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'حدث خطأ أثناء حذف الأكواد');
+          });
+        }
+      );
+    }
+  </script>
+</body>
+</html> 

@@ -1,112 +1,307 @@
-<html lang="ar">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script
-      src="https://kit.fontawesome.com/64d58efce2.js"
-      crossorigin="anonymous"
-    ></script>
+    <meta http-equiv="Cache-Control" content="max-age=31536000, immutable" />
+    
+    <!-- Preconnect to speed up font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <link rel = "icon" href ="images/logo.png"  type = "image/x-icon">
+    <!-- Optimize font loading: preload for faster rendering -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arima:wght@100..700&family=Noto+Kufi+Arabic:wght@100..900&family=Viga&display=swap"
+      rel="stylesheet"
+      rel="preload"
+      as="style"
+    />
+     <!-- Favicon -->
+    <!-- <link
+      rel="icon"
+      href="assetsLanding/img/headerIMG.webp"
+      type="image/webp"
+    /> -->
+    <!-- Consolidate and defer CSS loading: preload main CSS file -->
+    <link rel="preload" href="assetsLanding/css/all.min.css" as="style" />
+    <link rel="stylesheet" href="assetsLanding/css/all.min.css" />
+    <link rel="stylesheet" href="assetsLanding/css/header.css" />
+    <link rel="stylesheet" href="assetsLanding/css/style.css" />
+    <link rel="stylesheet" href="assetsLanding/css/main.css" />
+    
+    <!-- Lazy load the sign-in/up CSS if possible -->
+    <link rel="stylesheet" href="assetsLanding/css/sign-in-up.css" media="print" onload="this.media='all'" />
+    
+    <!-- Removed unused 'webfonts/' reference -->
+    <!-- If needed, add it back if this folder is being used for specific fonts -->
 
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/login.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Roboto+Mono:wght@200;300&display=swap" rel="stylesheet">
+    <title>الشهادة</title>
 
-    <title>Sign in & Sign up Form</title>
+    <style>
+      .Sign-Left {
+        max-width: 600px !important;
+      }
+      .inputs-form{
+        width: 80% !important;
+        margin: 0 auto;
+        min-width: 300px;
+      }
+      .input-container {
+        align-items: center;
+      }
+      @media (max-width: 768px) {
+        .inputs-form {
+          width: 90% !important;
+        }
+      }
+      @media (max-width: 576px) {
+        .inputs-form {
+          width: 100% !important;
+        }
+      }
+
+      /* Toast Styles */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+      }
+
+      .toast {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-family: 'Noto Kufi Arabic', sans-serif;
+        direction: rtl;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .toast-content {
+        flex: 1;
+      }
+
+      .toast-title {
+        font-weight: bold;
+        margin-bottom: 4px;
+        font-size: 16px;
+      }
+
+      .toast-message {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .toast-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+      }
+
+      .toast-close:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      @media (max-width: 576px) {
+        .toast-container {
+          top: 10px;
+          right: 10px;
+          left: 10px;
+          max-width: none;
+        }
+        
+        .toast {
+          transform: translateY(-100%);
+        }
+        
+        .toast.show {
+          transform: translateY(0);
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Start Header -->
+    <header>
+          <%- include("./partials/head.ejs") %>
 
-
-    <div class="container">
-      <!-- <span class="bub a "><img src="images/icon3.png" alt="DNA"></span>
-      <span class="bub d"><img src="images/icon5.png" alt="flask"></span>
-      <span class="bub e"> <img src="images/brain.png" alt="book"></span>
-      <span class="bub f"><img src="images/icon3.png" alt="DNA"></span>
-      <span class="bub g"><img src="images/icon5.png" alt="flask"></span>
-      <span class="bub h"><img src="images/brain.png" alt="book"></span>
-      <span class="bub i"><img src="images/icon3.png" alt="DNA"></span>
-      <span class="bub j "><img src="images/icon5.png" alt="book"></span>
-      <span class="bub k"><img src="images/brain.png" alt="flask"></span>
-      <span class="bub k2"><img src="images/icon5.png" alt="DNA"></span>
-      <span class="bub k3"><img src="images/brain.png" alt="book"></span>
-      <span class="bub k5"><img src="images/icon3.png" alt="flask"></span>
-      <span class="bub k6"><img src="images/brain.png" alt="DNA"></span>
-      <span class="bub k7"><img src="images/icon5.png" alt="book"></span>
-      <span class="bub k8"><img src="images/icon3.png" alt="flask"></span>
-      <span class="bub k9"><img src="images/brain.png" alt="book"></span>
-      <span class="bub k10"><img src="images/icon5.png" alt="DNA"></span>
-      <span class="bub k11"><img src="images/icon3.png" alt="flask"></span> -->
-
-      <div class="forms-container">
-
-        <div class="signin-signup" >
-          <div class="row">
-
-            <form action="/login" method="post" class="sign-in-form" id="login-form">
-              <h2 class="title" style="color: white;">تسجيل الدخول</h2>
-              <div class="input-field">
-                <i class="fas fa-user"></i>
-                <input type="text" name="emailOrPhone" placeholder= "رقم الهاتف"    value='<%= Email || "" %>'  required id="login-email" />
-              </div> 
-              <div class="input-field">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password"  placeholder= "كلمة المرور"  value= '<%= Password || "" %>' required id="login-password"/>
+    </header>
+    <main>
+      <div class="main-container">
+        <div class="Sign-Left">
+          <h2 class="title">
+            <i class="fa-solid fa-person"></i> تسجيل <span>الدخول:</span>
+          </h2>
+          <p>
+            ادخل علي حسابك بإدخال رقم الهاتف و كلمة المرور المسجل بهم من قبل
+          </p>
+          <form action="/login" method="post" >
+            <div class="input-container">
+              <div class="inputs-form phone-number">
+                <input type="text" id="phone" name="phone" required />
+                <div class="input-details">
+                  <i class="fa-solid fa-phone"></i>
+                  <label for="phone">رقم الهاتف</label>
+                </div>
               </div>
-              <% if (error) { %>
-                <a href="/forgetPassword">Forget Password</a>
-              <% } %>
-     
-              <h5 class="message"> <span   id="error"></span><%= error || ""%></h5>
-              <button id="loginbtn"  class="btn solid" >سجل الدخول</button>
-            </form>
-        
-         
-          </div>
-       
-      
+              <div class="inputs-form phone-number">
+                <input
+                  class="inputPassword"
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                />
+                <i
+                  class="fa-solid fa-eye-slash password-icon"
+                  id="password_hidden"
+                ></i>
+                <div class="input-details">
+                  <i class="fa-solid fa-lock"></i>
+                  <label for="password">كلمه السر</label>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="clientDeviceId" name="clientDeviceId" />
+            <% if (error) { %>
+             <p style="margin: 10px !important; color: rgb(239, 0, 0);"><%= error %></p>
+            <% } %>
+          
+            <button type="submit" class="Landing-btn-book" style="margin-top: 20px ;">تسجيل الدخول</button>
+            
+          </form>
+          <!-- <p class="password-forget">
+            هل نسيت كلمه المرور؟<a href="#">اضغط هنا</a>
+          </p> -->
+          <p class="password-account">
+            لا يوجد لديك حساب؟<a href="Register"> انشئ حسابك الآن !</a>
+          </p>
+          <a href="/">
+            <button class="Landing-btn-book return" style="margin-bottom: 30px;">الصفحة الرئيسية</button>
+          </a>
         </div>
+        <!-- <section>
+          <div class="Sign-Right"></div>
+        </section> -->
       </div>
+    </main>
+    <!-- Footer Section -->
+     <%- include("./partials/footer.ejs") %>
 
-      <div class="panels-container">
-        <div class="panel left-panel">
-          <div class="content">
-            <div class="header__right-image">
-              <a href="/"><img src="/images/logoelshaid.png" style="width: 30% !important;margin-bottom: 0.3rem; border: 1px solid white; border-radius: 50%;"  ></a> 
-           </div>
-            <h3>هل انت جديد هنا !</h3>
-            <p>
-              يمكنك انشاء حساب جديد من هنا وانتظار الموافقه حتي تستطيع تسجيل الدخول
-            </p>
-           <a href="/Register"><button class="btns transparent" id="sign-up-btn">
-            انشاء حساب جديد  
-          </button></a> 
-          </div>
-        </div>
- 
-      </div>
-      
-    </div>
-
-
-
+    <script src="assetsLanding/js/script.js" defer></script>
+    <script src="assetsLanding/js/sign-in-up.js" defer></script>
+    
     <script>
-             window.addEventListener('DOMContentLoaded', (event) => {
-          // Function to get the value of a query string parameter
-          const getQueryStringParameter = (name) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-          };
-
-          // Get the student code query string parameter
-          const studentCode = getQueryStringParameter('StudentCode');
-
-          // If the student code query string parameter exists, set the value of the student code input to it
-          if (studentCode) {
-            document.getElementById('error').innerHTML = `الاكونت بتاعك مش متفعل ابعت كلم الاسستنت بالكود بتاعك  <span style="color:yellow;"> ${studentCode} </span>`; ;
+      // Ensure the same device ID is reused across logins
+      (function ensureClientDeviceId(){
+        try {
+          let id = localStorage.getItem('clientDeviceId');
+          if (!id) {
+            // Simple UUID v4 generator
+            id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+              const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+              return v.toString(16);
+            });
+            localStorage.setItem('clientDeviceId', id);
           }
-        });
+          var input = document.getElementById('clientDeviceId');
+          if (input) input.value = id;
+        } catch (e) {}
+      })();
 
+      // Toast functionality
+      function showToast(title, message, type = 'error') {
+        const toastContainer = document.getElementById('toastContainer');
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        const icon = type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+        
+        toast.innerHTML = `
+          <i class="fa-solid ${icon} toast-icon"></i>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+          </div>
+          <button class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Show the toast
+        setTimeout(() => {
+          toast.classList.add('show');
+        }, 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          if (toast.parentElement) {
+            toast.classList.remove('show');
+            setTimeout(() => {
+              if (toast.parentElement) {
+                toast.remove();
+              }
+            }, 300);
+          }
+        }, 5000);
+      }
+      
+      // Check for StudentCode in URL and show toast
+      function checkStudentCode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentCode = urlParams.get('StudentCode');
+        
+        if (studentCode) {
+          showToast(
+            ' الحساب غير مفعل ',
+            ` يرجى التواصل مع الدعم لتفعيل الحساب ${studentCode}`,
+            'error'
+          );
+          
+          // Remove StudentCode from URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('StudentCode');
+          history.replaceState(null, null, url);
+        }
+      }
+      
+      // Check for StudentCode on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        checkStudentCode();
+      });
     </script>
   </body>
 </html>

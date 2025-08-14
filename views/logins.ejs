@@ -1,0 +1,111 @@
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://kit.fontawesome.com/64d58efce2.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <link rel = "icon" href ="images/photo.png"  type = "image/x-icon">
+
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/login.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Roboto+Mono:wght@200;300&display=swap" rel="stylesheet">
+
+    <title>Sign in & Sign up Form</title>
+  </head>
+  <body>
+
+
+    <div class="container">
+      <!-- <span class="bub a "><img src="./images/dna.svg" alt="DNA"></span>
+      <span class="bub d"><img src="./images/flask.svg" alt="flask"></span>
+      <span class="bub e"> <img src="./images/book.svg" alt="book"></span>
+      <span class="bub f"><img src="./images/dna.svg" alt="DNA"></span>
+      <span class="bub g"><img src="./images/flask.svg" alt="flask"></span>
+      <span class="bub h"><img src="./images/book.svg" alt="book"></span>
+      <span class="bub i"><img src="./images/dna.svg" alt="DNA"></span>
+      <span class="bub j "><img src="./images/book.svg" alt="book"></span>
+      <span class="bub k"><img src="./images/flask.svg" alt="flask"></span>
+      <span class="bub k2"><img src="./images/dna.svg" alt="DNA"></span>
+      <span class="bub k3"><img src="./images/book.svg" alt="book"></span>
+      <span class="bub k5"><img src="./images/flask.svg" alt="flask"></span>
+      <span class="bub k6"><img src="./images/dna.svg" alt="DNA"></span>
+      <span class="bub k7"><img src="./images/book.svg" alt="book"></span>
+      <span class="bub k8"><img src="./images/flask.svg" alt="flask"></span>
+      <span class="bub k9"><img src="./images/book.svg" alt="book"></span>
+      <span class="bub k10"><img src="./images/dna.svg" alt="DNA"></span>
+      <span class="bub k11"><img src="./images/flask.svg" alt="flask"></span> -->
+
+      <div class="forms-container">
+
+        <div class="signin-signup" >
+          <div class="row">
+
+            <form action="/login" method="post" class="sign-in-form" id="login-form">
+              <h2 class="title" style="color: rgb(0, 0, 0);">تسجيل الدخول</h2>
+              <div class="input-field">
+                <i class="fas fa-user"></i>
+                <input type="text" name="emailOrPhone" placeholder= "رقم الهاتف"    value='<%= Email || "" %>'  required id="login-email" />
+              </div> 
+              <div class="input-field">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password"  placeholder= "كلمة المرور"  value= '<%= Password || "" %>' required id="login-password"/>
+              </div>
+              <% if (error) { %>
+                <a href="/forgetPassword">Forget Password</a>
+              <% } %>
+     
+              <h5 class="message"> <span   id="error"></span><%= error || ""%></h5>
+              <button id="loginbtn"  class="btn solid" >سجل الدخول</button>
+            </form>
+        
+         
+          </div>
+       
+      
+        </div>
+      </div>
+
+      <div class="panels-container">
+        <div class="panel left-panel">
+          <div class="content">
+            <div class="header__right-image">
+           </div>
+            <h3>هل انت جديد هنا !</h3>
+            <p>
+              يمكنك انشاء حساب جديد من هنا وانتظار الموافقه حتي تستطيع تسجيل الدخول
+            </p>
+           <a href="/Register"><button class="btns transparent" id="sign-up-btn">
+            انشاء حساب جديد  
+          </button></a> 
+          </div>
+        </div>
+ 
+      </div>
+      
+    </div>
+
+
+
+    <script>
+             window.addEventListener('DOMContentLoaded', (event) => {
+          // Function to get the value of a query string parameter
+          const getQueryStringParameter = (name) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+          };
+
+          // Get the student code query string parameter
+          const studentCode = getQueryStringParameter('StudentCode');
+
+          // If the student code query string parameter exists, set the value of the student code input to it
+          if (studentCode) {
+            document.getElementById('error').innerHTML = `الاكونت بتاعك مش متفعل ابعت كلم الاسستنت بالكود بتاعك  <span style="color:yellow;"> ${studentCode} </span>`; ;
+          }
+        });
+
+    </script>
+  </body>
+</html>

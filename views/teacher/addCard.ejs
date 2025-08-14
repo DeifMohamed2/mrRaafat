@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
+<body>
+
+    <style>
+
+ #reader {
+            width: 300px;
+            height: 300px;
+            margin: auto;
+            border-radius: 10px;
+                        border: 2px solid #ffffff;
+            display: none;
+
+        }
+        #qr-code {
+            margin-top: 20px;
+        }
+
+        .chapter_Box form input {
+            border-radius: 10px;
+            background-color: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff !important;
+            text-align: center;
+            font-size: larger;
+            font-weight: 900;
+            transition: all 0.3s;
+        }
+
+        .chapter_Box form input:focus {
+            border: 2px solid #affff3;
+            background-color: transparent;
+            color: #ffffff !important;
+        }
+
+
+        .chapter_Box form button {
+            margin-top: 1rem;
+            border-radius: 10px;
+        }
+        
+        .spinner {
+                    
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: conic-gradient(#0000 10%,#474bff);
+            -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 9px),#000 0);
+            animation: spinner-zp9dbg 1s infinite linear;
+        }
+
+#errorMessage {
+    display: none;
+    color: red;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+@keyframes spinner-zp9dbg {
+   to {
+      transform: rotate(1turn);
+   }
+}
+
+@media (max-width: 768px) {
+    #myTable{
+        font-size: 10px
+    }
+    
+}
+        
+    </style>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" >
+                <%- include("./partials/nav.ejs") %>
+            </div>
+            <!--------------------END ASIDE  ------------------>
+   <!-- Modal -->
+
+
+
+<!--  END Modal -->
+            <div class="col-lg-10 ">
+                <main>
+                    <div class="row">
+                     
+                        <div class=" col-md-4 ">
+                            <div class="left" style="margin-top: 0.2rem;">
+                                <%- include("./partials/top.ejs") %> 
+
+                            </div>
+                        </div>
+
+                       
+                    </div>
+
+
+                    <div class="text-center">
+                                <button type="button" id="ShowStudentCardAdded" class="btn btn-secondary btn-lg px-4">اظهار اضافه كارت طالب</button>
+                     </div>
+                    
+                 <div class="row justify-content-center d-none" id="boxOfCardAdded">
+                    <div class="col-md-8">
+                        <div class=" p-4 chapter_Box">
+                            <h2 class="text-center mb-4">اضف كارت الي طالب</h2>
+                            <form action="/teacher/addCardToStudent" method="post" >
+                                <div class="row align-items-center">
+                                    <!-- Code -->
+                                    <div class="col-md-5 mb-3">
+                                        <label for="studentCode" class="form-label">كود الطالب</label>
+                                        <input type="number" class="form-control form-control-sm" id="studentCode" name="studentCode" required>
+                                    </div>
+
+                                    <!-- Icon for transferring -->
+                                    <div class="col-md-2 text-center " style="color: #ffff;">
+                                        <i class="bi bi-arrow-left-right fs-2"></i>
+                                    </div>
+
+                                    <!-- Card Assigned To -->
+                                    <div class="col-md-5 mb-3">
+                                        <label for="assignedCard" class="form-label">رقم الكارت</label>
+                                        <input type="number" class="form-control form-control-sm" id="assignedCard" name="assignedCard" required>
+                                    </div>
+                                </div>
+
+                                <div class="spinner d-none mx-auto" id="spinner"></div>
+
+                                <div class="studentData col-12 d-none" style="color: rgb(0, 181, 0);" id="StudentData">
+                                    
+                                    <h1 id="fgsagatgagt"></h1>
+                                    <h2>اسم الطالب : <span id="studentName"></span></h2>
+                                </div>
+
+                              
+                                <!-- Submit Button -->
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-md px-4">Add</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+ 
+                    <div class="row">
+                        <div class="col-md-12  col-sm-12">
+                            <form action="/teacher/addCard/attendUser" method="post" id="attendUserForm">
+                                <div class="col-md-10">   
+                                   <select name="searchBy" id="CardType" class="Grade" style="margin-top: -1rem;"  required>
+
+                                       <option value="Card" selected >رقم الكارت </option>
+                                       <option value="Code" >كود الطالب </option>
+                                       
+                                   </select>
+
+                                   <select name="Grade" class="Grade" id="CardGrade" required>
+                                       <option value="" >اختر الصف الدراسي</option>
+                                       <option  value="Grade1">الصف الاول الثانوي</option>
+                                       <option value="Grade2">الصف الثاني الثانوي </option>
+                                       <option value="Grade3">الصف الثالث الثانوي</option>
+
+                                   </select>
+                                   <select name="centerName" class="Grade" id="centerName" required>
+                                       <option value="" selected>اختر اسم السنتر </option>
+                                       <option value="centerBasmala">  البسمله</option>
+                                       <option value="centerDHL">DHL </option>
+                                       <option value="centerDarElsa3da">   دار السعاده</option>
+                                       <option value="centerFutureSoft">  Future Soft</option>
+                                       <option value="centerInfinity"> Infinity</option>
+                                       <option value="centerElra3y"> الراعي</option>
+                                       <option value="centerNewFuture"> New Future</option>
+                                       <option value="centerHarverd"> هارفرد </option>
+                                       <option value="centerA1"> A1 </option>
+
+                                   </select>
+                                 <select name="groupTime" class="Grade" id="groupTime" required>
+                                <option value="" selected>مجموعه</option>
+                               </select>
+
+                                 
+                                   <button type="button" id="saveAndStart" class="btn btn-secondary btn-md me-3 mt-4">  حفظ والبدأ </button>
+                                   
+                               </div>
+                                <div >
+                                    <div id="reader"></div>     
+                                </div>
+                                                         
+                            <div class="student-table">
+                                    <div class="row" style="margin-bottom: 0 !important;">
+                                                  
+                                       
+                                        <div class="col-md-4"> 
+                                                
+                                            <input type="number"  class="serachOnaddCard "  name="attendeeID" id="attendeeID" placeholder="رقم الكارت.." required>
+
+                                            <button type="button" class="btn  btn-outline-warning btn-md me-3 mt-5" id="openQrCamera"> <i class="fa-solid fa-camera"></i> استدخدام الكاميرا  </button>
+                                           
+                                            <button type="submit" class="btn btn-outline-warning btn-md me-3 mt-5" >   اضف بشكل يدوي </button>
+
+                                            
+                                        </div>
+                                        <h2 class=" " style="text-align: center;" id="errorMessage" >الرجاء إدخال رقم الكارت بشكل صحيح</h2>
+                                        <h2><span id="NumberOfParentsSendingMessages"  style="text-align: center;" class=" d-none warning "></span></h2>
+                                        
+                                    </div>
+                                    
+                                    <div class="spinner d-none mx-auto" id="spinnerInTabel"></div>
+                                   
+
+                               
+                             
+                                <table id="myTable">
+                                    <thead>
+                                        <th style="padding: 10px;"># </th>
+                                        <th style="padding-left: 20px;">اسم الطالب</th>
+                                        <th style="padding-left: 20px;">كود الطالب</th>
+                                        <th style="padding-left: 20px;">رقم هاتف الطالب</th>
+                                        <th style="padding-left: 20px;">رقم هاتف ولي امر الطالب</th>
+                                        <th style="padding-left: 20px;"></th>
+                             
+                                    </thead>
+
+                                    <tbody >
+                           
+                                    </tbody>
+                                </table>
+
+                            </div>
+                      </form>
+
+                      
+                        </div>
+                    </div>
+
+                    <div class="pagination justify-content-between mb-5">
+                           
+                        <div class="mx-auto">
+                            <button class="paginationBtns" id="ConvertAttadnaceToExcel">Save And Convert To Excel</button> 
+                        </div>
+                      
+                    </div>
+
+                
+                </main>
+            </div>
+
+            <!-------------------- END OF MAIN --------------------->
+         
+        </div>
+    </div>
+
+    <script src="/assest/bootstrap.bundle.min.js"></script>
+    <script src="/assest/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+
+<script>
+// Group times for each center
+const groupTimes = {
+    centerBasmala: [
+        { value: 'group1', text: 'السبت - 10  - 12 ' },
+        { value: 'group2', text: 'السبت - 12  - 2 ' }
+    ],
+    centerDHL: [
+        { value: 'group1', text: 'السبت - 3  - 5 ' },
+        { value: 'group2', text: 'السبت - 5  - 7 ' }
+    ],
+    centerDarElsa3da: [
+        { value: 'group1', text: 'الاحد - 3:30  - 5:30 ' },
+        { value: 'group2', text: 'الاثنين - 5  - 7 ' }
+    ],
+    centerFutureSoft: [
+        { value: 'group1', text: 'الاحد - 6  - 8 ' },
+        { value: 'group2', text: 'الخميس - 7  - 9 ' }
+    ],
+    centerInfinity: [
+        { value: 'group1', text: 'الاثنين - 7  - 9 ' }
+    ],
+    centerElra3y: [
+        { value: 'group1', text: 'الثلاثاء - 3  - 5 ' },
+        { value: 'group2', text: 'الاربعاء - 5:30  - 7:30 ' },
+        { value: 'group3', text: 'الاربعاء - 7:30  - 9:30 ' }
+    ],
+    centerNewFuture: [
+        { value: 'group1', text: 'الثلاثاء - 5  - 7 ' },
+        { value: 'group2', text: 'الثلاثاء - 7  - 9 ' }
+    ],
+    centerHarverd: [
+        { value: 'group1', text: 'الخميس - 3  - 5 ' },
+        { value: 'group2', text: 'الخميس - 5  - 7 ' }
+    ],
+    centerA1: [
+        { value: 'group1', text: 'الجمعه - 3  - 5 ' },
+        { value: 'group2', text: '7 - 5  - 5 ' }
+    ]
+};
+
+// Handle center name change
+document.getElementById('centerName').addEventListener('change', function() {
+    const selectedCenter = this.value;
+    const groupTime = document.getElementById('groupTime');
+
+    // Clear existing options
+    groupTime.innerHTML = '<option value="" selected>مجموعه</option>';
+
+    // Add new options based on the selected center
+    if (groupTimes[selectedCenter]) {
+        groupTimes[selectedCenter].forEach(group => {
+            const option = document.createElement('option');
+            option.value = group.value;
+            option.textContent = group.text;
+            groupTime.appendChild(option);
+        });
+    }
+});
+</script>
+
+
+    <script>
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const spinner = document.getElementById('spinner');
+       
+            const studentCode = document.getElementById('studentCode').value;
+            const assignedCard = document.getElementById('assignedCard').value;
+            const studentNameElement = document.getElementById('studentName');
+            const messageElement = document.getElementById('fgsagatgagt');
+            const studentDataElement = document.getElementById('StudentData');
+
+            console.log('studentCode:', studentCode);
+            console.log('assignedCard:', assignedCard);
+
+            spinner.classList.remove('d-none');
+            studentDataElement.classList.add('d-none');
+            if (!studentCode || !assignedCard) {
+                console.error('Both studentCode and assignedCard are required.');
+                return;
+            }
+
+            const data = {
+                studentCode: studentCode,
+                assignedCard: assignedCard
+            };
+
+            try {
+                const response = await fetch('/teacher/addCard', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+                console.log('Response:', responseData.message);
+
+
+                if (response.ok) {
+                    spinner.classList.add('d-none');
+                    // Set student name and success message
+                    studentNameElement.textContent = responseData.Username || "Unknown";
+                    messageElement.textContent = responseData.message || "Success!";
+                    studentDataElement.classList.remove('d-none');
+                    studentDataElement.style.color = '#00bc00'; // Set color to green for success
+                    form.reset();
+                } else {
+                    spinner.classList.add('d-none');
+                    // Set error message and clear the student's name if not found
+                    messageElement.textContent = responseData.message || 'An error occurred. Please try again.';
+                    studentNameElement.textContent = responseData.Username || "Unknown";
+                    studentDataElement.classList.remove('d-none');
+                    studentDataElement.style.color = 'red'; // Set color to red for errors
+                    form.reset();
+                }
+            } catch (error) {
+                spinner.classList.add('d-none');
+                console.error('An error occurred:', error);
+                const messageElement = document.getElementById('message');
+                const studentDataElement = document.getElementById('StudentData');
+
+                messageElement.textContent = 'A network error occurred.';
+                studentDataElement.classList.remove('d-none');
+                studentDataElement.style.color = 'red';
+            }
+        });
+
+    </script>
+
+    <script>
+
+        const ShowStudentCardAdded = document.getElementById('ShowStudentCardAdded');
+        const boxOfCardAdded = document.getElementById('boxOfCardAdded');
+         
+        ShowStudentCardAdded.addEventListener('click', () => {
+            boxOfCardAdded.classList.toggle('d-none');
+            ShowStudentCardAdded .textContent = boxOfCardAdded.classList.contains('d-none') ? 'اظهار اضافه كارت طالب' : 'اخفاء اضافه كارت طالب';
+        });
+
+    </script>
+
+    <script>
+        const saveAndStart = document.getElementById('saveAndStart');
+        const CardGrade = document.getElementById('CardGrade');
+        const centerName = document.getElementById('centerName');
+        const GroupTime = document.getElementById('groupTime');
+        const CardType = document.getElementById('CardType');
+        const attendeeID = document.getElementById('attendeeID');
+        const spinnerInTabel = document.getElementById('spinnerInTabel')
+        const errorMessage = document.getElementById('errorMessage');
+   
+        const attendUserForm = document.getElementById('attendUserForm');
+            
+        const ConvertAttadnaceToExcel = document.getElementById('ConvertAttadnaceToExcel') 
+
+        saveAndStart.addEventListener('click', async () => {
+            // Disable the inputs
+            spinnerInTabel.classList.remove('d-none');
+            CardGrade.setAttribute('disabled', 'disabled');
+            centerName.setAttribute('disabled', 'disabled');
+            GroupTime.setAttribute('disabled', 'disabled');
+            attendeeID.focus();
+            // Create the data object to be sent to the backend
+            const data = {
+                CardGrade: CardGrade.value,
+                centerName: centerName.value,
+                GroupTime: GroupTime.value,
+                CardType: CardType.value
+            };
+
+            try {
+                // Send a GET request to fetch all attended users for this session
+                const response = await fetch('/teacher/addCard/getAttendedUsers', {
+                    method: 'POST', // You might want to use POST to pass data in the body
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    // Clear the table
+                    const table = document.querySelector('tbody');
+                    table.innerHTML = '';
+
+                    // Populate the table with the fetched data
+                    responseData.students.forEach((student, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td  style="padding-left: 20px;"> ${index + 1}</td>
+                            <td  style="padding-left: 20px;">${student.Username}</td>
+                            <td  style="padding-left: 20px;">${student.Code}</td>
+                            <td  style="padding-left: 20px;">${student.phone}</td>
+                            <td  style="padding-left: 20px;">${student.parentPhone}</td>
+                            <td  style="padding-left: 20px;" <button class="btn btn-danger delete-btn" data-id="${student._id}">Delete</button></td>
+                        `;
+                        table.appendChild(row);
+                    
+                    });
+
+                    // Add event listeners for delete buttons
+                    const deleteButtons = document.querySelectorAll('.delete-btn');
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            const studentId = e.target.getAttribute('data-id');
+                            const rowToDelete = e.target.closest('tr'); // Get the row element to remove later
+                            await deleteAttendance(studentId, rowToDelete); // Pass the row for removal
+                        });
+                    });
+                    spinnerInTabel.classList.add('d-none');
+                } else {
+                    console.error('Failed to fetch attended users:', responseData.message);
+                    spinnerInTabel.classList.add('d-none');
+                }
+            } catch (error) {
+                console.error('An error occurred:', error);
+               spinnerInTabel.classList.add('d-none');
+            }
+        });
+        
+
+        attendUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+             spinnerInTabel.classList.remove('d-none');
+            const data = {
+                CardGrade: CardGrade.value,
+                centerName: centerName.value,
+                GroupTime: GroupTime.value,
+                CardType: CardType.value,
+                attendeeID : attendeeID.value
+            };
+
+            try {
+                const response = await fetch('/teacher/addCard/attendUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+                attendeeID.value = '';
+
+                if (response.ok) {
+                    // Populate the table with student data
+                    const table = document.querySelector('tbody');
+                    table.innerHTML = '';
+                    responseData['attendanceRecord']['Students'].forEach((student, index) => {
+                        const row = document.createElement('tr');
+                        row.setAttribute('data-student-id', student._id); // Set the student ID on the row
+                        row.innerHTML = `
+                            <td style="padding-left: 20px;">${index + 1}</td>
+                            <td style="padding-left: 20px;">${student.Username}</td>
+                            <td style="padding-left: 20px;">${student.Code}</td>
+                            <td style="padding-left: 20px;">${student.phone}</td>
+                            <td style="padding-left: 20px;">${student.parentPhone}</td>
+                            <td style="padding-left: 20px;"> 
+                                <button class="btn btn-danger delete-btn" data-id="${student._id}">Delete</button>
+                            </td>
+                        `;
+                        table.appendChild(row);
+                    });
+
+                    // Add event listeners for delete buttons
+                    const deleteButtons = document.querySelectorAll('.delete-btn');
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            const studentId = e.target.getAttribute('data-id');
+                            const rowToDelete = e.target.closest('tr'); // Get the row element to remove later
+                            await deleteAttendance(studentId, rowToDelete); // Pass the row for removal
+                        });
+                    });
+                     spinnerInTabel.classList.add('d-none');
+                } else {
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = responseData.message || 'An error occurred. Please try again.';
+                    attendeeID.value = '';
+
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                   spinnerInTabel.classList.add('d-none');
+                }
+            } catch (error) {
+                console.error('An error occurred:', error);
+                spinnerInTabel.classList.add('d-none');
+            }
+        });
+
+        async function deleteAttendance(studentId, rowToDelete) {
+                 spinnerInTabel.classList.remove('d-none');
+            try {
+                const data = {
+                    CardGrade: CardGrade.value,
+                    centerName: centerName.value,
+                    GroupTime: GroupTime.value
+                };
+
+                const response = await fetch(`/teacher/addCard/removeAttendance/${studentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    rowToDelete.remove(); 
+                    spinnerInTabel.classList.add('d-none');
+                } else {
+                    console.error('Failed to remove attendance:', responseData.message);
+                }
+            } catch (error) {
+                console.error('An error occurred while deleting attendance:', error);
+            }
+        }
+
+ConvertAttadnaceToExcel.addEventListener('click', async () => {
+    errorMessage.style.display='inline'
+    errorMessage.innerHTML = "يتم الان الارسال الي اولياء الامور برجاء الانتظار" 
+    const data = {
+        CardGrade: CardGrade.value,
+        centerName: centerName.value,
+        GroupTime: GroupTime.value
+    };
+
+    try {
+        const response = await fetch('/teacher/addCard/convertAttendanceToExcel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            // Convert the response to a blob
+            const blob = await response.blob();
+
+            // Create a URL for the blob and initiate a download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attendance_data.xlsx';
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up by revoking the object URL and removing the link
+            window.URL.revokeObjectURL(url);
+            a.remove();
+
+            console.log('Excel file downloaded successfully.');
+        } else {
+            const responseData = await response.json();
+            console.error('Failed to convert attendance to Excel:', responseData.message);
+        }
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
+});
+
+
+
+
+    </script>
+
+
+
+
+<!-- QR CODE SCAANER -->
+    <script>
+        // QR Code Scanner
+        const openQrCamera = document.getElementById("openQrCamera");
+        const reader = document.getElementById("reader");
+        const result = document.getElementById("result");
+        openQrCamera.addEventListener("click", function() {
+            reader.style.display = "block";
+            const html5QrCode = new Html5Qrcode("reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // use back camera
+                {
+                    fps: 24, // Optional, frame per second for qr code scanning
+                    qrbox: { width: 400, height: 400 } // Optional, scanning box
+                },
+                (decodedText, decodedResult) => {
+                    console.log(`QR Code detected: ${decodedText}`);
+                    attendeeID.value = decodedText;
+                    html5QrCode.stop().then(() => {
+                        reader.style.display = "none";
+                    }).catch(err => {
+                        console.error("Error stopping QR Code scan.", err);
+                    });
+                },
+                (errorMessage) => {
+                    // parse error, ignore it
+                }
+            ).catch(err => {
+                console.error("Unable to start scanning.", err);
+            });
+
+        });
+    </script>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        const NumberOfParentsSendingMessages = document.getElementById('NumberOfParentsSendingMessages')
+
+           const socket = io();
+
+               socket.on('sendingToParents', (data) => {
+                 NumberOfParentsSendingMessages.classList.remove('d-none') 
+                  NumberOfParentsSendingMessages.innerHTML= data.nPhone
+             });
+    </script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعديل الفيديو - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <header class="teacher-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">تعديل الفيديو</h1>
+        </div>
+        
+        <div class="header-right">
+          <div style="display: flex; gap: 0.5rem;">
+            <a href="/teacher/videos/<%= video._id %>" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للفيديو
+            </a>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <% if (error === 'missing_fields') { %>
+              يرجى ملء جميع الحقول المطلوبة
+            <% } else if (error === 'update_failed') { %>
+              حدث خطأ أثناء تحديث الفيديو
+            <% } else { %>
+              <%= error %>
+            <% } %>
+          </div>
+        <% } %>
+        
+        <div class="form-grid">
+          <div class="form-section">
+            <h3 class="section-title">معلومات الفصل</h3>
+            <div style="padding: 1rem; background: var(--surface-color); border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 60px; height: 60px; border-radius: var(--radius-md); overflow: hidden; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); display: flex; align-items: center; justify-content: center;">
+                  <% if (chapter.chapterIMG && chapter.chapterIMG !== '/images/default-chapter.jpg') { %>
+                    <img src="<%= chapter.chapterIMG %>" alt="<%= chapter.chapterName %>" style="width: 100%; height: 100%; object-fit: cover;">
+                  <% } else { %>
+                    <i class="fas fa-book" style="font-size: 1.5rem; color: white;"></i>
+                  <% } %>
+                </div>
+                <div>
+                  <h4 style="margin: 0; font-size: 1.125rem;"><%= chapter.chapterName %></h4>
+                  <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">
+                    <% if(chapter.chapterGrade === '1') { %>
+                      الصف الأول الثانوي
+                    <% } else if(chapter.chapterGrade === '2') { %>
+                      الصف الثاني الثانوي
+                    <% } else if(chapter.chapterGrade === '3') { %>
+                      الصف الثالث الثانوي
+                    <% } %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <form id="videoEditForm" action="/teacher/videos/<%= video._id %>/edit" method="POST" class="needs-validation" novalidate>
+          <input type="hidden" name="chapterId" value="<%= chapter._id %>">
+          <input type="hidden" name="videoType" value="<%= videoType %>">
+          
+          <div class="form-grid">
+            <!-- Basic Information -->
+            <div class="form-section">
+              <h3 class="section-title">المعلومات الأساسية</h3>
+              
+              <div class="form-group">
+                <label class="form-label">نوع الفيديو</label>
+                <div class="form-input" style="background: var(--surface-color); cursor: not-allowed;">
+                  <% if (videoType === 'lecture') { %>
+                    <i class="fas fa-chalkboard-teacher" style="margin-left: 0.5rem; color: var(--info-color);"></i> محاضرة
+                  <% } else if (videoType === 'summary') { %>
+                    <i class="fas fa-file-alt" style="margin-left: 0.5rem; color: var(--accent-color);"></i> ملخص
+                  <% } else if (videoType === 'solving') { %>
+                    <i class="fas fa-tasks" style="margin-left: 0.5rem; color: var(--success-color);"></i> حل تمارين
+                  <% } %>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">لا يمكن تغيير نوع الفيديو بعد الإنشاء</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">عنوان الفيديو <span style="color: var(--danger-color)">*</span></label>
+                <input type="text" class="form-input" id="videoTitle" name="videoTitle" value="<%= video.videoTitle || video.lectureName %>" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">وصف الفيديو</label>
+                <textarea class="form-input" id="videoDescription" name="videoDescription" rows="3"><%= video.videoDescription || '' %></textarea>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">أضف وصفًا مختصرًا للفيديو</small>
+              </div>
+            </div>
+            
+            <!-- Access & Pricing -->
+            <div class="form-section">
+              <h3 class="section-title">الوصول والتسعير</h3>
+              
+              <div class="form-group">
+                <label class="form-label">حالة الدفع <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="paymentStatus" name="paymentStatus" required>
+                  <option value="Free" <%= video.paymentStatus === 'Free' ? 'selected' : '' %>>مجاني</option>
+                  <option value="Pay" <%= video.paymentStatus === 'Pay' ? 'selected' : '' %>>مدفوع</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="priceGroup" style="<%= video.paymentStatus === 'Pay' ? '' : 'display: none;' %>">
+                <label class="form-label">سعر الفيديو</label>
+                <div style="position: relative;">
+                  <input type="number" class="form-input" id="videoPrice" name="videoPrice" min="0" step="0.01" value="<%= video.videoPrice || 0 %>">
+                  <span style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-secondary);">جنيه</span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">المتطلبات المسبقة</label>
+                <select class="form-select" id="prerequisites" name="prerequisites">
+                  <option value="" <%= !video.prerequisites ? 'selected' : '' %>>بدون متطلبات</option>
+                  <option value="WithExam" <%= video.prerequisites === 'WithExam' ? 'selected' : '' %>>مع اختبار</option>
+                  <option value="WithHw" <%= video.prerequisites === 'WithHw' ? 'selected' : '' %>>مع واجب</option>
+                  <option value="WithExamaAndHw" <%= video.prerequisites === 'WithExamaAndHw' ? 'selected' : '' %>>مع اختبار وواجب</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="accessibleAfterViewingGroup" style="<%= video.prerequisites ? '' : 'display: none;' %>">
+                <label class="form-label">متاح بعد مشاهدة</label>
+                <input type="text" class="form-input" id="AccessibleAfterViewing" name="AccessibleAfterViewing" value="<%= video.AccessibleAfterViewing || '' %>">
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">أدخل معرف الفيديو الذي يجب مشاهدته أولاً</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">إظهار الفيديو</label>
+                <select class="form-select" id="permissionToShow" name="permissionToShow">
+                  <option value="true" <%= video.permissionToShow ? 'selected' : '' %>>نعم</option>
+                  <option value="false" <%= !video.permissionToShow ? 'selected' : '' %>>لا</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">عدد المشاهدات المسموح بها</label>
+                <input type="number" class="form-input" id="videoAllowedAttemps" name="videoAllowedAttemps" min="1" value="<%= video.videoAllowedAttemps || 3 %>">
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Media Upload -->
+            <div class="form-section">
+              <h3 class="section-title">تحميل الصورة المصغرة</h3>
+              
+              <div class="form-group">
+                <div style="border: 2px dashed var(--border-color); padding: 1.5rem; border-radius: var(--radius-lg); text-align: center; margin-bottom: 1rem;">
+                  <div id="thumbnailPreview" style="width: 100%; height: 150px; margin-bottom: 1rem; border-radius: var(--radius-md); overflow: hidden;">
+                    <img id="thumbnailImage" src="<%= video.imgURL %>" alt="صورة مصغرة" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+                  
+                  <button type="button" id="uploadThumbnailBtn" class="btn btn-outline" style="width: 100%;">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    تغيير الصورة المصغرة
+                  </button>
+                  
+                  <input type="hidden" id="imgURL" name="imgURL" value="<%= video.imgURL %>" required>
+                  <small style="color: var(--text-secondary); font-size: 0.75rem; display: block; margin-top: 0.5rem;">الحد الأقصى للحجم: 5MB. الأبعاد الموصى بها: 1280×720</small>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Video Upload -->
+            <div class="form-section">
+              <h3 class="section-title">تحميل الفيديو</h3>
+              
+              <div class="form-group">
+                <div style="border: 2px dashed var(--border-color); padding: 1.5rem; border-radius: var(--radius-lg); text-align: center; margin-bottom: 1rem;">
+                  <div id="videoPreview" style="width: 100%; margin-bottom: 1rem;">
+                    <div class="embed-responsive" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: var(--radius-md);">
+                      <iframe id="videoFrame" class="embed-responsive-item" src="<%= video.videoURL %>" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                  </div>
+                  
+                  <button type="button" id="uploadVideoBtn" class="btn btn-outline" style="width: 100%;">
+                    <i class="fas fa-film"></i>
+                    تغيير ملف الفيديو
+                  </button>
+                  
+                  <input type="hidden" id="videoURL" name="videoURL" value="<%= video.videoURL %>" required>
+                  <small style="color: var(--text-secondary); font-size: 0.75rem; display: block; margin-top: 0.5rem;">الحد الأقصى للحجم: 500MB</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-grid">
+            <!-- Additional Options -->
+            <div class="form-section">
+              <h3 class="section-title">خيارات إضافية</h3>
+              
+              <div class="form-group">
+                <label class="form-label">رابط ملف PDF (اختياري)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" class="form-input" id="PDFURL" name="PDFURL" value="<%= video.PDFURL || '' %>" style="flex: 1;">
+                  <button type="button" id="uploadPDFBtn" class="btn btn-outline">
+                    <i class="fas fa-file-pdf"></i>
+                    تحميل PDF
+                  </button>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">موعد النشر (جدولة)</label>
+                <input type="datetime-local" class="form-input" id="scheduledTime" name="scheduledTime" value="<%= video.scheduledTime ? new Date(video.scheduledTime).toISOString().slice(0, 16) : '' %>">
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">اترك فارغًا للنشر الفوري أو حدد موعدًا في المستقبل</small>
+              </div>
+            </div>
+            
+            <!-- Preview -->
+            <div class="form-section">
+              <h3 class="section-title">معاينة</h3>
+              
+              <div style="background: var(--surface-color); border-radius: var(--radius-lg); padding: 1.5rem;">
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                  <div style="width: 120px; height: 80px; border-radius: var(--radius-md); overflow: hidden; background: var(--border-color); flex-shrink: 0;">
+                    <img id="previewThumbnail" src="<%= video.imgURL %>" alt="صورة مصغرة" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+                  
+                  <div style="flex: 1;">
+                    <h4 id="previewTitle" style="margin-top: 0; margin-bottom: 0.25rem; font-size: 1rem;"><%= video.videoTitle || video.lectureName %></h4>
+                    
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                      <span id="previewType" class="status-badge" style="background: var(--info-color);">
+                        <% if (videoType === 'lecture') { %>
+                          محاضرة
+                        <% } else if (videoType === 'summary') { %>
+                          ملخص
+                        <% } else if (videoType === 'solving') { %>
+                          حل تمارين
+                        <% } %>
+                      </span>
+                      <span id="previewPayment" class="status-badge <%= video.paymentStatus === 'Free' ? 'active' : 'pending' %>">
+                        <%= video.paymentStatus === 'Free' ? 'مجاني' : 'مدفوع' %>
+                      </span>
+                      <span id="previewSchedule" class="status-badge" style="background: var(--accent-color); <%= video.scheduledTime ? '' : 'display: none;' %>">مجدول</span>
+                    </div>
+                    
+                    <p id="previewDescription" style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;"><%= video.videoDescription || 'لا يوجد وصف' %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Form Actions -->
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i>
+              حفظ التغييرات
+            </button>
+            
+            <a href="/teacher/videos/<%= video._id %>" class="btn btn-outline">
+              <i class="fas fa-times"></i>
+              إلغاء
+            </a>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Sidebar Toggle
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    
+    // Form validation
+    const form = document.getElementById('videoEditForm');
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    });
+    
+    // Toggle price field based on payment status
+    const paymentStatusSelect = document.getElementById('paymentStatus');
+    const priceGroup = document.getElementById('priceGroup');
+    
+    function togglePriceField() {
+      if (paymentStatusSelect.value === 'Pay') {
+        priceGroup.style.display = 'block';
+        document.getElementById('videoPrice').setAttribute('required', 'required');
+      } else {
+        priceGroup.style.display = 'none';
+        document.getElementById('videoPrice').removeAttribute('required');
+      }
+    }
+    
+    paymentStatusSelect.addEventListener('change', togglePriceField);
+    
+    // Toggle accessible after viewing field based on prerequisites
+    const prerequisitesSelect = document.getElementById('prerequisites');
+    const accessibleGroup = document.getElementById('accessibleAfterViewingGroup');
+    
+    function toggleAccessibleField() {
+      if (prerequisitesSelect.value === 'WithExam' || prerequisitesSelect.value === 'WithHw' || prerequisitesSelect.value === 'WithExamaAndHw') {
+        accessibleGroup.style.display = 'block';
+      } else {
+        accessibleGroup.style.display = 'none';
+      }
+    }
+    
+    prerequisitesSelect.addEventListener('change', toggleAccessibleField);
+    
+    // Live preview
+    const titleInput = document.getElementById('videoTitle');
+    const descInput = document.getElementById('videoDescription');
+    const scheduleInput = document.getElementById('scheduledTime');
+    
+    const previewTitle = document.getElementById('previewTitle');
+    const previewPayment = document.getElementById('previewPayment');
+    const previewSchedule = document.getElementById('previewSchedule');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewThumbnail = document.getElementById('previewThumbnail');
+    
+    titleInput.addEventListener('input', function() {
+      previewTitle.textContent = this.value || 'عنوان الفيديو';
+    });
+    
+    paymentStatusSelect.addEventListener('change', function() {
+      if (this.value === 'Free') {
+        previewPayment.textContent = 'مجاني';
+        previewPayment.className = 'status-badge active';
+      } else {
+        previewPayment.textContent = 'مدفوع';
+        previewPayment.className = 'status-badge pending';
+      }
+    });
+    
+    scheduleInput.addEventListener('input', function() {
+      if (this.value) {
+        previewSchedule.style.display = 'inline-flex';
+        previewSchedule.title = 'سيتم نشر الفيديو في ' + new Date(this.value).toLocaleString('ar-EG');
+      } else {
+        previewSchedule.style.display = 'none';
+      }
+    });
+    
+    descInput.addEventListener('input', function() {
+      previewDescription.textContent = this.value || 'لا يوجد وصف';
+    });
+    
+    // Cloudinary Upload Widget for Thumbnail
+    const thumbnailUploadWidget = cloudinary.createUploadWidget({
+      cloudName: 'your-cloud-name', // Replace with your Cloudinary cloud name
+      uploadPreset: 'teacher_uploads', // Replace with your upload preset
+      sources: ['local', 'url', 'camera'],
+      multiple: false,
+      maxFileSize: 5000000, // 5MB
+      resourceType: 'image',
+      folder: 'thumbnails',
+      styles: {
+        palette: {
+          window: "#FFFFFF",
+          windowBorder: "#90A0B3",
+          tabIcon: "#4F46E5",
+          menuIcons: "#5A616A",
+          textDark: "#000000",
+          textLight: "#FFFFFF",
+          link: "#4F46E5",
+          action: "#4F46E5",
+          inactiveTabIcon: "#0E2F5A",
+          error: "#F44235",
+          inProgress: "#4F46E5",
+          complete: "#20B832",
+          sourceBg: "#E4EBF1"
+        },
+        fonts: {
+          default: {
+            active: true
+          }
+        }
+      }
+    }, (error, result) => {
+      if (!error && result && result.event === "success") {
+        // Set the thumbnail URL to the hidden input
+        document.getElementById('imgURL').value = result.info.secure_url;
+        
+        // Update the thumbnail preview
+        document.getElementById('thumbnailImage').src = result.info.secure_url;
+        
+        // Update the preview thumbnail
+        document.getElementById('previewThumbnail').src = result.info.secure_url;
+      }
+    });
+    
+    // Cloudinary Upload Widget for Video
+    const videoUploadWidget = cloudinary.createUploadWidget({
+      cloudName: 'your-cloud-name', // Replace with your Cloudinary cloud name
+      uploadPreset: 'teacher_uploads', // Replace with your upload preset
+      sources: ['local', 'url'],
+      multiple: false,
+      maxFileSize: 500000000, // 500MB
+      resourceType: 'video',
+      folder: 'videos',
+      styles: {
+        palette: {
+          window: "#FFFFFF",
+          windowBorder: "#90A0B3",
+          tabIcon: "#4F46E5",
+          menuIcons: "#5A616A",
+          textDark: "#000000",
+          textLight: "#FFFFFF",
+          link: "#4F46E5",
+          action: "#4F46E5",
+          inactiveTabIcon: "#0E2F5A",
+          error: "#F44235",
+          inProgress: "#4F46E5",
+          complete: "#20B832",
+          sourceBg: "#E4EBF1"
+        },
+        fonts: {
+          default: {
+            active: true
+          }
+        }
+      }
+    }, (error, result) => {
+      if (!error && result && result.event === "success") {
+        // Set the video URL to the hidden input
+        document.getElementById('videoURL').value = result.info.secure_url;
+        
+        // Update the video preview
+        document.getElementById('videoFrame').src = result.info.secure_url;
+      }
+    });
+    
+    // Cloudinary Upload Widget for PDF
+    const pdfUploadWidget = cloudinary.createUploadWidget({
+      cloudName: 'your-cloud-name', // Replace with your Cloudinary cloud name
+      uploadPreset: 'teacher_uploads', // Replace with your upload preset
+      sources: ['local', 'url'],
+      multiple: false,
+      maxFileSize: 10000000, // 10MB
+      resourceType: 'raw',
+      folder: 'pdfs',
+      allowedFormats: ['pdf'],
+      styles: {
+        palette: {
+          window: "#FFFFFF",
+          windowBorder: "#90A0B3",
+          tabIcon: "#4F46E5",
+          menuIcons: "#5A616A",
+          textDark: "#000000",
+          textLight: "#FFFFFF",
+          link: "#4F46E5",
+          action: "#4F46E5",
+          inactiveTabIcon: "#0E2F5A",
+          error: "#F44235",
+          inProgress: "#4F46E5",
+          complete: "#20B832",
+          sourceBg: "#E4EBF1"
+        },
+        fonts: {
+          default: {
+            active: true
+          }
+        }
+      }
+    }, (error, result) => {
+      if (!error && result && result.event === "success") {
+        // Set the PDF URL to the input
+        document.getElementById('PDFURL').value = result.info.secure_url;
+      }
+    });
+    
+    // Attach click events to upload buttons
+    document.getElementById('uploadThumbnailBtn').addEventListener('click', function() {
+      thumbnailUploadWidget.open();
+    });
+    
+    document.getElementById('uploadVideoBtn').addEventListener('click', function() {
+      videoUploadWidget.open();
+    });
+    
+    document.getElementById('uploadPDFBtn').addEventListener('click', function() {
+      pdfUploadWidget.open();
+    });
+  </script>
+</body>
+</html> 

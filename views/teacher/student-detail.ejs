@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+  <style>
+    /* Base Styles */
+    :root {
+      --modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      --modal-radius: 12px;
+      --modal-transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .student-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .student-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .student-info h1 {
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      font-size: 1.8rem;
+    }
+    .student-info p {
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .student-info strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .student-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 0.75rem;
+    }
+    .student-actions .btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+    }
+    .data-section {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .data-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+    .data-section h2 i {
+      color: var(--primary-color);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .stat-item {
+      background: var(--background-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .section-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+    .section-tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .section-tab:hover {
+      background: rgba(var(--primary-rgb), 0.1);
+    }
+    .section-tab.active {
+      background: var(--primary-color);
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .contact-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    .teacher-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .teacher-table th,
+    .teacher-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .teacher-table th {
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-primary);
+      width: 150px;
+    }
+    .teacher-table td {
+      color: var(--text-secondary);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .status-badge.active {
+      /* background-color: rgba(46, 204, 113, 0.15); */
+      color: #2ecc71;
+    }
+    .status-badge.pending {
+      background-color: rgba(241, 196, 15, 0.15);
+      color: #f1c40f;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--text-secondary);
+      opacity: 0.5;
+      margin-bottom: 1rem;
+    }
+    .empty-state p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .table-actions .btn {
+      padding: 0.25rem 0.5rem;
+    }
+    .table-cell-primary {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .table-cell-primary span {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    /* Enhanced Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--modal-transition);
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-content {
+      /* background: var(--card-bg); */
+      border-radius: var(--modal-radius);
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--modal-shadow);
+      transform: translateY(30px) scale(0.95);
+      transition: var(--modal-transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .modal-overlay.show .modal-content {
+      transform: translateY(0) scale(1);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 1.75rem;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .modal-close:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--text-primary);
+    }
+    .modal-body {
+      padding: 1.75rem;
+    }
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.02);
+    }
+    .modal-footer .btn {
+      min-width: 100px;
+      padding: 0.6rem 1.25rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .modal-footer .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .modal-icon {
+      margin: 0 auto;
+      font-size: 3.5rem;
+      margin-bottom: 1.25rem;
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.05);
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-icon.danger {
+      color: var(--danger-color);
+      background: rgba(244, 67, 54, 0.1);
+    }
+    .modal-icon.warning {
+      color: var(--warning-color);
+      background: rgba(255, 152, 0, 0.1);
+    }
+    .modal-icon.success {
+      color: var(--success-color);
+      background: rgba(76, 175, 80, 0.1);
+    }
+    
+    /* Toast Styles */
+    .toast {
+      min-width: 300px;
+      margin-bottom: 15px;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeIn 0.3s ease;
+    }
+    .toast.success {
+      background-color: #4caf50;
+      color: white;
+    }
+    .toast.error {
+      background-color: #f44336;
+      color: white;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <!-- Back button -->
+        <div class="mb-4">
+          <a href="/teacher/students" class="btn btn-outline btn-sm">
+            <i class="fas fa-arrow-right"></i>
+            العودة إلى قائمة الطلاب
+          </a>
+        </div>
+        
+        <!-- Student Header -->
+        <div class="student-header">
+          <div class="student-avatar">
+            <%= student.Username ? student.Username.charAt(0).toUpperCase() : 'S' %>
+          </div>
+          
+          <div class="student-info">
+            <h1><%= student.Username %></h1>
+            <p><strong>الكود:</strong> <%= student.Code %></p>
+            <p>
+              <strong>الصف:</strong>
+              <% let gradeName = ''; %>
+              <% if (student.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+              <% if (student.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+              <% if (student.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+              <%= gradeName %>
+            </p>
+            <p><strong>الحالة:</strong> 
+              <span class="status-badge <%= student.subscribe ? 'active' : 'pending' %>">
+                <%= student.subscribe ? 'نشط' : 'قيد المراجعة' %>
+              </span>
+            </p>
+          </div>
+          
+          <!-- Student Actions -->
+          <div class="student-actions">
+            <% if (!student.subscribe) { %>
+              <button class="btn btn-success approve-student" data-id="<%= student._id %>">
+                <i class="fas fa-check"></i>
+                <span>تفعيل الحساب</span>
+              </button>
+            <% } else { %>
+              <button class="btn btn-warning block-student" data-id="<%= student._id %>">
+                <i class="fas fa-ban"></i>
+                <span>إيقاف الحساب</span>
+              </button>
+            <% } %>
+              
+            <button class="btn btn-danger delete-student" data-id="<%= student._id %>">
+              <i class="fas fa-trash"></i>
+              <span>حذف الحساب</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Student Stats -->
+        <div class="data-section">
+          <h2><i class="fas fa-chart-line"></i> إحصائيات الطالب</h2>
+          
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value"><%= student.totalScore || 0 %></div>
+              <div class="stat-label">مجموع الدرجات</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value"><%= student.totalQuestions || 0 %></div>
+              <div class="stat-label">عدد الأسئلة</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value">
+                <%= student.totalQuestions ? Math.round((student.totalScore / student.totalQuestions) * 100) : 0 %>%
+              </div>
+              <div class="stat-label">متوسط الدرجات</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value"><%= watchedVideos.length %></div>
+              <div class="stat-label">الفيديوهات المشاهدة</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value"><%= takenQuizzes.length %></div>
+              <div class="stat-label">الاختبارات المكتملة</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value"><%= chapters.length %></div>
+              <div class="stat-label">الفصول المشترك بها</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="data-section">
+          <h2><i class="fas fa-address-card"></i> معلومات الاتصال</h2>
+          
+          <div class="contact-grid">
+            <div class="contact-section">
+              <h3>معلومات الطالب</h3>
+              <table class="teacher-table">
+                <tbody>
+                  <tr>
+                    <th>رقم الهاتف</th>
+                    <td><%= student.phone || 'غير متوفر' %></td>
+                  </tr>
+                  <tr>
+                    <th>المحافظة</th>
+                    <td><%= student.gov || 'غير متوفر' %></td>
+                  </tr>
+                  <tr>
+                    <th>المركز</th>
+                    <td><%= student.Markez || 'غير متوفر' %></td>
+                  </tr>
+                  <tr>
+                    <th>العنوان</th>
+                    <td><%= student.place || 'غير متوفر' %></td>
+                  </tr>
+                  <tr>
+                    <th>النوع</th>
+                    <td><%= student.gender === 'male' ? 'ذكر' : 'أنثى' %></td>
+                  </tr>
+                  <tr>
+                    <th>تاريخ التسجيل</th>
+                    <td><%= new Date(student.createdAt || Date.now()).toLocaleDateString('ar-EG') %></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="contact-section">
+              <h3>معلومات ولي الأمر</h3>
+              <table class="teacher-table">
+                <tbody>
+                  <tr>
+                    <th>رقم الهاتف</th>
+                    <td><%= student.parentPhone || 'غير متوفر' %></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tabbed Content -->
+        <div class="data-section">
+          <div class="section-tabs">
+            <div class="section-tab active" data-tab="chapters">الفصول المشترك بها</div>
+            <div class="section-tab" data-tab="quizzes">الاختبارات</div>
+            <div class="section-tab" data-tab="videos">الفيديوهات المشاهدة</div>
+          </div>
+          
+          <!-- Chapters Tab -->
+          <div class="tab-content active" id="chapters-tab">
+            <div class="teacher-table-container">
+              <table class="teacher-table">
+                <thead>
+                  <tr>
+                    <th>اسم الفصل</th>
+                    <th>الصف</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (chapters && chapters.length > 0) { %>
+                    <% chapters.forEach(chapter => { %>
+                      <tr>
+                        <td>
+                          <div class="table-cell-primary">
+                            <span><%= chapter.chapterName %></span>
+                          </div>
+                        </td>
+                        <td>
+                          <% let chapterGradeName = ''; %>
+                          <% if (chapter.chapterGrade === 'Grade1') chapterGradeName = 'الصف الأول الثانوي'; %>
+                          <% if (chapter.chapterGrade === 'Grade2') chapterGradeName = 'الصف الثاني الثانوي'; %>
+                          <% if (chapter.chapterGrade === 'Grade3') chapterGradeName = 'الصف الثالث الثانوي'; %>
+                          <%= chapterGradeName %>
+                        </td>
+                        <td>
+                          <div class="table-actions">
+                            <a href="/teacher/chapters/<%= chapter._id %>" class="btn btn-sm btn-outline">
+                              <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger remove-chapter" data-chapter="<%= chapter._id %>" data-student="<%= student._id %>" data-name="<%= chapter.chapterName %>">
+                              <i class="fas fa-times"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="3" class="empty-table">
+                        <div class="empty-state">
+                          <i class="fas fa-book"></i>
+                          <p>هذا الطالب غير مشترك في أي فصول دراسية</p>
+                        </div>
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Quizzes Tab -->
+          <div class="tab-content" id="quizzes-tab">
+            <div class="teacher-table-container">
+              <table class="teacher-table">
+                <thead>
+                  <tr>
+                    <th>اسم الاختبار</th>
+                    <th>الدرجة</th>
+                    <th>تاريخ الأداء</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (takenQuizzes && takenQuizzes.length > 0) { %>
+                    <% takenQuizzes.forEach(quiz => { %>
+                      <tr>
+                        <td>
+                          <div class="table-cell-primary">
+                            <span><%= quiz.quizName %></span>
+                          </div>
+                        </td>
+                        <td><%= quiz.score || 0 %></td>
+                        <td><%= new Date(quiz.endTime || Date.now()).toLocaleString('ar-EG') %></td>
+                        <td>
+                          <div class="table-actions">
+                            <a href="/teacher/quizzes/<%= quiz.quizId %>" class="btn btn-sm btn-outline">
+                              <i class="fas fa-eye"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="4" class="empty-table">
+                        <div class="empty-state">
+                          <i class="fas fa-question-circle"></i>
+                          <p>هذا الطالب لم يؤدي أي اختبارات بعد</p>
+                        </div>
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Videos Tab -->
+          <div class="tab-content" id="videos-tab">
+            <div class="teacher-table-container">
+              <table class="teacher-table">
+                <thead>
+                  <tr>
+                    <th>اسم الفيديو</th>
+                    <th>عدد المشاهدات</th>
+                    <th>آخر مشاهدة</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (watchedVideos && watchedVideos.length > 0) { %>
+                    <% watchedVideos.forEach(video => { %>
+                      <tr>
+                        <td>
+                          <div class="table-cell-primary">
+                            <span><%= video.videoName %></span>
+                          </div>
+                        </td>
+                        <td><%= video.numberOfWatches || 0 %></td>
+                        <td><%= video.lastWatch ? new Date(video.lastWatch).toLocaleString('ar-EG') : 'غير معروف' %></td>
+                        <td>
+                          <div class="table-actions">
+                            <a href="/teacher/videos/<%= video.videoId %>" class="btn btn-sm btn-outline">
+                              <i class="fas fa-eye"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="4" class="empty-table">
+                        <div class="empty-state">
+                          <i class="fas fa-video"></i>
+                          <p>هذا الطالب لم يشاهد أي فيديوهات بعد</p>
+                        </div>
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الحذف</h3>
+        <button class="modal-close" id="closeDeleteModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center;">
+          <div class="modal-icon danger">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <p style="font-size: 1.1rem; margin-bottom: 0.75rem;">هل أنت متأكد من حذف حساب الطالب "<%= student.Username %>"؟</p>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">لا يمكن التراجع عن هذا الإجراء</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelDelete">إلغاء</button>
+        <button class="btn btn-danger" id="confirmDelete" data-id="<%= student._id %>">حذف</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Status Change Modal -->
+  <div class="modal-overlay" id="statusModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="statusModalTitle">تغيير حالة الطالب</h3>
+        <button class="modal-close" id="closeStatusModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center;">
+          <div class="modal-icon success" id="statusIconContainer">
+            <i id="statusIcon" class="fas fa-check-circle"></i>
+          </div>
+          <p id="statusConfirmText" style="font-size: 1.1rem;">هل أنت متأكد من تغيير حالة هذا الطالب؟</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelStatus">إلغاء</button>
+        <button class="btn btn-primary" id="confirmStatus" data-id="<%= student._id %>" data-action="">تأكيد</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Chapter Remove Modal -->
+  <div class="modal-overlay" id="chapterRemoveModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">إلغاء اشتراك الفصل</h3>
+        <button class="modal-close" id="closeChapterRemoveModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center;">
+          <div class="modal-icon warning">
+            <i class="fas fa-book"></i>
+          </div>
+          <p id="chapterRemoveText" style="font-size: 1.1rem;">هل أنت متأكد من إلغاء اشتراك الطالب في هذا الفصل؟</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelChapterRemove">إلغاء</button>
+        <button class="btn btn-warning" id="confirmChapterRemove" data-student="" data-chapter="">تأكيد</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Tab Functionality
+    const tabs = document.querySelectorAll('.section-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Hide all tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+    
+    // Delete Modal
+    const deleteModal = document.getElementById('deleteModal');
+    const closeDeleteModal = document.getElementById('closeDeleteModal');
+    const cancelDelete = document.getElementById('cancelDelete');
+    const confirmDelete = document.getElementById('confirmDelete');
+    const deleteStudentBtn = document.querySelector('.delete-student');
+    
+    if (deleteStudentBtn) {
+      deleteStudentBtn.addEventListener('click', function() {
+        deleteModal.classList.add('show');
+      });
+    }
+    
+    function closeDeleteModalFunc() {
+      deleteModal.classList.remove('show');
+    }
+    
+    if (closeDeleteModal) {
+      closeDeleteModal.addEventListener('click', closeDeleteModalFunc);
+    }
+    
+    if (cancelDelete) {
+      cancelDelete.addEventListener('click', closeDeleteModalFunc);
+    }
+    
+    if (confirmDelete) {
+      confirmDelete.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        deleteModal.classList.remove('show');
+        
+        fetch(`/teacher/students/${studentId}/delete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/teacher/students?success=تم حذف الطالب بنجاح';
+          } else {
+            alert(data.message || 'حدث خطأ أثناء حذف الطالب');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('حدث خطأ أثناء حذف الطالب');
+        });
+      });
+    }
+    
+    // Status Change Modal
+    const statusModal = document.getElementById('statusModal');
+    const closeStatusModal = document.getElementById('closeStatusModal');
+    const cancelStatus = document.getElementById('cancelStatus');
+    const confirmStatus = document.getElementById('confirmStatus');
+    const statusModalTitle = document.getElementById('statusModalTitle');
+    const statusIconContainer = document.getElementById('statusIconContainer');
+    const statusIcon = document.getElementById('statusIcon');
+    const statusConfirmText = document.getElementById('statusConfirmText');
+    
+    // Approve Student
+    const approveStudentBtn = document.querySelector('.approve-student');
+    if (approveStudentBtn) {
+      approveStudentBtn.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        
+        statusModalTitle.textContent = 'تفعيل حساب الطالب';
+        statusIconContainer.className = 'modal-icon success';
+        statusIcon.className = 'fas fa-check-circle';
+        statusIcon.style.color = '';
+        statusConfirmText.textContent = 'هل أنت متأكد من تفعيل حساب هذا الطالب؟';
+        confirmStatus.className = 'btn btn-success';
+        confirmStatus.textContent = 'تفعيل';
+        confirmStatus.setAttribute('data-action', 'approve');
+        
+        statusModal.classList.add('show');
+      });
+    }
+    
+    // Block Student
+    const blockStudentBtn = document.querySelector('.block-student');
+    if (blockStudentBtn) {
+      blockStudentBtn.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        
+        statusModalTitle.textContent = 'إيقاف حساب الطالب';
+        statusIconContainer.className = 'modal-icon warning';
+        statusIcon.className = 'fas fa-ban';
+        statusIcon.style.color = '';
+        statusConfirmText.textContent = 'هل أنت متأكد من إيقاف حساب هذا الطالب؟';
+        confirmStatus.className = 'btn btn-warning';
+        confirmStatus.textContent = 'إيقاف';
+        confirmStatus.setAttribute('data-action', 'block');
+        
+        statusModal.classList.add('show');
+      });
+    }
+    
+    function closeStatusModalFunc() {
+      statusModal.classList.remove('show');
+    }
+    
+    if (closeStatusModal) {
+      closeStatusModal.addEventListener('click', closeStatusModalFunc);
+    }
+    
+    if (cancelStatus) {
+      cancelStatus.addEventListener('click', closeStatusModalFunc);
+    }
+    
+    if (confirmStatus) {
+      confirmStatus.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        const action = this.getAttribute('data-action');
+        statusModal.classList.remove('show');
+        
+        const endpoint = action === 'approve' ? 
+          `/teacher/students/${studentId}/approve` : 
+          `/teacher/students/${studentId}/reject`;
+        
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            const errorMessage = action === 'approve' ? 'حدث خطأ أثناء تفعيل الحساب' : 'حدث خطأ أثناء إيقاف الحساب';
+            alert(data.message || errorMessage);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          const errorMessage = action === 'approve' ? 'حدث خطأ أثناء تفعيل الحساب' : 'حدث خطأ أثناء إيقاف الحساب';
+          alert(errorMessage);
+        });
+      });
+    }
+    
+    // Chapter Remove Modal
+    const chapterRemoveModal = document.getElementById('chapterRemoveModal');
+    const closeChapterRemoveModal = document.getElementById('closeChapterRemoveModal');
+    const cancelChapterRemove = document.getElementById('cancelChapterRemove');
+    const confirmChapterRemove = document.getElementById('confirmChapterRemove');
+    
+    // Remove Chapter Access
+    document.querySelectorAll('.remove-chapter').forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-student');
+        const chapterId = this.getAttribute('data-chapter');
+        const chapterName = this.getAttribute('data-name');
+        
+        document.getElementById('chapterRemoveText').textContent = `هل أنت متأكد من إلغاء اشتراك الطالب في فصل "${chapterName}"؟`;
+        confirmChapterRemove.setAttribute('data-student', studentId);
+        confirmChapterRemove.setAttribute('data-chapter', chapterId);
+        chapterRemoveModal.classList.add('show');
+      });
+    });
+    
+    function closeChapterRemoveModalFunc() {
+      chapterRemoveModal.classList.remove('show');
+    }
+    
+    if (closeChapterRemoveModal) {
+      closeChapterRemoveModal.addEventListener('click', closeChapterRemoveModalFunc);
+    }
+    
+    if (cancelChapterRemove) {
+      cancelChapterRemove.addEventListener('click', closeChapterRemoveModalFunc);
+    }
+    
+    if (confirmChapterRemove) {
+      confirmChapterRemove.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-student');
+        const chapterId = this.getAttribute('data-chapter');
+        chapterRemoveModal.classList.remove('show');
+        
+        fetch(`/teacher/students/${studentId}/chapters/${chapterId}/remove`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert(data.message || 'حدث خطأ أثناء إلغاء اشتراك الطالب');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('حدث خطأ أثناء إلغاء اشتراك الطالب');
+        });
+      });
+    }
+    
+    // Toast notification function
+    function showToast(type, message) {
+      // Create toast container if it doesn't exist
+      let toastContainer = document.getElementById('toastContainer');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.cssText = 'position: fixed; top: 20px; left: 20px; z-index: 9999;';
+        document.body.appendChild(toastContainer);
+      }
+      
+      // Create toast
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.style.cssText = `
+        min-width: 250px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        animation: fadeIn 0.3s ease;
+        background-color: ${type === 'success' ? '#4caf50' : '#f44336'};
+        color: white;
+      `;
+      
+      toast.innerHTML = `
+        <div style="display: flex; align-items: center;">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="margin-left: 10px;"></i>
+          <span>${message}</span>
+        </div>
+        <button style="background: none; border: none; color: white; cursor: pointer;">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      // Add close functionality
+      toast.querySelector('button').addEventListener('click', function() {
+        toast.remove();
+      });
+      
+      // Auto remove after 5 seconds
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+  </script>
+</body>
+</html> 

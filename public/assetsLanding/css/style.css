@@ -1,0 +1,179 @@
+/* Global Styles */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+@font-face {
+  font-family: "Noto Kufi Arabic";
+  src: url("path-to-your-font.woff2") format("woff2");
+  font-display: swap;
+}
+html {
+  visibility: hidden;
+  scroll-behavior: smooth;
+}
+
+html.darkmode,
+html:not(.darkmode) {
+  visibility: visible;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--body-color);
+  overflow-x: hidden;
+  transition: var(--main-transition);
+  font-family: "Noto Kufi Arabic", sans-serif;
+  font-weight: bold;
+}
+
+a,
+i,
+p,
+h1,
+h2,
+h3 {
+  color: var(--tags-color);
+  transition: var(--secoundery-transition);
+}
+
+p {
+  line-height: 2.2;
+  opacity: 0.8;
+}
+
+button {
+  font-family: "Noto Kufi Arabic", sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:active,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover {
+  -webkit-box-shadow: inset 0 0 0 30px var(--input-selection-background) !important;
+  -webkit-text-fill-color: var(--tags-color) !important;
+  border: none;
+}
+
+/* Root Variables */
+:root {
+  --light-bg: #eee;
+  --section-outer-space: 100px;
+  --section-inner-space: 100px;
+  --body-color: #fff;
+  --primary-color: rgba(238, 118, 5, 0.911);
+  --section-color: white;
+  --input-selection-background: rgb(232, 240, 254);
+  --tags-color: #111827;
+  --boxSizing-color: inset 6px 6px 10px 0 rgba(0, 0, 0, 0.1),
+    inset -6px -6px 10px 0 rgba(217, 217, 217, 0.6);
+  --danger--color: #ffbe31;
+  --secoundery-color: #ffb003;
+  --third-color: #3992b3;
+  --main-transition: background-color 0.3s ease-in-out;
+  --secoundery-transition: color 0.3s ease-in-out;
+}
+
+.darkmode {
+  --input-selection-background: rgba(23, 26, 32, 0.8);
+  --light-bg: #101724;
+  --tags-color: white;
+  --body-color: #080c14;
+  --boxSizing-color: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Container */
+.container {
+  padding: 0 15px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 750px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    width: 970px;
+  }
+}
+
+@media (min-width: 1222px) {
+  .container {
+    width: 1200px;
+  }
+}
+
+/* Section Title */
+.Section-title {
+  display: flex;
+  justify-content: center;
+  transition: var(--main-transition);
+  margin: var(--section-outer-space) auto;
+  width: 100%;
+}
+
+.Section-title h1 {
+  position: relative;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 45px;
+}
+
+.Section-title h1::before {
+  content: "";
+  position: absolute;
+  height: 3px;
+  background-color: var(--primary-color);
+  width: 50%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.Section-title span {
+  color: var(--primary-color);
+}
+
+.section-line {
+  width: 400px;
+}
+
+.grade-select{
+  float: right;
+  top: 0;
+  direction: ltr;
+  /* width: 100%; */
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid #e5e5e5;
+  margin: 10px 0;
+  font-size: 16px;
+  background-color: #f9f9f9;
+}
+
+@media (max-width: 476px) {
+  .Section-title {
+    margin: 50px 0;
+  }
+
+  .Section-title h1 {
+    font-size: 30px;
+  }
+
+  .section-line {
+    width: 250px;
+  }
+}

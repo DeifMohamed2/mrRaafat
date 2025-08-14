@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= chapter.chapterName %> - الفيديوهات</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/student-modern.css">
+    
+    <style>
+        .page-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2.5rem 0;
+            margin-bottom: 2rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            position: relative;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .video-card:hover .video-thumbnail img {
+            transform: scale(1.05);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .video-card:hover .video-overlay {
+            opacity: 1;
+        }
+        
+        .video-info {
+            padding: 1.5rem;
+        }
+        
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+        
+        .video-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .video-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-free {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-paid {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-owned {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .watches-indicator {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+        
+        .section-header {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid;
+        }
+        
+        .section-lectures { border-left-color: #007bff; }
+        .section-summaries { border-left-color: #28a745; }
+        .section-solvings { border-left-color: #ffc107; }
+        
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        
+        .btn-success-modern {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn-warning-modern {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: #212529;
+        }
+        
+        .btn-outline-modern {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            color: #495057;
+        }
+        
+        .btn-outline-modern:hover {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        .access-denied {
+            background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%);
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .floating-stats {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            color: #495057;
+        }
+        
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .page-hero {
+                padding: 1.5rem 0;
+            }
+            
+            .video-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+  <body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/student/dash" class="sidebar-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    منصة الشهادة
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/student/dash" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">dashboard</i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="/student/chapters" class="nav-link active">
+                        <i class="material-icons-outlined nav-icon">library_books</i>
+                        <span>الأبواب التعليمية</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="/student/exams" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">quiz</i>
+                        <span>الامتحانات</span>
+                    </a>
+        </div>
+                
+                <div class="nav-item">
+                    <a href="/student/PDFs" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">description</i>
+                        <span>المواد التعليمية</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="/student/ranking" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">leaderboard</i>
+                        <span>التصنيف</span>
+                    </a>
+              </div>
+                
+                <div class="nav-item">
+                    <a href="/student/settings" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">settings</i>
+                        <span>الإعدادات</span>
+                    </a>
+            </div>
+            
+                <div class="nav-item">
+                    <a href="/student/logOut" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">logout</i>
+                        <span>تسجيل الخروج</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Hero -->
+            <div class="page-hero">
+                <div class="container">
+                    <div class="d-flex align-items-center mb-3">
+                        <a href="/student/chapter/<%= chapterId %>" class="btn btn-light btn-modern me-3">
+                            <i class="fas fa-arrow-right"></i>
+                            العودة للباب
+                    </a>
+                        <div class="badge bg-primary">فيديوهات</div>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-2"><%= chapter.chapterName %></h1>
+                    <p class="lead mb-0">استكشف جميع الفيديوهات التعليمية في هذا الباب</p>
+              </div>
+            </div>
+
+            <div class="container">
+            <!-- Access Alert -->
+            <% if (!hasChapterAccess) { %>
+                <div class="access-denied">
+                    <i class="fas fa-lock fa-3x text-danger mb-3"></i>
+                    <h4 class="text-danger">هذا الباب غير متاح</h4>
+                    <p class="text-muted mb-3">يجب شراء الباب أولاً للوصول إلى جميع فيديوهاته</p>
+                    <a href="/student/chapter/<%= chapterId %>" class="btn btn-primary-modern">
+                        <i class="fas fa-key"></i>
+                        شراء الباب
+                    </a>
+            </div>
+            <% } %>
+
+              <!-- Lectures Section -->
+              <% if (chapter.chapterLectures && chapter.chapterLectures.length > 0) { %>
+                <div class="section-header section-lectures">
+                    <h3 class="mb-0">
+                        <i class="fas fa-play-circle text-primary me-2"></i>
+                        الدروس الأساسية
+                        <span class="badge bg-primary ms-2"><%= chapter.chapterLectures.length %></span>
+                    </h3>
+                  </div>
+                <div class="video-grid">
+                    <% chapter.chapterLectures.forEach((lecture, index) => { 
+                        const videoInfo = userData.videosInfo ? userData.videosInfo.find(v => v._id.toString() === lecture._id.toString()) : null;
+                        const watchesLeft = videoInfo ? Math.max(0, (videoInfo.videoAllowedAttemps || 3) - (videoInfo.numberOfWatches || 0)) : 3;
+                        const hasAccess = hasChapterAccess || (userData.videosPaid && userData.videosPaid.includes(lecture._id.toString()));
+                    %>
+                        <div class="video-card">
+                        <div class="video-thumbnail">
+                            <% if (lecture.imgURL && lecture.imgURL.trim() !== '') { %>
+                                <img src="<%= lecture.imgURL %>" alt="<%= lecture.lectureName || lecture.videoTitle %>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <% } else { %>
+                                <i class="fas fa-play-circle fa-4x text-primary opacity-50"></i>
+                            <% } %>
+                            <div class="floating-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span><%= lecture.lectureDuration || '30' %>د</span>
+                                </div>
+                                <% if (hasAccess && videoInfo) { %>
+                                <div class="stat-item">
+                                    <i class="fas fa-redo"></i>
+                                    <span><%= watchesLeft %></span>
+                                </div>
+                                <% } %>
+                            </div>
+                            <div class="video-overlay">
+                                <% if (hasAccess) { %>
+                                    <a href="/student/chapter/<%= chapterId %>/video/<%= lecture._id %>" class="btn btn-primary-modern btn-lg">
+                                  <i class="fas fa-play"></i>
+                                        مشاهدة الآن
+                                </a>
+                              <% } else { %>
+                                    <button class="btn btn-warning-modern btn-lg" onclick="showPurchaseModal('<%= lecture._id %>', '<%= lecture.lectureName || lecture.videoTitle %>', '<%= lecture.lecturePrice || lecture.price || '25' %>')">
+                                        <i class="fas fa-lock"></i>
+                                        <%= lecture.lecturePrice || lecture.price || '25' %> جنيه
+                                </button>
+                              <% } %>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h5 class="video-title"><%= lecture.lectureName || lecture.videoTitle %></h5>
+                            <div class="video-meta">
+                                <div class="d-flex gap-2">
+                                    <div class="meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span><%= lecture.views || 0 %></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>الدرس <%= index + 1 %></span>
+                                    </div>
+                                </div>
+                                <% if (lecture.paymentStatus === 'Free') { %>
+                                <span class="status-badge status-free">مجاني</span>
+                                <% } else if (hasAccess) { %>
+                                <span class="status-badge status-owned">مملوك</span>
+                                <% } else { %>
+                                <span class="status-badge status-paid"><%= lecture.lecturePrice || lecture.price || '25' %> جنيه</span>
+                                <% } %>
+                            </div>
+                            <div class="video-actions">
+                                <% if (hasAccess) { %>
+                                    <% if (watchesLeft<=0) { %>
+                                    
+                                        <div class="text-success small">
+                                        <i class="fas fa-check-circle"></i>
+                                        تم المشاهدة
+                                    </div>
+                                    <% } else { %>
+                                   <a href="/student/chapter/<%= chapterId %>/video/<%= solving._id %>" class="btn btn-warning-modern flex-fill">
+                                        <i class="fas fa-play"></i>
+                                        مشاهدة
+                                    </a>
+                                    <% } %>
+                                <% } else { %>
+                                    <button class="btn btn-outline-modern flex-fill" onclick="showPurchaseModal('<%= lecture._id %>', '<%= lecture.lectureName || lecture.videoTitle %>', '<%= lecture.lecturePrice || lecture.price || '25' %>')">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        شراء الفيديو
+                                    </button>
+                                <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      <% }); %>
+              </div>
+              <% } %>
+
+              <!-- Summaries Section -->
+              <% if (chapter.chapterSummaries && chapter.chapterSummaries.length > 0) { %>
+                <div class="section-header section-summaries">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bookmark text-success me-2"></i>
+                        الملخصات والمراجعات
+                        <span class="badge bg-success ms-2"><%= chapter.chapterSummaries.length %></span>
+                    </h3>
+                  </div>
+                <div class="video-grid">
+                    <% chapter.chapterSummaries.forEach((summary, index) => { 
+                        const videoInfo = userData.videosInfo ? userData.videosInfo.find(v => v._id.toString() === summary._id.toString()) : null;
+                        const watchesLeft = videoInfo ? Math.max(0, (videoInfo.videoAllowedAttemps || 3) - (videoInfo.numberOfWatches || 0)) : 3;
+                        const hasAccess = hasChapterAccess || (userData.videosPaid && userData.videosPaid.includes(summary._id.toString()));
+                    %>
+                        <div class="video-card">
+                        <div class="video-thumbnail">
+                            <% if (summary.imgURL && summary.imgURL.trim() !== '') { %>
+                                <img src="<%= summary.imgURL %>" alt="<%= summary.lectureName || summary.videoTitle %>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <% } else { %>
+                                <i class="fas fa-bookmark fa-4x text-success opacity-50"></i>
+                            <% } %>
+                            <div class="floating-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span><%= summary.lectureDuration || '20' %>د</span>
+                                </div>
+                                <% if (hasAccess && videoInfo) { %>
+                                <div class="stat-item">
+                                    <i class="fas fa-redo"></i>
+                                    <span><%= watchesLeft %></span>
+                                </div>
+                                <% } %>
+                            </div>
+                            <div class="video-overlay">
+                                <% if (hasAccess) { %>
+                                    <a href="/student/chapter/<%= chapterId %>/video/<%= summary._id %>" class="btn btn-success-modern btn-lg">
+                                  <i class="fas fa-play"></i>
+                                        مشاهدة الآن
+                                </a>
+                              <% } else { %>
+                                    <button class="btn btn-warning-modern btn-lg" onclick="showPurchaseModal('<%= summary._id %>', '<%= summary.lectureName || summary.videoTitle %>', '<%= summary.lecturePrice || summary.price || '15' %>')">
+                                        <i class="fas fa-lock"></i>
+                                        <%= summary.lecturePrice || summary.price || '15' %> جنيه
+                                </button>
+                              <% } %>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h5 class="video-title"><%= summary.lectureName || summary.videoTitle %></h5>
+                            <div class="video-meta">
+                                <div class="d-flex gap-2">
+                                    <div class="meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span><%= summary.views || 0 %></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-bookmark"></i>
+                                        <span>المراجعة <%= index + 1 %></span>
+                                    </div>
+                                </div>
+                                <% if (summary.paymentStatus === 'Free') { %>
+                                <span class="status-badge status-free">مجاني</span>
+                                <% } else if (hasAccess) { %>
+                                <span class="status-badge status-owned">مملوك</span>
+                                <% } else { %>
+                                <span class="status-badge status-paid"><%= summary.lecturePrice || summary.price || '15' %> جنيه</span>
+                                <% } %>
+                            </div>
+                            <div class="video-actions">
+                                <% if (hasAccess) { %>
+                                    <% if (watchesLeft<=0) { %>
+                                    
+                                        <div class="text-success small">
+                                        <i class="fas fa-check-circle"></i>
+                                        تم المشاهدة
+                                    </div>
+                                    <% } else { %>
+                                   <a href="/student/chapter/<%= chapterId %>/video/<%= solving._id %>" class="btn btn-warning-modern flex-fill">
+                                        <i class="fas fa-play"></i>
+                                        مشاهدة
+                                    </a>
+                                    <% } %>
+                                <% } else { %>
+                                    <button class="btn btn-outline-modern flex-fill" onclick="showPurchaseModal('<%= summary._id %>', '<%= summary.lectureName || summary.videoTitle %>', '<%= summary.lecturePrice || summary.price || '15' %>')">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        شراء الفيديو
+                                    </button>
+                                <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      <% }); %>
+              </div>
+              <% } %>
+
+              <!-- Solvings Section -->
+              <% if (chapter.chapterSolvings && chapter.chapterSolvings.length > 0) { %>
+                <div class="section-header section-solvings">
+                    <h3 class="mb-0">
+                        <i class="fas fa-calculator text-warning me-2"></i>
+                        الحلول والتطبيقات
+                        <span class="badge bg-warning ms-2"><%= chapter.chapterSolvings.length %></span>
+                    </h3>
+                  </div>
+                <div class="video-grid">
+                    <% chapter.chapterSolvings.forEach((solving, index) => { 
+                        const videoInfo = userData.videosInfo ? userData.videosInfo.find(v => v._id.toString() === solving._id.toString()) : null;
+                        const watchesLeft = videoInfo ? Math.max(0, (videoInfo.videoAllowedAttemps || 3) - (videoInfo.numberOfWatches || 0)) : 3;
+                        const hasAccess = hasChapterAccess || (userData.videosPaid && userData.videosPaid.includes(solving._id.toString()));
+                    %>
+                        <div class="video-card">
+                        <div class="video-thumbnail">
+                            <% if (solving.imgURL && solving.imgURL.trim() !== '') { %>
+                                <img src="<%= solving.imgURL %>" alt="<%= solving.lectureName || solving.videoTitle %>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <% } else { %>
+                                <i class="fas fa-calculator fa-4x text-warning opacity-50"></i>
+                            <% } %>
+                            <div class="floating-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span><%= solving.lectureDuration || '35' %>د</span>
+                                </div>
+                                <% if (hasAccess && videoInfo) { %>
+                                <div class="stat-item">
+                                    <i class="fas fa-redo"></i>
+                                    <span><%= watchesLeft %></span>
+                                </div>
+                                <% } %>
+                            </div>
+                            <div class="video-overlay">
+                                <% if (hasAccess) { %>
+                                    <a href="/student/chapter/<%= chapterId %>/video/<%= solving._id %>" class="btn btn-warning-modern btn-lg">
+                                  <i class="fas fa-play"></i>
+                                        مشاهدة الآن
+                                </a>
+                              <% } else { %>
+                                    <button class="btn btn-warning-modern btn-lg" onclick="showPurchaseModal('<%= solving._id %>', '<%= solving.lectureName || solving.videoTitle %>', '<%= solving.lecturePrice || solving.price || '20' %>')">
+                                        <i class="fas fa-lock"></i>
+                                        <%= solving.lecturePrice || solving.price || '20' %> جنيه
+                                </button>
+                              <% } %>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h5 class="video-title"><%= solving.lectureName || solving.videoTitle %></h5>
+                            <div class="video-meta">
+                                <div class="d-flex gap-2">
+                                    <div class="meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span><%= solving.views || 0 %></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calculator"></i>
+                                        <span>الحل <%= index + 1 %></span>
+                                    </div>
+                                </div>
+                                <% if (solving.paymentStatus === 'Free') { %>
+                                <span class="status-badge status-free">مجاني</span>
+                                <% } else if (hasAccess) { %>
+                                <span class="status-badge status-owned">مملوك</span>
+                                <% } else { %>
+                                <span class="status-badge status-paid"><%= solving.lecturePrice || solving.price || '20' %> جنيه</span>
+                                <% } %>
+                            </div>
+                            <div class="video-actions">
+                                <% if (hasAccess) { %>
+                                    <% if (watchesLeft<=0) { %>
+                                    
+                                        <div class="text-success small">
+                                        <i class="fas fa-check-circle"></i>
+                                        تم المشاهدة
+                                    </div>
+                                    <% } else { %>
+                                   <a href="/student/chapter/<%= chapterId %>/video/<%= solving._id %>" class="btn btn-warning-modern flex-fill">
+                                        <i class="fas fa-play"></i>
+                                        مشاهدة
+                                    </a>
+                                    <% } %>
+                                <% } else { %>
+                                    <button class="btn btn-outline-modern flex-fill" onclick="showPurchaseModal('<%= solving._id %>', '<%= solving.lectureName || solving.videoTitle %>', '<%= solving.lecturePrice || solving.price || '20' %>')">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        شراء الفيديو
+                                    </button>
+                                <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      <% }); %>
+              </div>
+              <% } %>
+
+              <!-- No Videos Message -->
+              <% if ((!chapter.chapterLectures || chapter.chapterLectures.length === 0) && 
+                     (!chapter.chapterSummaries || chapter.chapterSummaries.length === 0) && 
+                     (!chapter.chapterSolvings || chapter.chapterSolvings.length === 0)) { %>
+                <div class="text-center py-5">
+                    <i class="fas fa-video fa-4x text-muted mb-4"></i>
+                  <h4 class="text-muted">لا توجد فيديوهات متاحة حالياً</h4>
+                  <p class="text-muted">سيتم إضافة المحتوى قريباً</p>
+              </div>
+              <% } %>
+            </div>
+          </main>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">شراء الفيديو</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body text-center">
+                    <i class="fas fa-video fa-3x text-primary mb-3"></i>
+            <h5 id="videoName"></h5>
+            <p class="text-muted">هل تريد شراء هذا الفيديو؟</p>
+                    <div class="h4 text-primary" id="videoPrice"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-primary" id="confirmPurchase">شراء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none;">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    let selectedVideoId = '';
+
+    function showPurchaseModal(videoId, videoName, price) {
+      selectedVideoId = videoId;
+      document.getElementById('videoName').textContent = videoName;
+      document.getElementById('videoPrice').textContent = price + ' جنيه';
+      new bootstrap.Modal(document.getElementById('purchaseModal')).show();
+    }
+
+    document.getElementById('confirmPurchase').addEventListener('click', function() {
+      if (selectedVideoId) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/student/chapter/<%= chapterId %>/video/${selectedVideoId}/buy`;
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('open');
+        }
+
+        // Mobile responsive handling
+        function handleResize() {
+            if (window.innerWidth <= 1024) {
+                document.querySelector('.mobile-menu-toggle').style.display = 'block';
+            } else {
+                document.querySelector('.mobile-menu-toggle').style.display = 'none';
+                document.querySelector('.sidebar').classList.remove('open');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const toggleBtn = document.querySelector('.mobile-menu-toggle');
+            
+            if (window.innerWidth <= 1024 && 
+                !sidebar.contains(event.target) && 
+                !toggleBtn.contains(event.target) &&
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+      }
+    });
+    </script>
+  </body>
+</html> 

@@ -1,148 +1,169 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="max-age=31536000, immutable" />
+
+    <!-- Preconnect to speed up font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Optimize font loading -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arima:wght@100..700&family=Noto+Kufi+Arabic:wght@100..900&family=Viga&display=swap"
+      rel="stylesheet"
+      rel="preload"
+      as="style"
+    />
+    <!-- Favicon -->
+    <!-- <link
+      rel="icon"
+      href="assetsLanding/img/headerIMG.webp"
+      type="image/webp"
+    /> -->
+    <!-- Consolidate and defer CSS loading -->
+    <link rel="stylesheet" href="assetsLanding/css/all.min.css" />
+    <link rel="stylesheet" href="assetsLanding/css/header.css" />
+    <link rel="stylesheet" href="assetsLanding/css/style.css" />
+    <link rel="stylesheet" href="assetsLanding/css/main.css" />
+
+    <!-- Avoid unused links -->
+    <!-- Removed the unused 'webfonts/' directory reference -->
+
+    <title>الشهادة</title>
+  </head>
+  <body>
+    <!-- Start Header -->
+    <header>
     <%- include("./partials/head.ejs") %>
 
-<body>
-    <%- include("./partials/nav.ejs") %>
-
-    <!--========================== END OF NAVBAR ============================-->
-    <header>
-        <div class="container header__container">
-            <div class="header__left box-right  animate__animated animate__fadeInRight ">
-                <h1>     علم اللغة العربية هو فن تذوق المعاني بدلاً من مجرد قراءة الكلمات. </h1>
-                <p>
-
-
-                
-تجربة فريدة لتعلم ممتع، سجل الآن واستمتع بتعلم اللغة العربية كما لم ترها من قبل.
-                   
-                </p>
-                <a href="/login" class="btn btn-primary box-right " style="color: #fff !important;">سجل الدخول</a><span class="aw">او</span>
-                <a  id="Features" class="btn btn-secondey box-right">اضغط هنا للتعرف علي جميع المزايا</a>
-            </div>
-            <div class="header__right box-left animate__animated animate__fadeInLeft">
-                <!-- <div class="bubbles ">
-                    <span class="bub a "> <img src="images/icon3.png" alt="DNA"></span>
-                    <span class="bub b "> <img src="images/icon5.png" alt="flask"></span>
-                    <span class="bub c "> <img src="images/brain.png" alt="book"></span>
-                </div> -->
-                <div class="header__right-image">
-                    <img src="images/rda.png">
-                </div>
-            </div>
-        </div>
     </header>
-
-
-
-    <!--========================== END OF HEADER ============================-->
-
-<main>
-    <section class="categories">
-        <div class="container categories__container">
-            <div class="categories__left box-right">
-                <h1>الاماكن</h1>
-                <p>
-                    يمكنك من هنا التعرف علي جميع اماكن مستر رأفت سبع الليل او يمكنك الحجز اون لاين عن طريق الحجز الالكتروني
-                </p>
-                <a href="/Register" class="btn info "> حجز الكتروني </a>
-            </div>
-
-            <div class="categories__right ">
-                <article class="category box-left"  >
-                   
-                    <h3>القناطر الخيرية</h3>
-                    <p style="color:black">ارض بني - ش حضانه الشروق منزل رأفت سبع الليل</p>
-
-                    <ul class="teachers-info">
-                       <!-- <h4>الاول الثانوي  </h4>
-                        <li style="font-weight: bolder; margin-top: 0.5rem;"> الاحد 6:00pm </li>
-                        <li style="font-weight: bolder; margin-bottom: 0.3rem;">الخميس 3:30pm</li>
-                        <h4>الثاني الثانوي  </h4>
-                        <li style="font-weight: bolder; margin-top: 0.5rem; ">الأحد 4:00pm</li>
-                        <li style="font-weight: bolder; ">الخميس 5:30pm</li> -->
-                    </ul>
-                </article>
-     
-                
-            </div>
+    <!-- Start Landing -->
+    <div class="Landing-page">
+      <div class="container">
+        <div class="Landing-page_left">
+          <!-- <img src="assetsLanding/img/headerIMG.webp" alt="" loading="lazy" /> -->
         </div>
-    </section>
-
-    <!--====================== END OF CATEGORIES =====================-->
-
-   <section class="featuers" id="featuers">
-    <div class="container">
-        <div class="featuers-title text-center ">
-            <h2>
-                <i class="fas fa-graduation-cap"></i>
-                 تعرف علي جميع المزايا 
-            </h2>
+        <div class="Landing-page_right">
+          <h2>منصة <span class="largefont">الشهادة</span></h2>
+          <p class="enhanced-text">
+            منصة متكاملة بها كل ما يحتاجه الطالب ليتفوق
+          </p>
+          <div class="line-between"></div>
+          <div class="Landing-btns">
+            <!-- <button class="Landing-btn-enroll">اطلب الكتاب من هنا</button> -->
+            <!-- <div class="line-btween"></div> -->
+            <a href="Register">
+            <button class="Landing-btn-book">
+              ابدأ رحلتك <span>الأن</span>
+            </button>
+            </a>
+          </div>
         </div>
-        <ul class="timeline">
-            <li>
-                <div class="timebox">
-                    <h4> امتحانات الكترونية اسبوعية </h4>
-                    <p>
-                        امتحان اسبوعي علي كل حصه والي بيساعدك انك تحل اكبر عدد من الاسئله وتكون جاهز لامتحانات اكبر
-                    </p>
-                </div>
-            </li>
-            <li>
-                <div class="timebox">
-                    <h4>  فيدوهات تعليمية  </h4>
-                    <p>
-                        فيدوهات تعليمية باعلي جوده ومؤمنه بشكل كامل
-                    </p>
-                </div>
-            </li>
-            <li>
-                <div class="timebox">
-                    <h4>  مسابقات وجوائز   </h4>
-                    <p>
-                        مسابقات بين الطلاب بشكل دوري حتي يتم تحفيز الطالب علي المذاكرة بجِد والاستعداد دائما
-                    </p>
-                </div>
-            </li>
-            <li>
-                <div class="timebox">
-                    <h4> تجربه سلسه وممتعه في الاستخدام</h4>
-                    <p>
-                        تم اختيار كل شيء لكي يكون مهيء للتعليم الالكتروني بشكل سلس من الالوان وحتي اختيار اماكن الازرار
-                    </p>
-                </div>
-            </li>
-        </ul>
+      </div>
     </div>
-    </section>
-     <!--========================== END OF TEAM ============================-->
+    <!-- End Landing -->
+
+    <!-- Start main-->
+    <main>
+      <section class="Intro" id="information">
+        <div class="Section-title">
+          <div class="section-line">
+            <h1>مع منصة <span>الشهادة</span></h1>
+          </div>
+        </div>
+        <div class="container">
+          <div class="card">
+            <div class="card-box card-box1">
+              <img
+                src="assetsLanding/img/book-brain_tiny_image (1).webp"
+                loading="lazy"
+                alt=""
+              />
+              <div>
+                <h1>لماذا تختار برنامجنا؟</h1>
+                <p>
+                  و انضم إلينا اليوم واكتشف المزايا التي ستغير تجربتك بشكل
+                  إيجابي لماذا تختار برنامجنا؟ نحن نقدم لك أفضل تجربة ممكنة لدعم
+                  احتياجاتك
+                </p>
+                <button onclick="openVideo()" class="card-box-btn">
+                  <i class="fas fa-book"></i>
+                  <span >تعلم المزيد</span>
+                </button>
+              </div>
+            </div>
+            <div class="card-box card-box2">
+              <div></div>
+              <i class="fa-regular fa-clock"></i>
+              <h3>هـتشارك</h3>
+              <p>مجموعات للمناقشة عشان تسأل وتشارك أفكارك مع زمايلك</p>
+            </div>
+            <div class="card-box card-box3">
+              <i class="fa-regular fa-flag"></i>
+              <h3>هـتنافس</h3>
+              <p>نظام نقط على كل امتحان بتدخلو وهدايا للطلبة النشيطة</p>
+            </div>
+            <div class="card-box card-box4">
+              <i class="fa-regular fa-pen-to-square"></i>
+              <h3>هـنجهزك</h3>
+              <p>مش محتاج تسأل هذاكر إيه النهاردة.. إحنا هنقول لك</p>
+            </div>
+            <div class="card-box card-box5">
+              <i class="fa-regular fa-star"></i>
+              <h3>هـتدرب</h3>
+              <p>امتحانات إلكترونية تقدر تعيدها لحد ما تتقنها</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Teacher Section -->
+      <section>
+        <div class="Section-title">
+         
+          <div class="section-line">
+           
+            <h1>إختار <span>الكورس</span></h1>
+          </div>
+        </div>
     
-    
-       
+        <div class="container">
+        
 
+        </div>
+      </section>
 
-    <!--====================== END OF TESTIMONIALS =====================-->
-</main>
+      <section class="about-teacher">
+        <div class="Section-title">
+          <div class="section-line">
+            <h1>اتعرف <span>علينا</span></h1>
+          </div>
+        </div>
+        <div class="container">
+          <div class="about-teacher-left">
+            <!-- <img
+              src="assetsLanding/img/headerIMG.webp"
+              loading="lazy"
+              alt="فريق منصة الشهادة"
+            /> -->
+          </div>
+          <div class="about-teacher-right">
+            <h1>نحن فريق منصة الشهادة التعليمية</h1>
+            <p>
+              هل تريد إتقان اللغة العربية بطريقة ممتعة وفعّالة؟ انضم إلينا في
+              منصة الشهادة التعليمية! نقدم لك تجربة تعليمية فريدة، حيث المعرفة
+              تلتقي بالإبداع. مع فريق متميز من المعلمين المختصين، نساعدك على
+              استيعاب قواعد اللغة العربية بسهولة، وتطوير مهاراتك في القراءة
+              والكتابة والنطق.
+            </p>
+          </div>
+        </div>
+      </section>
 
-
-<%- include("./partials/footer.ejs") %>
-
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js" integrity="sha512-Eak/29OTpb36LLo2r47IpVzPBLXnAMPAVypbSZiZ4Qkf8p/7S/XRG5xp7OKWPPYfJT6metI+IORkR5G8F900+g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/9.0.5/swiper-bundle.min.js" integrity="sha512-cEcJcdNCHLm3YSMAwsI/NeHFqfgNQvO0C27zkPuYZbYjhKlS9+kqO5hZ9YltQ4GaTDpePDQ2SrEk8gHUVaqxig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
-<script>        window.addEventListener("load", (event) => {
-    console.log(event.composedPath())
-    setTimeout(() => {
-        document.querySelector('.bub.b').style.animation="up-down 5s ease-in-out infinite"
-        document.querySelector('.bub.c').style.animation="up-down 5s ease-in-out infinite"
-        document.querySelector('.bub.a').style.animation="up-down 5s ease-in-out infinite"
-    }, 2500)
-    });
-</script>
-</body>
-
+    </main>
+    <!-- Footer Section -->
+     <%- include("./partials/footer.ejs") %>
+    <script src="assetsLanding/js/script.js" defer></script>
+  </body>
 </html>

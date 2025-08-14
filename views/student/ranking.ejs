@@ -1,172 +1,567 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-    <%- include("./partials/head.ejs") %>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التصنيف - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <style>
+    /* Ranking Page Specific Styles */
+    .ranking-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
 
-    
+    .ranking-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
 
+    .ranking-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .ranking-subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* Search Section */
+    .search-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 25px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .clear-btn {
+      padding: 1rem 1.5rem;
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .clear-btn:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    /* Ranking Table */
+    .ranking-table-container {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ranking-table thead {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    .ranking-table th {
+      padding: 1.5rem 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 2px solid #e2e8f0;
+      font-size: 1.1rem;
+    }
+
+    .ranking-table td {
+      padding: 1.5rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #4b5563;
+      font-size: 1rem;
+    }
+
+    .ranking-table tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    .ranking-table tbody tr:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    /* Rank Badges */
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .rank-1 {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+    }
+
+    .rank-2 {
+      background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+      box-shadow: 0 4px 15px rgba(156, 163, 175, 0.4);
+    }
+
+    .rank-3 {
+      background: linear-gradient(135deg, #cd7f32 0%, #b45309 100%);
+      box-shadow: 0 4px 15px rgba(205, 127, 50, 0.4);
+    }
+
+    .rank-other {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Student Info */
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .student-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .student-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .student-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .student-name {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 1.1rem;
+    }
+
+    .student-code {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    /* Score Display */
+    .score-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .score-icon {
+      color: #10b981;
+      font-size: 1.2rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+
+    .empty-state-text {
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .ranking-container {
+        padding: 1rem;
+      }
+
+      .ranking-header {
+        padding: 2rem 1rem;
+      }
+
+      .ranking-title {
+        font-size: 2rem;
+      }
+
+      .search-form {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .search-input,
+      .search-btn,
+      .clear-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .ranking-table {
+        font-size: 0.9rem;
+      }
+
+      .ranking-table th,
+      .ranking-table td {
+        padding: 1rem 0.5rem;
+      }
+
+      .student-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+
+      .student-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Loading Animation */
+    .slide-in-up {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideInUp 0.6s ease-out forwards;
+    }
+
+    @keyframes slideInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide-in-up:nth-child(1) { animation-delay: 0.1s; }
+    .slide-in-up:nth-child(2) { animation-delay: 0.2s; }
+    .slide-in-up:nth-child(3) { animation-delay: 0.3s; }
+  </style>
+</head>
 <body>
-    <%- include("./partials/preloader.ejs") %>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-2">
-           <%- include("./partials/aside.ejs") %>
-
-            </div>
-
-
-            <!-- Button trigger modal -->
-
-
-        
-            <!--------------------END ASIDE  ------------------>
-
-            <div class=" col-lg-10 ">
-                <main>
-
-                    <div class="row">
-                        <div class="col-md-6">
-
-                        </div>
-                        <div class=" col-md-6 ">
-                            <div class="left">
-                            
-                                <%- include("./partials/top.ejs") %>
-                            
-                                <!-- END OF TOP -->
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-lg-11  col-sm-12">
-                            <div class="student-table" style="margin: 0;">
-                                <form action="" method="get">
-
-                                    <div class="row" style="margin-bottom: 0 !important;">
-                                   
-                                      
-                                        <div class="col-md-6">  
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <button  type="submit" class="primary" ><i class="fa-solid fa-magnifying-glass"></i></button>
-
-                                                </div>
-                                               
-                                                <div class="col-md-1 d-flex justify-content-center align-items-center ">
-                                            
-                                                    <% if (isSearching) { %>
-                                                     
-                                                
-                                                        <button type="button"><a href="/student/ranking" class="primary" style="margin-bottom: 0; margin-top: 0 !important; cursor: pointer;" ><i class="fa-solid fa-x"></i></a></button>
-
-                                                        <% } %>
-
-                                            
-                                                </div>  
-                                          
-                                            </div>
-                                          
-                                        </div>
-
-                                        <div class="col-md-6"> 
-                                            <input type="text" class="mx-auto" name="searchInput" placeholder="بحث..">
-                                        </div>
-                                    </div>
-                                </form>
-                                <table id="myTable">
-                                    <thead>
-                                        <th style="padding: 10px;"># </th>
-                                        <th style="padding-left: 20px;">اسم الطالب</th>
-                                        <th style="padding-left: 20px;">كود الطالب</th>
-                                        <th style="padding-left: 20px;"> مجموع الدرجات </th>
-                                    </thead>
-                                    <tbody id="tbody">
-                                       <% if (rankedUsers&&!isSearching) { %>
-                                            <% counter =1 %>
-                                            <% rankedUsers.forEach(user => { %>
-                                                <tr>
-                                                    <td><%= counter++ %></td>
-                                                    <td><%= user.Username %></td>
-                                                    <td><%= user.Code %></td>
-                                                    <td><%= user.totalScore %></td>
-                                                
-                                                </tr>
-                                            <% }) %>
-                                          
-                                       <% } else {%>
-                                            <% if (rankedUsers&&isSearching) { %>
-                                            
-                                                <% rankedUsers.forEach(user => { %>
-                                                    <tr>
-                                                        <td><%= userRank  %></td>
-                                                        <td><%= user.Username %></td>
-                                                        <td><%= user.Code %></td>
-                                                        <td><%= user.totalScore %></td>
-                                                    </tr>
-                                                <% }) %>
-                                            <% } %>
-                                        <% } %>
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
-
-<!-- 
-                            <div class="pagination justify-content-between">
-                                        
-                                <div>
-
-                                    <% if (nextPage !== null) { %>
-
-                                        
-                                        <a  href="/student/ranking?page=<%= nextPage %>" > <button class="paginationBtns">Next</button> </a>
-
-                               
-
-                                    <% } %>
-                                </div>
-                             
-                            
-                             
-                                <div>
-                                    <% if (previousPage !== null) { %>
-
-
-
-                                            <a  href="/student/ranking?page=<%= previousPage %> " > <button class="paginationBtns">Pervious</button> </a>
-
-                                  
-
-                                    <% } %>
-                                </div>
-                            </div> -->
- 
-                        </div>
-                    </div>
-                </main>
-            </div>
-
-            <!-------------------- END OF MAIN --------------------->
-
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+          <i class="fas fa-graduation-cap"></i>
+          منصة الشهادة
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="/student/dash" class="nav-link">
+            <i class="material-icons-outlined nav-icon">dashboard</i>
+            <span>لوحة التحكم</span>
+          </a>
         </div>
-    </div>
+        
+        <div class="nav-item">
+          <a href="/student/chapters" class="nav-link">
+            <i class="material-icons-outlined nav-icon">library_books</i>
+            <span>الأبواب التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/exams" class="nav-link">
+            <i class="material-icons-outlined nav-icon">quiz</i>
+            <span>الامتحانات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/PDFs" class="nav-link">
+            <i class="material-icons-outlined nav-icon">description</i>
+            <span>المواد التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/ranking" class="nav-link active">
+            <i class="material-icons-outlined nav-icon">leaderboard</i>
+            <span>التصنيف</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/settings" class="nav-link">
+            <i class="material-icons-outlined nav-icon">settings</i>
+            <span>الإعدادات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/logOut" class="nav-link">
+            <i class="material-icons-outlined nav-icon">logout</i>
+            <span>تسجيل الخروج</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
 
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="ranking-container">
+        
+        <!-- Ranking Header -->
+        <div class="ranking-header slide-in-up">
+          <h1 class="ranking-title">تصنيف الطلاب</h1>
+          <p class="ranking-subtitle">شاهد ترتيبك وترتيب زملائك حسب النقاط الإجمالية</p>
+        </div>
 
+        <!-- Search Section -->
+        <div class="search-section slide-in-up">
+          <form class="search-form" method="get">
+            <input 
+              type="text" 
+              class="search-input" 
+              name="searchInput" 
+              placeholder="ابحث عن طالب بالاسم أو الكود..."
+              value="<%= locals.searchInput || '' %>"
+            >
+            <button type="submit" class="search-btn">
+              <i class="fas fa-search"></i>
+              بحث
+            </button>
+            <% if (isSearching) { %>
+              <a href="/student/ranking" class="clear-btn">
+                <i class="fas fa-times"></i>
+                إلغاء
+              </a>
+            <% } %>
+          </form>
+        </div>
 
-    <script src="../assest/bootstrap.bundle.min.js"></script>
-    <script src="../assest/bootstrap.min.js"></script>
+        <!-- Ranking Table -->
+        <div class="ranking-table-container slide-in-up">
+          <% if (rankedUsers && rankedUsers.length > 0) { %>
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>الترتيب</th>
+                  <th>الطالب</th>
+                  <th>كود الطالب</th>
+                  <th>مجموع النقاط</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% rankedUsers.forEach((user, index) => { %>
+                  <% 
+                    const rank = isSearching ? userRank : (index + 1);
+                    const rankClass = rank === 1 ? 'rank-1' : 
+                                     rank === 2 ? 'rank-2' : 
+                                     rank === 3 ? 'rank-3' : 'rank-other';
+                  %>
+                  <tr>
+                    <td>
+                      <div class="rank-badge <%= rankClass %>">
+                        <%= rank %>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="student-info">
+                        <div class="student-avatar">
+                          <% if (user.userPhoto) { %>
+                            <img src="<%= user.userPhoto %>" alt="<%= user.Username %>">
+                          <% } else { %>
+                            <%= user.Username.charAt(0).toUpperCase() %>
+                          <% } %>
+                        </div>
+                        <div class="student-details">
+                          <div class="student-name"><%= user.Username %></div>
+                          <div class="student-code"><%= user.Code %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= user.Code %></td>
+                    <td>
+                      <div class="score-display">
+                        <i class="fas fa-star score-icon"></i>
+                        <%= user.totalScore %> نقطة
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } else { %>
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <div class="empty-state-title">لا يوجد طلاب في التصنيف</div>
+              <div class="empty-state-text">
+                <% if (isSearching) { %>
+                  لم يتم العثور على طلاب يطابقون البحث
+                <% } else { %>
+                  ابدأ في حل الامتحانات لتحصل على نقاط وتظهر في التصنيف
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        </div>
 
+      </div>
+    </main>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
-        integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script type="module" src="./js/ranking.js"></script>
-    <script >
-        module={}
-    </script>
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1001; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <i class="fas fa-bars"></i>
+  </button>
 
+  <script>
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    // Mobile responsive handling
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        document.querySelector('.mobile-menu-toggle').style.display = 'block';
+      } else {
+        document.querySelector('.mobile-menu-toggle').style.display = 'none';
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call on load
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(event) {
+      const sidebar = document.querySelector('.sidebar');
+      const toggleBtn = document.querySelector('.mobile-menu-toggle');
+      
+      if (window.innerWidth <= 1024 && 
+          !sidebar.contains(event.target) && 
+          !toggleBtn.contains(event.target) &&
+          sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // Add loading animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.querySelectorAll('.slide-in-up');
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+        }, index * 100);
+      });
+    });
+  </script>
 </body>
-
-
 </html>

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title">إدارة الطلاب</h1>
+          <div class="page-actions">
+            <button class="btn btn-primary" id="exportBtn">
+              <i class="fas fa-download"></i>
+              تصدير البيانات
+            </button>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= totalStudents %></h3>
+              <p class="stat-label">إجمالي الطلاب</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= activeStudents %></h3>
+              <p class="stat-label">طلاب نشطين</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-user-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= pendingRequests %></h3>
+              <p class="stat-label">طلبات تسجيل</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= Math.round(averageProgress) %>%</h3>
+              <p class="stat-label">متوسط التقدم</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-container">
+          <form action="/teacher/students" method="GET" class="filters-form">
+            <div class="filter-group">
+              <label for="grade">الصف</label>
+              <select name="grade" id="grade" class="form-select">
+                <option value="">الكل</option>
+                <option value="Grade1" <%= filters.grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                <option value="Grade2" <%= filters.grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                <option value="Grade3" <%= filters.grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="status">الحالة</label>
+              <select name="status" id="status" class="form-select">
+                <option value="">الكل</option>
+                <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>نشط</option>
+                <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>قيد المراجعة</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="search">بحث</label>
+              <input type="text" name="search" id="search" class="form-input" value="<%= filters.search || '' %>" placeholder="اسم أو كود الطالب...">
+            </div>
+            
+            <div class="filter-actions">
+              <button type="submit" class="btn btn-primary">تطبيق</button>
+              <a href="/teacher/students" class="btn btn-outline">إعادة ضبط</a>
+            </div>
+          </form>
+        </div>
+        
+        <!-- View Toggles -->
+        <div class="view-toggles">
+          <button class="view-toggle active" data-view="table">
+            <i class="fas fa-table"></i>
+            جدول
+          </button>
+          <button class="view-toggle" data-view="cards">
+            <i class="fas fa-th-large"></i>
+            بطاقات
+          </button>
+        </div>
+        
+        <!-- Bulk Actions -->
+        <div class="bulk-actions">
+          <div class="bulk-selection">
+            <input type="checkbox" id="selectAll" class="form-checkbox">
+            <label for="selectAll">تحديد الكل</label>
+            <span id="selectedCount" class="selected-count">0 محدد</span>
+          </div>
+          
+          <div class="bulk-buttons">
+            <button class="btn btn-sm btn-outline bulk-btn" id="bulkMessage" disabled>
+              <i class="fas fa-envelope"></i>
+              إرسال رسالة
+            </button>
+            <button class="btn btn-sm btn-outline bulk-btn" id="bulkExport" disabled>
+              <i class="fas fa-download"></i>
+              تصدير
+            </button>
+            <button class="btn btn-sm btn-danger bulk-btn" id="bulkDelete" disabled>
+              <i class="fas fa-trash"></i>
+              حذف
+            </button>
+          </div>
+        </div>
+        
+        <!-- Table View -->
+        <div class="view-container" id="tableView">
+          <div class="teacher-table-container">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">
+                    <input type="checkbox" class="form-checkbox" id="selectAllHeader">
+                  </th>
+                  <th>الطالب</th>
+                  <th>الكود</th>
+                  <th>الصف</th>
+                  <th>رقم الهاتف</th>
+                  <th>الحالة</th>
+                  <th>تاريخ التسجيل</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% students.forEach(function(student) { %>
+                  <tr>
+                    <td>
+                      <input type="checkbox" class="form-checkbox student-checkbox" data-id="<%= student._id %>">
+                    </td>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                          <%= student.Username ? student.Username.charAt(0).toUpperCase() : 'S' %>
+                        </div>
+                        <div>
+                          <div style="font-weight: 600; color: var(--text-primary);"><%= student.Username %></div>
+                          <div style="font-size: 0.75rem; color: var(--text-secondary);"><%= student.gov || 'غير محدد' %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= student.Code %></td>
+                    <td>
+                      <% let gradeName = ''; %>
+                      <% if (student.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+                      <% if (student.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+                      <% if (student.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+                      <%= gradeName %>
+                    </td>
+                    <td><%= student.phone %></td>
+                    <td>
+                      <span class="status-badge <%= student.subscribe ? 'active' : 'pending' %>">
+                        <%= student.subscribe ? 'نشط' : 'قيد المراجعة' %>
+                      </span>
+                    </td>
+                    <td><%= new Date(student.createdAt || Date.now()).toLocaleDateString('ar-EG') %></td>
+                    <td>
+                      <div class="table-actions">
+                        <a href="/teacher/students/<%= student._id %>" class="btn btn-sm btn-outline" title="عرض الملف الشخصي">
+                          <i class="fas fa-user"></i>
+                          <span>عرض</span>
+                        </a>
+                        <button class="btn btn-sm <%= student.subscribe ? 'btn-warning block-btn' : 'btn-success approve-btn' %>" 
+                                data-id="<%= student._id %>" 
+                                title="<%= student.subscribe ? 'إيقاف الحساب' : 'تفعيل الحساب' %>">
+                          <i class="fas <%= student.subscribe ? 'fa-ban' : 'fa-check' %>"></i>
+                          <span><%= student.subscribe ? 'إيقاف' : 'تفعيل' %></span>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" 
+                                data-id="<%= student._id %>" 
+                                data-name="<%= student.Username %>"
+                                title="حذف الحساب">
+                          <i class="fas fa-trash"></i>
+                          <span>حذف</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+                
+                <% if (students.length === 0) { %>
+                  <tr>
+                    <td colspan="8" class="empty-table">
+                      <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>لا يوجد طلاب متطابقين مع معايير البحث</p>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Cards View -->
+        <div class="view-container hidden" id="cardsView">
+          <div class="cards-grid">
+            <% students.forEach(function(student) { %>
+              <div class="student-card">
+                <div class="student-card-header">
+                  <div class="student-avatar">
+                    <%= student.Username ? student.Username.charAt(0).toUpperCase() : 'S' %>
+                  </div>
+                  <div class="student-info">
+                    <h3 class="student-name"><%= student.Username %></h3>
+                    <p class="student-code"><%= student.Code %></p>
+                  </div>
+                  <span class="status-badge <%= student.subscribe ? 'active' : 'pending' %>">
+                    <%= student.subscribe ? 'نشط' : 'قيد المراجعة' %>
+                  </span>
+                </div>
+                
+                <div class="student-card-content">
+                  <div class="student-detail">
+                    <i class="fas fa-graduation-cap"></i>
+                    <% let gradeName = ''; %>
+                    <% if (student.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+                    <% if (student.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+                    <% if (student.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+                    <span><%= gradeName %></span>
+                  </div>
+                  
+                  <div class="student-detail">
+                    <i class="fas fa-phone"></i>
+                    <span><%= student.phone %></span>
+                  </div>
+                  
+                  <div class="student-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span><%= student.gov || 'غير محدد' %></span>
+                  </div>
+                  
+                  <div class="student-detail">
+                    <i class="fas fa-calendar"></i>
+                    <span><%= new Date(student.createdAt || Date.now()).toLocaleDateString('ar-EG') %></span>
+                  </div>
+                </div>
+                
+                <div class="student-card-actions">
+                  <a href="/teacher/students/<%= student._id %>" class="btn btn-sm btn-outline" title="عرض الملف الشخصي">
+                    <i class="fas fa-user"></i>
+                    <span>عرض</span>
+                  </a>
+                  <button class="btn btn-sm <%= student.subscribe ? 'btn-warning block-btn' : 'btn-success approve-btn' %>" 
+                          data-id="<%= student._id %>" 
+                          title="<%= student.subscribe ? 'إيقاف الحساب' : 'تفعيل الحساب' %>">
+                    <i class="fas <%= student.subscribe ? 'fa-ban' : 'fa-check' %>"></i>
+                    <span><%= student.subscribe ? 'إيقاف' : 'تفعيل' %></span>
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-btn" 
+                          data-id="<%= student._id %>" 
+                          data-name="<%= student.Username %>"
+                          title="حذف الحساب">
+                    <i class="fas fa-trash"></i>
+                    <span>حذف</span>
+                  </button>
+                </div>
+              </div>
+            <% }); %>
+            
+            <% if (students.length === 0) { %>
+              <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-users"></i>
+                <p>لا يوجد طلاب متطابقين مع معايير البحث</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div class="pagination">
+            <% if (currentPage > 1) { %>
+              <a href="/teacher/students?page=<%= currentPage - 1 %>&grade=<%= filters.grade || '' %>&status=<%= filters.status || '' %>&search=<%= filters.search || '' %>" class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            <% } %>
+            
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a href="/teacher/students?page=<%= i %>&grade=<%= filters.grade || '' %>&status=<%= filters.status || '' %>&search=<%= filters.search || '' %>" 
+                 class="pagination-item <%= i === currentPage ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            <% } %>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="/teacher/students?page=<%= currentPage + 1 %>&grade=<%= filters.grade || '' %>&status=<%= filters.status || '' %>&search=<%= filters.search || '' %>" class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Message Modal -->
+  <div class="modal-overlay" id="messageModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">إرسال رسالة</h3>
+        <button class="modal-close" id="closeMessageModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">إلى</label>
+          <div id="messageRecipients" class="message-recipients"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="messageSubject">الموضوع</label>
+          <input type="text" id="messageSubject" class="form-input" placeholder="أدخل موضوع الرسالة...">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="messageContent">نص الرسالة</label>
+          <textarea id="messageContent" class="form-input" rows="5" placeholder="اكتب رسالتك هنا..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">طريقة الإرسال</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              <span class="checkbox-custom"></span>
+              البريد الإلكتروني
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              <span class="checkbox-custom"></span>
+              رسالة نصية
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox">
+              <span class="checkbox-custom"></span>
+              إشعار داخل التطبيق
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelMessage">إلغاء</button>
+        <button class="btn btn-primary" id="sendMessage">إرسال</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الحذف</h3>
+        <button class="modal-close" id="closeDeleteModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+          <p id="deleteConfirmText">هل أنت متأكد من حذف هذا الطالب؟</p>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">لا يمكن التراجع عن هذا الإجراء</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelDelete">إلغاء</button>
+        <button class="btn btn-danger" id="confirmDelete" data-id="">حذف</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Status Change Modal -->
+  <div class="modal-overlay" id="statusModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="statusModalTitle">تغيير حالة الطالب</h3>
+        <button class="modal-close" id="closeStatusModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i id="statusIcon" class="fas fa-check-circle" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+          <p id="statusConfirmText">هل أنت متأكد من تغيير حالة هذا الطالب؟</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelStatus">إلغاء</button>
+        <button class="btn btn-primary" id="confirmStatus" data-id="" data-action="">تأكيد</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // View Toggle
+    const viewToggles = document.querySelectorAll('.view-toggle');
+    const tableView = document.getElementById('tableView');
+    const cardsView = document.getElementById('cardsView');
+    
+    viewToggles.forEach(toggle => {
+      toggle.addEventListener('click', function() {
+        viewToggles.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const view = this.getAttribute('data-view');
+        if (view === 'table') {
+          tableView.classList.remove('hidden');
+          cardsView.classList.add('hidden');
+        } else {
+          tableView.classList.add('hidden');
+          cardsView.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Checkbox Selection
+    const selectAllHeader = document.getElementById('selectAllHeader');
+    const selectAll = document.getElementById('selectAll');
+    const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+    const selectedCount = document.getElementById('selectedCount');
+    const bulkButtons = document.querySelectorAll('.bulk-btn');
+    
+    function updateSelectedCount() {
+      const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+      selectedCount.textContent = `${checkedCount} محدد`;
+      
+      if (checkedCount > 0) {
+        bulkButtons.forEach(btn => btn.disabled = false);
+      } else {
+        bulkButtons.forEach(btn => btn.disabled = true);
+      }
+    }
+    
+    selectAllHeader.addEventListener('change', function() {
+      studentCheckboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+      });
+      selectAll.checked = this.checked;
+      updateSelectedCount();
+    });
+    
+    selectAll.addEventListener('change', function() {
+      studentCheckboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+      });
+      selectAllHeader.checked = this.checked;
+      updateSelectedCount();
+    });
+    
+    studentCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        updateSelectedCount();
+        
+        const allChecked = Array.from(studentCheckboxes).every(c => c.checked);
+        const someChecked = Array.from(studentCheckboxes).some(c => c.checked);
+        
+        selectAll.checked = allChecked;
+        selectAllHeader.checked = allChecked;
+        
+        if (someChecked && !allChecked) {
+          selectAll.indeterminate = true;
+          selectAllHeader.indeterminate = true;
+        } else {
+          selectAll.indeterminate = false;
+          selectAllHeader.indeterminate = false;
+        }
+      });
+    });
+    
+    // Message Modal
+    const messageModal = document.getElementById('messageModal');
+    const messageRecipients = document.getElementById('messageRecipients');
+    const closeMessageModalBtn = document.getElementById('closeMessageModal');
+    const cancelMessageBtn = document.getElementById('cancelMessage');
+    const sendMessageBtn = document.getElementById('sendMessage');
+    const messageButtons = document.querySelectorAll('.message-btn');
+    const bulkMessageBtn = document.getElementById('bulkMessage');
+    
+    function openMessageModal(recipients) {
+      messageRecipients.innerHTML = '';
+      
+      recipients.forEach(recipient => {
+        const chip = document.createElement('div');
+        chip.className = 'recipient-chip';
+        chip.innerHTML = `
+          <span>${recipient.name}</span>
+          <button class="remove-recipient" data-id="${recipient.id}">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        messageRecipients.appendChild(chip);
+      });
+      
+      messageModal.classList.add('show');
+    }
+    
+    function closeMessageModal() {
+      messageModal.classList.remove('show');
+    }
+    
+    if (messageButtons.length > 0) {
+      messageButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const studentId = this.getAttribute('data-id');
+          const studentName = this.getAttribute('data-name');
+          
+          openMessageModal([{ id: studentId, name: studentName }]);
+        });
+      });
+    }
+    
+    if (bulkMessageBtn) {
+      bulkMessageBtn.addEventListener('click', function() {
+        const selectedStudents = [];
+        
+        document.querySelectorAll('.student-checkbox:checked').forEach(checkbox => {
+          const studentId = checkbox.getAttribute('data-id');
+          const studentRow = checkbox.closest('tr');
+          const studentName = studentRow.querySelector('td:nth-child(2)').textContent.trim();
+          
+          selectedStudents.push({ id: studentId, name: studentName });
+        });
+        
+        openMessageModal(selectedStudents);
+      });
+    }
+    
+    if (closeMessageModalBtn) {
+      closeMessageModalBtn.addEventListener('click', closeMessageModal);
+    }
+    
+    if (cancelMessageBtn) {
+      cancelMessageBtn.addEventListener('click', closeMessageModal);
+    }
+    
+    if (sendMessageBtn) {
+      sendMessageBtn.addEventListener('click', function() {
+        const subject = document.getElementById('messageSubject').value;
+        const content = document.getElementById('messageContent').value;
+        
+        if (!subject || !content) {
+          showToast('error', 'يرجى ملء جميع الحقول المطلوبة');
+          return;
+        }
+        
+        // In a real implementation, you would send the message to the server
+        showToast('success', 'تم إرسال الرسالة بنجاح');
+        closeMessageModal();
+      });
+    }
+    
+    // Export Data
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      window.location.href = '/teacher/students/export';
+    });
+    
+    document.getElementById('bulkExport').addEventListener('click', function() {
+      const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked'))
+        .map(checkbox => checkbox.getAttribute('data-id'));
+      
+      // In a real implementation, you would send the selected IDs to the server
+      window.location.href = `/teacher/students/export?ids=${selectedIds.join(',')}`;
+    });
+    
+    // Bulk Delete
+    document.getElementById('bulkDelete').addEventListener('click', function() {
+      const selectedIds = Array.from(document.querySelectorAll('.student-checkbox:checked'))
+        .map(checkbox => checkbox.getAttribute('data-id'));
+      
+      confirmAction(
+        'حذف الطلاب',
+        `هل أنت متأكد من رغبتك في حذف ${selectedIds.length} طالب؟ هذا الإجراء لا يمكن التراجع عنه.`,
+        'نعم، حذف',
+        function() {
+          // Send DELETE request to server
+          fetch('/teacher/students/bulk-delete', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids: selectedIds })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              showToast('success', 'تم حذف الطلاب بنجاح');
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            } else {
+              showToast('error', data.message || 'حدث خطأ أثناء حذف الطلاب');
+            }
+          })
+          .catch(error => {
+            showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+            console.error('Error:', error);
+          });
+        }
+      );
+    });
+    
+    // Delete Modal
+    const deleteModal = document.getElementById('deleteModal');
+    const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
+    const cancelDeleteBtn = document.getElementById('cancelDelete');
+    const confirmDeleteBtn = document.getElementById('confirmDelete');
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        const studentName = this.getAttribute('data-name');
+        
+        document.getElementById('deleteConfirmText').textContent = `هل أنت متأكد من حذف الطالب "${studentName}"؟ هذا الإجراء لا يمكن التراجع عنه.`;
+        confirmDeleteBtn.setAttribute('data-id', studentId);
+        deleteModal.classList.add('show');
+      });
+    });
+    
+    if (closeDeleteModalBtn) {
+      closeDeleteModalBtn.addEventListener('click', function() {
+        deleteModal.classList.remove('show');
+      });
+    }
+    
+    if (cancelDeleteBtn) {
+      cancelDeleteBtn.addEventListener('click', function() {
+        deleteModal.classList.remove('show');
+      });
+    }
+    
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        deleteModal.classList.remove('show');
+        
+        // Send DELETE request to server
+        fetch(`/teacher/students/${studentId}/delete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            showToast('success', 'تم حذف الطالب بنجاح');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            showToast('error', data.message || 'حدث خطأ أثناء حذف الطالب');
+          }
+        })
+        .catch(error => {
+          showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+          console.error('Error:', error);
+        });
+      });
+    }
+    
+    // Status Change Modal
+    const statusModal = document.getElementById('statusModal');
+    const closeStatusModalBtn = document.getElementById('closeStatusModal');
+    const cancelStatusBtn = document.getElementById('cancelStatus');
+    const confirmStatusBtn = document.getElementById('confirmStatus');
+    const statusButtons = document.querySelectorAll('.approve-btn, .block-btn');
+    
+    statusButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        const isApprove = this.classList.contains('approve-btn');
+        
+        // Set modal content
+        if (isApprove) {
+          document.getElementById('statusModalTitle').textContent = 'تفعيل حساب الطالب';
+          document.getElementById('statusIcon').className = 'fas fa-check-circle';
+          document.getElementById('statusIcon').style.color = 'var(--success-color)';
+          document.getElementById('statusConfirmText').textContent = 'هل أنت متأكد من تفعيل حساب هذا الطالب؟';
+          confirmStatusBtn.className = 'btn btn-success';
+          confirmStatusBtn.textContent = 'تفعيل';
+          confirmStatusBtn.setAttribute('data-action', 'approve');
+        } else {
+          document.getElementById('statusModalTitle').textContent = 'إيقاف حساب الطالب';
+          document.getElementById('statusIcon').className = 'fas fa-ban';
+          document.getElementById('statusIcon').style.color = 'var(--warning-color)';
+          document.getElementById('statusConfirmText').textContent = 'هل أنت متأكد من إيقاف حساب هذا الطالب؟';
+          confirmStatusBtn.className = 'btn btn-warning';
+          confirmStatusBtn.textContent = 'إيقاف';
+          confirmStatusBtn.setAttribute('data-action', 'block');
+        }
+        
+        confirmStatusBtn.setAttribute('data-id', studentId);
+        statusModal.classList.add('show');
+      });
+    });
+    
+    if (closeStatusModalBtn) {
+      closeStatusModalBtn.addEventListener('click', function() {
+        statusModal.classList.remove('show');
+      });
+    }
+    
+    if (cancelStatusBtn) {
+      cancelStatusBtn.addEventListener('click', function() {
+        statusModal.classList.remove('show');
+      });
+    }
+    
+    if (confirmStatusBtn) {
+      confirmStatusBtn.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-id');
+        const action = this.getAttribute('data-action');
+        statusModal.classList.remove('show');
+        
+        const endpoint = action === 'approve' ? 
+          `/teacher/students/${studentId}/approve` : 
+          `/teacher/students/${studentId}/reject`;
+        
+        // Send POST request to server
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const message = action === 'approve' ? 'تم تفعيل حساب الطالب بنجاح' : 'تم إيقاف حساب الطالب بنجاح';
+            showToast('success', message);
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            const errorMessage = action === 'approve' ? 'حدث خطأ أثناء تفعيل حساب الطالب' : 'حدث خطأ أثناء إيقاف حساب الطالب';
+            showToast('error', data.message || errorMessage);
+          }
+        })
+        .catch(error => {
+          showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+          console.error('Error:', error);
+        });
+      });
+    }
+    
+    // Helper function for confirmations
+    function confirmAction(title, message, confirmText, callback) {
+      // Create modal if it doesn't exist
+      let confirmModal = document.getElementById('confirmActionModal');
+      if (!confirmModal) {
+        confirmModal = document.createElement('div');
+        confirmModal.id = 'confirmActionModal';
+        confirmModal.className = 'modal-overlay';
+        confirmModal.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title" id="confirmTitle"></h3>
+              <button class="modal-close" id="closeConfirmModal">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div style="text-align: center; margin-bottom: 1.5rem;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+                <p id="confirmMessage"></p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline" id="cancelConfirm">إلغاء</button>
+              <button class="btn btn-danger" id="confirmBtn"></button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(confirmModal);
+        
+        document.getElementById('closeConfirmModal').addEventListener('click', () => {
+          confirmModal.classList.remove('show');
+        });
+        
+        document.getElementById('cancelConfirm').addEventListener('click', () => {
+          confirmModal.classList.remove('show');
+        });
+      }
+      
+      // Set modal content
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').textContent = message;
+      document.getElementById('confirmBtn').textContent = confirmText;
+      
+      // Set confirm action
+      const confirmBtn = document.getElementById('confirmBtn');
+      // Remove previous event listeners
+      const newConfirmBtn = confirmBtn.cloneNode(true);
+      confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+      
+      newConfirmBtn.addEventListener('click', function() {
+        confirmModal.classList.remove('show');
+        callback();
+      });
+      
+      // Show modal
+      confirmModal.classList.add('show');
+    }
+    
+    // Toast notification function
+    function showToast(type, message) {
+      // Create toast container if it doesn't exist
+      let toastContainer = document.getElementById('toastContainer');
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.cssText = 'position: fixed; top: 20px; left: 20px; z-index: 9999;';
+        document.body.appendChild(toastContainer);
+      }
+      
+      // Create toast
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.style.cssText = `
+        min-width: 250px;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        animation: fadeIn 0.3s ease;
+        background-color: ${type === 'success' ? '#4caf50' : '#f44336'};
+        color: white;
+      `;
+      
+      toast.innerHTML = `
+        <div style="display: flex; align-items: center;">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="margin-left: 10px;"></i>
+          <span>${message}</span>
+        </div>
+        <button style="background: none; border: none; color: white; cursor: pointer;">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      // Add close functionality
+      toast.querySelector('button').addEventListener('click', function() {
+        toast.remove();
+      });
+      
+      // Auto remove after 5 seconds
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+  </script>
+</body>
+</html> 

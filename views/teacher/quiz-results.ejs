@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+  <style>
+    .quiz-results-container {
+      padding: 20px;
+    }
+    
+    .results-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .results-title {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .results-meta {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .results-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .results-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    
+    .results-section {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+    }
+    
+    .top-performers {
+      margin-bottom: 30px;
+    }
+    
+    .performer-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+    }
+    
+    .performer-rank {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .rank-1 { background: #ffd700; }
+    .rank-2 { background: #c0c0c0; }
+    .rank-3 { background: #cd7f32; }
+    .rank-other { background: var(--primary-color); }
+    
+    .performer-info {
+      flex: 1;
+    }
+    
+    .performer-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .performer-details {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .performer-score {
+      font-weight: bold;
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+    
+    .score-distribution {
+      margin-bottom: 30px;
+    }
+    
+    .distribution-bars {
+      display: flex;
+      gap: 10px;
+      align-items: end;
+      height: 120px;
+      margin-top: 15px;
+    }
+    
+    .distribution-bar {
+      flex: 1;
+      background: var(--primary-color);
+      border-radius: 5px 5px 0 0;
+      position: relative;
+      min-height: 20px;
+    }
+    
+    .distribution-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    
+    .distribution-count {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    .question-analysis {
+      grid-column: 1 / -1;
+    }
+    
+    .question-item {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .question-number {
+      font-weight: bold;
+      color: var(--primary-color);
+      font-size: 1.1rem;
+    }
+    
+    .question-stats {
+      display: flex;
+      gap: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .question-text {
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    
+    .question-success-rate {
+      background: var(--primary-color);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    
+    .students-table {
+      grid-column: 1 / -1;
+    }
+    
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .results-table th {
+      background: var(--primary-color);
+      color: white;
+      padding: 15px;
+      text-align: right;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .results-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .results-table tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .score-cell {
+      font-weight: bold;
+    }
+    
+    .score-excellent { color: #28a745; }
+    .score-good { color: #17a2b8; }
+    .score-average { color: #ffc107; }
+    .score-below-average { color: #fd7e14; }
+    .score-failed { color: #dc3545; }
+    
+    .actions-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .btn-export {
+      background: var(--success-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-export:hover {
+      background: #28a745;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="quiz-results-container">
+          <!-- Results Header -->
+          <div class="results-header">
+            <h1 class="results-title">نتائج الاختبار: <%= quiz.quizName %></h1>
+            <div class="results-meta">
+              <div class="results-meta-item">
+                <i class="fas fa-layer-group"></i>
+                <span><%= chapter ? chapter.chapterName : 'غير محدد' %></span>
+              </div>
+              <div class="results-meta-item">
+                <i class="fas fa-users"></i>
+                <span><%= quiz.Grade === 'Grade1' ? 'الصف الأول الثانوي' : quiz.Grade === 'Grade2' ? 'الصف الثاني الثانوي' : 'الصف الثالث الثانوي' %></span>
+              </div>
+              <div class="results-meta-item">
+                <i class="fas fa-clock"></i>
+                <span><%= quiz.timeOfQuiz %> دقيقة</span>
+              </div>
+              <div class="results-meta-item">
+                <i class="fas fa-calendar"></i>
+                <span><%= new Date(quiz.createdAt).toLocaleDateString('ar-EG') %></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Actions Bar -->
+          <div class="actions-bar">
+            <a href="/teacher/quizzes/<%= quiz._id %>" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للتفاصيل
+            </a>
+            <a href="/teacher/quizzes/<%= quiz._id %>/export" class="btn-export">
+              <i class="fas fa-download"></i>
+              تصدير النتائج
+            </a>
+          </div>
+          
+          <!-- Statistics Overview -->
+          <div class="stats-overview">
+            <div class="stat-card">
+              <div class="stat-value"><%= stats.totalAttempts %></div>
+              <div class="stat-label">إجمالي المحاولات</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value"><%= stats.averageScoreDisplay %></div>
+              <div class="stat-label">متوسط الدرجات</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value"><%= stats.highestScoreDisplay %></div>
+              <div class="stat-label">أعلى درجة</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value"><%= stats.lowestScoreDisplay %></div>
+              <div class="stat-label">أدنى درجة</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value"><%= stats.completionRate %>%</div>
+              <div class="stat-label">معدل الإكمال</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value"><%= stats.passRate %>%</div>
+              <div class="stat-label">معدل النجاح</div>
+            </div>
+          </div>
+          
+          <!-- Performance Charts -->
+          <div class="results-section" style="grid-column: 1 / -1; margin-bottom: 30px;">
+            <h3 class="section-title">تحليل الأداء العام</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <!-- Average Score Trend -->
+              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h4 style="margin-bottom: 15px; color: var(--primary-color);">متوسط الدرجات عبر الزمن</h4>
+                <div style="height: 200px; display: flex; align-items: end; gap: 10px;">
+                  <% const timeRanges = ['الأسبوع الأول', 'الأسبوع الثاني', 'الأسبوع الثالث', 'الأسبوع الرابع']; %>
+                  <% timeRanges.forEach((range, index) => { %>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                      <div style="background: var(--primary-color); width: 100%; height: <%= Math.random() * 80 + 20 %>% max-height: 150px; border-radius: 5px 5px 0 0;"></div>
+                      <div style="margin-top: 10px; font-size: 0.8rem; text-align: center;"><%= range %></div>
+                    </div>
+                  <% }); %>
+                </div>
+              </div>
+              
+              <!-- Performance Distribution -->
+              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h4 style="margin-bottom: 15px; color: var(--primary-color);">توزيع الأداء العام</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>ممتاز (90%+)</span>
+                    <div style="flex: 1; margin: 0 10px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                      <div style="width: <%= (scoreDistribution.excellent / Math.max(...Object.values(scoreDistribution))) * 100 %>% height: 100%; background: #28a745;"></div>
+                    </div>
+                    <span><%= scoreDistribution.excellent %></span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>جيد (80-89%)</span>
+                    <div style="flex: 1; margin: 0 10px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                      <div style="width: <%= (scoreDistribution.good / Math.max(...Object.values(scoreDistribution))) * 100 %>% height: 100%; background: #17a2b8;"></div>
+                    </div>
+                    <span><%= scoreDistribution.good %></span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>متوسط (70-79%)</span>
+                    <div style="flex: 1; margin: 0 10px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                      <div style="width: <%= (scoreDistribution.average / Math.max(...Object.values(scoreDistribution))) * 100 %>% height: 100%; background: #ffc107;"></div>
+                    </div>
+                    <span><%= scoreDistribution.average %></span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>ضعيف (60-69%)</span>
+                    <div style="flex: 1; margin: 0 10px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                      <div style="width: <%= (scoreDistribution.belowAverage / Math.max(...Object.values(scoreDistribution))) * 100 %>% height: 100%; background: #fd7e14;"></div>
+                    </div>
+                    <span><%= scoreDistribution.belowAverage %></span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>راسب (<60%)</span>
+                    <div style="flex: 1; margin: 0 10px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                      <div style="width: <%= (scoreDistribution.failed / Math.max(...Object.values(scoreDistribution))) * 100 %>% height: 100%; background: #dc3545;"></div>
+                    </div>
+                    <span><%= scoreDistribution.failed %></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="results-sections">
+            <!-- Top Performers -->
+            <div class="results-section top-performers">
+              <h3 class="section-title">أفضل الأداء</h3>
+              <% if (topPerformers.length > 0) { %>
+                <% topPerformers.forEach((performer, index) => { %>
+                  <div class="performer-card">
+                    <div class="performer-rank rank-<%= index < 3 ? index + 1 : 'other' %>">
+                      <%= index + 1 %>
+                    </div>
+                    <div class="performer-info">
+                      <div class="performer-name"><%= performer.studentName %></div>
+                      <div class="performer-details">كود: <%= performer.studentCode %> | الصف: <%= performer.grade %></div>
+                    </div>
+                    <div class="performer-score">
+                      <%= performer.quizScoreDisplay %>
+                    </div>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <div class="empty-state">
+                  <i class="fas fa-trophy"></i>
+                  <p>لا توجد نتائج متاحة بعد</p>
+                </div>
+              <% } %>
+            </div>
+            
+            <!-- Score Distribution -->
+            <div class="results-section score-distribution">
+              <h3 class="section-title">توزيع الدرجات</h3>
+              <div class="distribution-bars">
+                <div class="distribution-bar" style="height: <%= scoreDistribution.excellent > 0 ? (scoreDistribution.excellent / Math.max(...Object.values(scoreDistribution))) * 100 : 0 %>%">
+                  <div class="distribution-count"><%= scoreDistribution.excellent %></div>
+                  <div class="distribution-label">ممتاز<br>(90+)</div>
+                </div>
+                <div class="distribution-bar" style="height: <%= scoreDistribution.good > 0 ? (scoreDistribution.good / Math.max(...Object.values(scoreDistribution))) * 100 : 0 %>%">
+                  <div class="distribution-count"><%= scoreDistribution.good %></div>
+                  <div class="distribution-label">جيد<br>(80-89)</div>
+                </div>
+                <div class="distribution-bar" style="height: <%= scoreDistribution.average > 0 ? (scoreDistribution.average / Math.max(...Object.values(scoreDistribution))) * 100 : 0 %>%">
+                  <div class="distribution-count"><%= scoreDistribution.average %></div>
+                  <div class="distribution-label">متوسط<br>(70-79)</div>
+                </div>
+                <div class="distribution-bar" style="height: <%= scoreDistribution.belowAverage > 0 ? (scoreDistribution.belowAverage / Math.max(...Object.values(scoreDistribution))) * 100 : 0 %>%">
+                  <div class="distribution-count"><%= scoreDistribution.belowAverage %></div>
+                  <div class="distribution-label">ضعيف<br>(60-69)</div>
+                </div>
+                <div class="distribution-bar" style="height: <%= scoreDistribution.failed > 0 ? (scoreDistribution.failed / Math.max(...Object.values(scoreDistribution))) * 100 : 0 %>%">
+                  <div class="distribution-count"><%= scoreDistribution.failed %></div>
+                  <div class="distribution-label">راسب<br>(<60)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Question Analysis -->
+          <div class="results-section question-analysis">
+            <h3 class="section-title">تحليل الأسئلة</h3>
+            <% if (questionAnalysis.length > 0) { %>
+              <% questionAnalysis.forEach(function(question) { %>
+                <div class="question-item">
+                  <div class="question-header">
+                    <div class="question-number">السؤال <%= question.questionNumber %></div>
+                    <div class="question-stats">
+                      <span>الإجابات الصحيحة: <%= question.correctAnswers %>/<%= question.totalAnswers %></span>
+                      <span class="question-success-rate"><%= question.successRate %>% نجاح</span>
+                    </div>
+                  </div>
+                  <div class="question-text"><%= question.questionText %></div>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
+                <p>لا توجد بيانات تحليل متاحة</p>
+              </div>
+            <% } %>
+          </div>
+          
+          <!-- Students Results Table -->
+          <div class="results-section students-table">
+            <h3 class="section-title">نتائج الطلاب</h3>
+            <% if (studentResults.length > 0) { %>
+              <div class="table-container">
+                <table class="results-table">
+                  <thead>
+                    <tr>
+                      <th>الترتيب</th>
+                      <th>اسم الطالب</th>
+                      <th>كود الطالب</th>
+                      <th>الصف</th>
+                      <th>الدرجة</th>
+                      <th>وقت الانتهاء</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% studentResults.forEach(function(student, index) { %>
+                      <tr>
+                        <td><strong><%= index + 1 %></strong></td>
+                        <td><%= student.studentName %></td>
+                        <td><%= student.studentCode %></td>
+                        <td><%= student.grade %></td>
+                        <td class="score-cell score-<%= (student.quizScore / stats.questionsShown) >= 0.9 ? 'excellent' : (student.quizScore / stats.questionsShown) >= 0.8 ? 'good' : (student.quizScore / stats.questionsShown) >= 0.7 ? 'average' : (student.quizScore / stats.questionsShown) >= 0.6 ? 'below-average' : 'failed' %>">
+                          <%= student.quizScoreDisplay %>
+                        </td>
+                        <td>
+                          <% if (student.quizEndTime) { %>
+                            <%= new Date(student.quizEndTime).toLocaleString('ar-EG') %>
+                          <% } else { %>
+                            -
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>لا توجد نتائج متاحة بعد</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Add any interactive functionality here
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-refresh every 60 seconds to get latest results
+      setInterval(() => {
+        // You can add auto-refresh logic here if needed
+      }, 60000);
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+    <%- include("./partials/head.ejs") %>
+
+<body>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .upload-container {
+            background-color: transparent;
+            border: 2px solid #e3b228;
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-size: 2rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .file-label {
+            display: block;
+            background-color: transparent;
+            border: 2px dashed #e3b228;
+            border-radius: 5px;
+            padding: 15px;
+            color: #e3b228;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .file-label:hover {
+            background-color: #e3b228;
+            color: rgb(0, 0, 0);
+        }
+
+        #file {
+            display: none;
+        }
+
+        .upload-btn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            border: 2px solid #e3b228;
+            background-color: transparent;
+            color: #e3b228;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: #e3b228;
+            color: rgb(0, 0, 0);
+            transform: scale(1.05);
+        }
+
+        .output {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2">
+                <%- include("./partials/nav.ejs") %>
+            </div>
+
+            <div class="col-lg-10">
+                <main>
+                    <div class="row">
+                        <div class="col-md-6"></div>
+
+                        <div class="col-md-6">
+                            <div class="left" style="margin-top: 0.2rem;">
+                                <%- include("./partials/top.ejs") %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 mb-4">
+                            <select name="chapterGrade" id="optionSelect" class="Grade w-100 text-center" required>
+                                <option value="">اختر نوع الارسال </option>
+                                <option value="msgWithoutPhoto">ارسال رسائل بدون صوره</option>
+                                <option value="msgWithPhoto">ارسال رسائل بصوره</option>
+                                <option value="gradeMsg">ارسال درجات</option>
+                            </select>
+                        </div>
+                        <hr>
+
+                        <!-- Section for "ارسال رسائل بدون صوره" -->
+                        <div id="msgWithoutPhotoSection" class="hidden">
+                            <div class="col-md-4 mb-4">
+                                <input type="text" class="form-control" placeholder="اسم الرسالة">
+                            </div>
+                        </div>
+
+                        <!-- Section for "ارسال رسائل بصوره" -->
+                        <div id="msgWithPhotoSection" class="hidden">
+                            <div class="col-md-4 mb-4">
+                                <input type="file" class="form-control" placeholder="اختر الصورة">
+                            </div>
+                        </div>
+
+                        <!-- Section for "ارسال درجات" -->
+                        <div id="gradeMsgSection" class="hidden">
+                            <div class="col-md-4 mb-4">
+                                <input type="text" id="quizName" class="form-control" placeholder="اسم الامتحان">
+                            </div>
+
+                            <div class="col-md-4 mb-4">
+                                <input type="text" id="phoneCloumnName" class="form-control" placeholder="اكتب اسم ال cloumn بتاع الارقام">
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <input type="text" id="gradeCloumnName" class="form-control" placeholder="اكتب اسم ال cloumn بتاع الدرجات">
+                            </div>
+
+                            <div class="upload-container">
+                                <h1>رفع شيت الاكسل</h1>
+                                <div class="file-input-wrapper">
+                                    <label for="file" class="file-label" id="fileLabel">
+                                        <i class="fas fa-upload"></i> اختر الملف لرفعه
+                                    </label>
+                                    <input type="file" id="file" name="file" required onchange="updateFileName()">
+                                </div>
+                                <button class="upload-btn" onclick="handleFile()">رفع الملف</button>
+
+                                <div class="output" id="output"></div>
+                                <h2 class="warning d-none" id="numberOfSend"></h2>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assest/bootstrap.bundle.min.js"></script>
+    <script src="../assest/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        const optionSelect = document.getElementById('optionSelect');
+        const msgWithoutPhotoSection = document.getElementById('msgWithoutPhotoSection');
+        const msgWithPhotoSection = document.getElementById('msgWithPhotoSection');
+        const gradeMsgSection = document.getElementById('gradeMsgSection');
+
+        // Event listener to show/hide sections based on selection
+        optionSelect.addEventListener('change', function () {
+            const selectedValue = optionSelect.value;
+
+            // Hide all sections initially
+            msgWithoutPhotoSection.classList.add('hidden');
+            msgWithPhotoSection.classList.add('hidden');
+            gradeMsgSection.classList.add('hidden');
+
+            // Show corresponding section
+            if (selectedValue === 'msgWithoutPhoto') {
+                msgWithoutPhotoSection.classList.remove('hidden');
+            } else if (selectedValue === 'msgWithPhoto') {
+                msgWithPhotoSection.classList.remove('hidden');
+            } else if (selectedValue === 'gradeMsg') {
+                gradeMsgSection.classList.remove('hidden');
+            }
+        });
+
+        // Function to handle file reading
+        function updateFileName() {
+            const input = document.getElementById('file');
+            const fileLabel = document.getElementById('fileLabel');
+            if (input.files.length > 0) {
+                fileLabel.innerHTML = `<i class="fas fa-file-alt"></i> ${input.files[0].name}`;
+            }
+        }
+
+        // Function to handle file reading and show "Uploaded" status
+        function handleFile() {
+            const input = document.getElementById('file');
+            const fileLabel = document.getElementById('fileLabel');
+
+            if (!input.files.length) {
+                alert('Please select a file!');
+                return;
+            }
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                const sheetName = workbook.SheetNames[0];
+                console.log(sheetName);
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet);
+                console.log(json);
+
+                displayDataAndSend(json);
+
+                // Update label to indicate that the file is uploaded
+                fileLabel.innerHTML = `<i class="fas fa-check-circle"></i> ${file.name} (Uploaded)`;
+                fileLabel.style.color = "green";
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Function to send the data
+        async function displayDataAndSend(data) {
+            const output = document.getElementById('output');
+
+            output.innerHTML = 'data is being sent...';
+            const phoneCloumnName = document.getElementById('phoneCloumnName');
+            const gradeCloumnName = document.getElementById('gradeCloumnName');
+            const quizName = document.getElementById('quizName');
+
+            if (!phoneCloumnName.value || !gradeCloumnName.value) {
+                alert('ادخل اسامي ال cloumn');
+                return;
+            }
+
+            const dataSend = {
+                phoneCloumnName: phoneCloumnName.value,
+                gradeCloumnName: gradeCloumnName.value,
+                quizName: quizName.value,
+                dataToSend: data
+            };
+
+            try {
+                const response = await fetch('/teacher/sendGradeMessages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataSend)
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    output.innerHTML = `<h2>تم الارسال بنجاح</h2>`;
+                    output.style.color = "green";
+                } else {
+                    output.innerHTML = `<h2>حدث خطأ أثناء الارسال</h2>`;
+                    output.style.color = "red";
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                output.innerHTML = `<h2>حدث خطأ أثناء الارسال</h2>`;
+                output.style.color = "red";
+            }
+        }
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const numberOfSend = document.getElementById('numberOfSend');
+        const socket = io();
+
+        socket.on('sendingMessages', (data) => {
+            numberOfSend.classList.remove('d-none');
+            numberOfSend.innerHTML = `تم ارسال ${data.nMessages} رساله`;
+        });
+    </script>
+
+</body>
+
+</html>

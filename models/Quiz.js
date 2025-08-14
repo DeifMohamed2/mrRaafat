@@ -15,34 +15,49 @@ const quizSchema = new Schema({
         type: Number, 
         required: true, 
     },
-    Questions:{
-        type:Array,
+    questionsToShow: {
+        type: Number,
+        default: function() {
+            return this.questionsCount; // Default to showing all questions
+        }
+    },
+    Questions: {
+        type: Array,
         required: true, 
     },
-    isQuizActive:{
-        type:Boolean,
-        required:true,
+    isQuizActive: {
+        type: Boolean,
+        required: true,
     },
-    permissionToShow:{
-        type:Boolean,
-        required:true,
+    permissionToShow: {
+        type: Boolean,
+        required: true,
     },
-    videoWillbeOpen:{
-        type:String,
+    videoWillbeOpen: {
+        type: String,
     },
-    Grade :{
+    Grade: {
         type: String, 
         required: true,  
     },
-    prepaidStatus:{
-        type:Boolean,
-        required:true
+    chapterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Chapter',
+        default: null
+    },
+    prepaidStatus: {
+        type: Boolean,
+        required: true
+    },
+    quizPrice: {
+        type: Number,
+        default: 0
+    },
+    showAnswersAfterQuiz: {
+        type: Boolean,
+        default: true
     }
-
-
-
-
-},{timestamps:true});
+}, {timestamps: true});
 
 const Quiz = mongoose.model('Quiz',quizSchema)
 

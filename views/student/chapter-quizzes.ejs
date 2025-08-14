@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <%- include("./partials/head.ejs") %>
+  <body>
+    <%- include("./partials/preloader.ejs") %>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-2">
+          <%- include("./partials/aside.ejs") %>
+        </div>
+        <div class="col-lg-10">
+          <main>
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="left float-start">
+                  <%- include("./partials/top.ejs") %>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Header Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="chapter-header p-4 rounded" style="background: linear-gradient(135deg, #4776e6 0%, #8e54e9 100%); color: white;">
+                  <div class="d-flex align-items-center">
+                    <a href="/student/chapter/<%= chapterId %>" class="btn btn-light btn-sm me-3">
+                      <i class="fas fa-arrow-right"></i> العودة للباب
+                    </a>
+                    <div>
+                      <h2 class="mb-1"><%= chapter.chapterName %></h2>
+                      <p class="mb-0 opacity-75">الاختبارات والتقييم</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Alert -->
+            <% if (!hasChapterAccess) { %>
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="alert alert-warning text-center">
+                  <i class="fas fa-lock fs-3 mb-2"></i>
+                  <h5>هذا الباب غير متاح</h5>
+                  <p>يجب شراء الباب أولاً للوصول إلى اختباراته</p>
+                  <a href="/student/chapter/<%= chapterId %>" class="btn btn-primary">شراء الباب</a>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Quizzes Section -->
+            <div class="row">
+              <% if (quizzes && quizzes.length > 0) { %>
+                <% quizzes.forEach((quiz, index) => { %>
+                <div class="col-lg-6 col-xl-4 mb-4">
+                  <div class="quiz-card h-100">
+                    <div class="card-header">
+                      <div class="quiz-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                      </div>
+                      <div class="quiz-badge">
+                        <span class="badge bg-primary">اختبار <%= index + 1 %></span>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <h5 class="quiz-title"><%= quiz.quizName %></h5>
+                      <div class="quiz-details">
+                        <div class="detail-item">
+                          <i class="fas fa-question-circle text-info"></i>
+                          <span><%= quiz.questions.length %> سؤال</span>
+                        </div>
+                        <div class="detail-item">
+                          <i class="fas fa-clock text-warning"></i>
+                          <span><%= quiz.quizDuration || '30' %> دقيقة</span>
+                        </div>
+                        <div class="detail-item">
+                          <i class="fas fa-star text-success"></i>
+                          <span><%= quiz.quizDegree || (quiz.questions.length * 5) %> درجة</span>
+                        </div>
+                        <% if (quiz.quizPrice && quiz.quizPrice > 0) { %>
+                        <div class="detail-item">
+                          <i class="fas fa-money-bill text-primary"></i>
+                          <span><%= quiz.quizPrice %> جنيه</span>
+                        </div>
+                        <% } %>
+                      </div>
+                      
+                      <!-- User's Performance Info -->
+                      <% if (userData.quizesInfo && userData.quizesInfo.some(result => result._id.toString() === quiz._id.toString())) { %>
+                        <% const userResult = userData.quizesInfo.find(result => result._id.toString() === quiz._id.toString()) %>
+                        <div class="user-performance mt-3">
+                          <div class="performance-grid">
+                            <div class="performance-item">
+                              <div class="performance-icon">
+                                <i class="fas fa-trophy"></i>
+                              </div>
+                              <div class="performance-details">
+                                <div class="performance-value"><%= userResult.Score || 0 %>/<%= quiz.quizDegree || (quiz.questions.length * 5) %></div>
+                                <div class="performance-label">أفضل نتيجة</div>
+                              </div>
+                            </div>
+                            <% if (userResult.timeTaken) { %>
+                            <div class="performance-item">
+                              <div class="performance-icon">
+                                <i class="fas fa-stopwatch"></i>
+                              </div>
+                              <div class="performance-details">
+                                <div class="performance-value"><%= Math.round(userResult.timeTaken / 60) || 0 %>د</div>
+                                <div class="performance-label">وقت الحل</div>
+                              </div>
+                            </div>
+                            <% } %>
+                            <div class="performance-item">
+                              <div class="performance-icon">
+                                <i class="fas fa-percentage"></i>
+                              </div>
+                              <div class="performance-details">
+                                <div class="performance-value"><%= Math.round(((userResult.Score || 0) / (quiz.quizDegree || (quiz.questions.length * 5))) * 100) %>%</div>
+                                <div class="performance-label">النسبة المئوية</div>
+                              </div>
+                            </div>
+                            <% if (userResult.isEnterd) { %>
+                            <div class="performance-item">
+                              <div class="performance-icon">
+                                <i class="fas fa-check-circle"></i>
+                              </div>
+                              <div class="performance-details">
+                                <div class="performance-value">مكتمل</div>
+                                <div class="performance-label">الحالة</div>
+                              </div>
+                            </div>
+                            <% } %>
+                          </div>
+                          <!-- Performance bar -->
+                          <div class="performance-bar-container">
+                            <div class="performance-bar">
+                              <div class="performance-fill" style="width: <%= Math.round(((userResult.Score || 0) / (quiz.quizDegree || (quiz.questions.length * 5))) * 100) %>%"></div>
+                            </div>
+                            <div class="performance-percentage"><%= Math.round(((userResult.Score || 0) / (quiz.quizDegree || (quiz.questions.length * 5))) * 100) %>%</div>
+                          </div>
+                        </div>
+                      <% } else { %>
+                        <div class="user-performance mt-3">
+                          <div class="no-attempt">
+                            <i class="fas fa-clock text-muted"></i>
+                            <span>لم يتم المحاولة بعد</span>
+                          </div>
+                        </div>
+                      <% } %>
+                    </div>
+                    <div class="card-footer">
+                      <% 
+                        // Check user access (chapter access, general quiz access, or specific quiz access)
+                        const hasGeneralQuizAccess = false;
+                        const hasSpecificQuizAccess = userData.examsPaid && userData.examsPaid.includes(quiz._id.toString());
+                        const hasQuizAccess = hasChapterAccess || hasGeneralQuizAccess || hasSpecificQuizAccess;
+                        const isFreeQuiz = !quiz.quizPrice || quiz.quizPrice === 0;
+                      %>
+                      
+                      <% if (hasQuizAccess || isFreeQuiz) { %>
+                        <a href="/student/chapter/<%= chapterId %>/quiz/<%= quiz._id %>" 
+                           class="btn <%= isFreeQuiz ? 'btn-success' : 'btn-primary' %> btn-block">
+                          <i class="fas fa-<%= isFreeQuiz ? 'gift' : 'play' %>"></i> 
+                          <%= isFreeQuiz ? 'اختبار مجاني' : 'بدء الاختبار' %>
+                        </a>
+                      <% } else { %>
+                        <button class="btn btn-outline-primary btn-block" 
+                                onclick="showPurchaseModal('<%= quiz._id %>', '<%= quiz.quizName %>', '<%= quiz.quizPrice || 25 %>')">
+                          <i class="fas fa-lock"></i> شراء مقابل <%= quiz.quizPrice || 25 %> جنيه
+                        </button>
+                      <% } %>
+                      
+                      <!-- Quiz Type Badge -->
+                      <div class="quiz-type-badge mt-2">
+                        <% if (hasGeneralQuizAccess) { %>
+                          <span class="badge bg-info"><i class="fas fa-unlock"></i> وصول شامل</span>
+                        <% } else if (hasSpecificQuizAccess) { %>
+                          <span class="badge bg-success"><i class="fas fa-check-circle"></i> مُشترى</span>
+                        <% } else if (hasChapterAccess) { %>
+                          <span class="badge bg-primary"><i class="fas fa-book"></i> مع الباب</span>
+                        <% } else if (isFreeQuiz) { %>
+                          <span class="badge bg-success"><i class="fas fa-gift"></i> مجاني</span>
+                        <% } else { %>
+                          <span class="badge bg-warning"><i class="fas fa-lock"></i> مدفوع</span>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% }); %>
+              <% } else { %>
+                <div class="col-12">
+                  <div class="text-center py-5">
+                    <i class="fas fa-clipboard-list fs-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">لا توجد اختبارات متاحة حالياً</h4>
+                    <p class="text-muted">سيتم إضافة الاختبارات قريباً</p>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Quiz Statistics -->
+            <% if (quizzes && quizzes.length > 0) { %>
+            <div class="row mt-5">
+              <div class="col-12">
+                <div class="stats-section">
+                  <h4 class="mb-4"><i class="fas fa-chart-bar me-2"></i>إحصائياتك في هذا الباب</h4>
+                  <div class="row g-3">
+                    <div class="col-md-3">
+                      <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                          <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stat-content">
+                          <h3><%= quizzes.length %></h3>
+                          <p>إجمالي الاختبارات</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                          <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                          <% const completedQuizzes = userData.quizesInfo ? userData.quizesInfo.filter(result => quizzes.some(quiz => quiz._id.toString() === result._id.toString()) && result.isEnterd).length : 0 %>
+                          <h3><%= completedQuizzes %></h3>
+                          <p>اختبارات مكتملة</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                          <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                          <% const avgScore = userData.quizesInfo && userData.quizesInfo.length > 0 && completedQuizzes > 0 ? Math.round(userData.quizesInfo.filter(result => quizzes.some(quiz => quiz._id.toString() === result._id.toString()) && result.isEnterd).reduce((sum, result) => sum + (result.Score || 0), 0) / completedQuizzes) : 0 %>
+                          <h3><%= avgScore || 0 %>%</h3>
+                          <p>متوسط النتائج</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="stat-card">
+                        <div class="stat-icon bg-info">
+                          <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-content">
+                          <% const highScores = userData.quizesInfo ? userData.quizesInfo.filter(result => quizzes.some(quiz => quiz._id.toString() === result._id.toString()) && result.isEnterd && result.Score >= 80).length : 0 %>
+                          <h3><%= highScores %></h3>
+                          <p>نتائج ممتازة</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">شراء الاختبار</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body text-center">
+            <i class="fas fa-clipboard-list fs-1 text-primary mb-3"></i>
+            <h5 id="quizName"></h5>
+            <p class="text-muted">هل تريد شراء هذا الاختبار؟</p>
+            <h4 class="text-primary" id="quizPrice"></h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-primary" id="confirmPurchase">شراء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include("./partials/footer.ejs") %>
+
+    <style>
+    .chapter-header {
+      border-radius: 15px !important;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .quiz-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      border: none;
+    }
+
+    .quiz-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    .quiz-card .card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom: none;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .quiz-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .quiz-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+    }
+
+    .quiz-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    .quiz-details {
+      margin-bottom: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .detail-item i {
+      width: 20px;
+      margin-left: 8px;
+    }
+
+    .user-performance {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 1.25rem;
+      border-radius: 15px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .performance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .performance-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: white;
+      padding: 0.875rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .performance-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .performance-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .performance-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .performance-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2c3e50;
+      line-height: 1.2;
+    }
+
+    .performance-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 0.125rem;
+    }
+
+    .performance-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .performance-bar {
+      flex: 1;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .performance-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .performance-percentage {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #495057;
+      min-width: 40px;
+    }
+
+    .no-attempt {
+      text-align: center;
+      padding: 1rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .no-attempt i {
+      margin-left: 0.5rem;
+    }
+
+    .quiz-type-badge {
+      text-align: center;
+    }
+
+    .quiz-type-badge .badge {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 20px;
+    }
+
+    .card-footer {
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      padding: 1.25rem;
+    }
+
+    .btn-block {
+      width: 100%;
+      padding: 0.75rem;
+      font-weight: 600;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-block:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .stats-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .stat-content h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #2c3e50;
+    }
+
+    .stat-content p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .bg-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+    .bg-success { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%) !important; }
+    .bg-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important; }
+    .bg-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important; }
+    </style>
+
+    <script>
+    let selectedQuizId = '';
+
+    function showPurchaseModal(quizId, quizName, price) {
+      selectedQuizId = quizId;
+      document.getElementById('quizName').textContent = quizName;
+      document.getElementById('quizPrice').textContent = price + ' جنيه';
+      new bootstrap.Modal(document.getElementById('purchaseModal')).show();
+    }
+
+    document.getElementById('confirmPurchase').addEventListener('click', async function() {
+      if (selectedQuizId) {
+        try {
+          // Show loading state
+          this.disabled = true;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الشراء...';
+          
+          // Create purchase request
+          const formData = new FormData();
+          formData.append('code', prompt('أدخل كود شراء الاختبار:'));
+          
+          if (!formData.get('code')) {
+            this.disabled = false;
+            this.innerHTML = 'شراء';
+            return;
+          }
+          
+          const response = await fetch(`/student/chapter/<%= chapterId %>/quiz/${selectedQuizId}/buy`, {
+            method: 'POST',
+            body: formData
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('تم شراء الاختبار بنجاح!');
+            window.location.reload();
+          } else {
+            alert(result.message || 'فشل في عملية الشراء');
+            this.disabled = false;
+            this.innerHTML = 'شراء';
+          }
+          
+          // Hide modal
+          bootstrap.Modal.getInstance(document.getElementById('purchaseModal')).hide();
+        } catch (error) {
+          console.error('Purchase error:', error);
+          alert('حدث خطأ في عملية الشراء');
+          this.disabled = false;
+          this.innerHTML = 'شراء';
+        }
+      }
+    });
+    </script>
+  </body>
+</html> 

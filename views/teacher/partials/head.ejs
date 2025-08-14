@@ -22,7 +22,68 @@
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.2/dropzone.min.css">
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %> - منصة تعليمية</title>
 
-  <title>Teacher | <%= title %></title>
+<!-- CSS -->
+<link rel="stylesheet" href="/css/teacher-modern.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- JavaScript Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
+<!-- Custom Script -->
+<script>
+  // Global utility functions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Show toast notification
+    window.showToast = function(type, message) {
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+      
+      Toast.fire({
+        icon: type, // 'success', 'error', 'warning', 'info'
+        title: message
+      });
+    };
+    
+    // Confirm action
+    window.confirmAction = function(title, text, confirmButtonText, callback) {
+      Swal.fire({
+        title: title,
+        text: text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3730a3',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: 'إلغاء'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          callback();
+        }
+      });
+    };
+    
+    // Format date
+    window.formatDate = function(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('ar-EG', options);
+    };
+  });
+</script>
+
+  <title>Teacher | Dashboard</title>
 
 </head>

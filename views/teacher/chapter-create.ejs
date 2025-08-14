@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+  <style>
+    .image-upload-container {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      background-color: var(--bg-light);
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    
+    .image-upload-container.highlight {
+      border-color: var(--primary);
+      background-color: rgba(var(--primary-rgb), 0.08);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .image-upload-preview {
+      margin-bottom: 1.5rem;
+      position: relative;
+      max-width: 320px;
+      margin: 0 auto 1.5rem;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .image-upload-preview:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .image-upload-preview img {
+      width: 100%;
+      border-radius: 10px;
+      max-height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .image-upload-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .upload-progress-container {
+      width: 100%;
+      height: 10px;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      overflow: hidden;
+      display: none;
+      position: relative;
+    }
+    
+    .upload-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upload-progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      animation: shimmer 1.5s infinite;
+      transform: skewX(-20deg);
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) skewX(-20deg); }
+      100% { transform: translateX(100%) skewX(-20deg); }
+    }
+    
+    .upload-status {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .upload-status i {
+      margin-left: 0.5rem;
+    }
+    
+    .upload-status.uploading {
+      color: var(--primary);
+    }
+    
+    .upload-status.success {
+      color: var(--success);
+    }
+    
+    .upload-status.error {
+      color: var(--danger);
+    }
+    
+    .image-upload-hint {
+      margin-top: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .image-upload-hint p {
+      margin: 0.25rem 0;
+    }
+    
+    .text-muted {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 5;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-primary {
+      background-color: #3498db !important;
+      color: white !important;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9 !important;
+    }
+    
+    .btn-secondary {
+      background-color: #2ecc71 !important;
+      color: white !important;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #27ae60 !important;
+    }
+    
+    .btn-outline {
+      background-color: #f8f9fa !important;
+      border: 1px solid #ddd !important;
+      color: #555 !important;
+    }
+    
+    .btn-outline:hover {
+      background-color: #e9ecef !important;
+      border-color: #ced4da !important;
+    }
+    
+    .btn-danger {
+      background-color: #e74c3c !important;
+      color: white !important;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b !important;
+    }
+    
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: var(--success-dark);
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .form-section {
+      background-color: var(--bg-white);
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .form-section:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      margin-bottom: 1.75rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: 0;
+      width: 60px;
+      height: 3px;
+      background-color: var(--primary);
+      border-radius: 3px;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: var(--bg-white);
+      color: var(--text-primary);
+    }
+    
+    .form-input:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .form-actions .btn {
+      min-width: 120px;
+    }
+    
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: fadeIn 0.3s ease;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .alert-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: auto;
+      max-width: 90%;
+      min-width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .alert-close {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: inherit;
+      opacity: 0.7;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 5px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .alert-close:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .alert-danger {
+      background-color: rgba(var(--danger-rgb), 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(var(--danger-rgb), 0.2);
+      border-right: 4px solid var(--danger);
+    }
+    
+    .alert-success {
+      background-color: rgba(var(--success-rgb), 0.1);
+      color: var(--success);
+      border: 1px solid rgba(var(--success-rgb), 0.2);
+      border-right: 4px solid var(--success);
+      display: none;
+    }
+    
+    .alert i:first-child {
+      font-size: 1.25rem;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .page-title i {
+      color: var(--primary);
+      font-size: 1.75rem;
+    }
+    
+    .page-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .page-description {
+      margin-bottom: 2rem;
+      background-color: rgba(var(--primary-rgb), 0.05);
+      border-right: 3px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+    }
+    
+    .page-description p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <!-- Alert Messages -->
+        <div class="alert-container">
+          <% if (error) { %>
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle"></i>
+              <span>حدث خطأ: <%= error %></span>
+            </div>
+          <% } %>
+          
+          <div id="successAlert" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span id="successMessage"></span>
+          </div>
+        </div>
+        
+        <div class="page-header">
+          <h1 class="page-title">
+            <i class="fas fa-book-open"></i>
+            إنشاء فصل جديد
+          </h1>
+          <div class="page-actions">
+            <a href="/teacher/chapters" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للفصول
+            </a>
+          </div>
+        </div>
+        
+        <div class="page-description">
+          <p>قم بإنشاء فصل جديد وإضافة المعلومات الأساسية له. يمكنك إضافة المحتوى (فيديوهات، اختبارات، ملفات PDF) لاحقاً.</p>
+        </div>
+        
+        <div class="teacher-table-container">
+          <form action="/teacher/chapters/create" method="POST" class="form-grid" id="chapterForm">
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                معلومات الفصل الأساسية
+              </h3>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterName">اسم الفصل*</label>
+                <input type="text" id="chapterName" name="chapterName" class="form-input" required placeholder="أدخل اسم الفصل">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterGrade">المرحلة الدراسية*</label>
+                <select id="chapterGrade" name="chapterGrade" class="form-input" required>
+                  <option value="">اختر المرحلة</option>
+                  <option value="Grade1">الصف الأول الثانوي</option>
+                  <option value="Grade2">الصف الثاني الثانوي</option>
+                  <option value="Grade3">الصف الثالث الثانوي</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="ARorEN">اللغة*</label>
+                <select id="ARorEN" name="ARorEN" class="form-input" required>
+                  <option value="AR">العربية</option>
+                  <option value="EN">الإنجليزية</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterDescription">وصف الفصل</label>
+                <textarea id="chapterDescription" name="chapterDescription" class="form-input" rows="4" placeholder="أدخل وصفاً مختصراً للفصل"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="fas fa-cog"></i>
+                الصورة والإعدادات
+              </h3>
+              
+              <div class="form-group">
+                <label class="form-label">صورة الفصل</label>
+                <div class="image-upload-container" id="imageUploadContainer">
+                  <div class="image-upload-preview" id="imagePreview">
+                    <img src="/images/default-chapter.jpg" alt="صورة افتراضية" id="previewImage">
+                  </div>
+                  <div class="image-upload-controls">
+                    <label for="fileInput" class="btn btn-secondary" style="margin-bottom: 0;">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      اختر صورة
+                    </label>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    <input type="hidden" id="chapterIMG" name="chapterIMG" value="/images/default-chapter.jpg">
+                    <button type="button" class="btn btn-outline" id="resetImage" style="margin-bottom: 0;">
+                      <i class="fas fa-trash-alt"></i>
+                      إزالة
+                    </button>
+                  </div>
+                  <div class="upload-progress-container" id="progressContainer">
+                    <div class="upload-progress-bar" id="progressBar"></div>
+                  </div>
+                  <div class="upload-status" id="uploadStatus"></div>
+                  <div class="image-upload-hint">
+                    <p><i class="fas fa-cloud-upload-alt"></i> اسحب وأفلت الصورة هنا، أو اضغط لاختيار صورة</p>
+                    <p class="text-muted"><i class="fas fa-info-circle"></i> الحجم المناسب: 16:9، الحد الأقصى: 2MB</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="chapterAccessibility">نوع الوصول*</label>
+                <select id="chapterAccessibility" name="chapterAccessibility" class="form-input" required>
+                  <option value="EnterInFree">مجاني (يمكن الوصول للمحتوى)</option>
+                  <option value="Pay">مدفوع (يتطلب كود للوصول)</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="priceGroup" style="display: none;">
+                <label class="form-label" for="chapterPrice">السعر (جنيه مصري)</label>
+                <input type="number" id="chapterPrice" name="chapterPrice" class="form-input" value="0" min="0" placeholder="أدخل السعر">
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                حفظ الفصل
+              </button>
+              <a href="/teacher/chapters" class="btn btn-outline">
+                <i class="fas fa-times"></i>
+                إلغاء
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // Cloudinary configuration
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dusod9wxt/upload';
+    const CLOUDINARY_UPLOAD_PRESET = 'order_project';
+    
+    // Elements
+    const imageUploadContainer = document.getElementById('imageUploadContainer');
+    const previewImage = document.getElementById('previewImage');
+    const chapterIMGInput = document.getElementById('chapterIMG');
+    const fileInput = document.getElementById('fileInput');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const successAlert = document.getElementById('successAlert');
+    const successMessage = document.getElementById('successMessage');
+    const uploadStatus = document.getElementById('uploadStatus');
+    
+    // Toggle price field based on accessibility
+    document.getElementById('chapterAccessibility').addEventListener('change', function() {
+      const priceGroup = document.getElementById('priceGroup');
+      if (this.value === 'Pay') {
+        priceGroup.style.display = 'block';
+      } else {
+        priceGroup.style.display = 'none';
+        document.getElementById('chapterPrice').value = 0;
+      }
+    });
+    
+    // Reset image to default
+    document.getElementById('resetImage').addEventListener('click', function() {
+      previewImage.src = '/images/default-chapter.jpg';
+      chapterIMGInput.value = '/images/default-chapter.jpg';
+      fileInput.value = '';
+      updateUploadStatus('success', 'تم إزالة الصورة بنجاح.');
+      
+      // Show temporary success message
+      showTemporaryAlert('success', 'تم إزالة الصورة بنجاح!');
+    });
+    
+    // File input change handler
+    fileInput.addEventListener('change', function(e) {
+      if (this.files && this.files[0]) {
+        handleFiles(this.files);
+      }
+    });
+    
+    // Handle drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      imageUploadContainer.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      imageUploadContainer.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      imageUploadContainer.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+      imageUploadContainer.classList.add('highlight');
+    }
+    
+    function unhighlight() {
+      imageUploadContainer.classList.remove('highlight');
+    }
+    
+    imageUploadContainer.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length) {
+        handleFiles(files);
+      }
+    }
+    
+    function handleFiles(files) {
+      if (files[0]) {
+        const file = files[0];
+        
+        // Check file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          showTemporaryAlert('danger', 'حجم الملف كبير جدًا. الحد الأقصى هو 2 ميجابايت.');
+          updateUploadStatus('error', 'حجم الملف كبير جدًا (الحد الأقصى: 2MB)');
+          return;
+        }
+        
+        // Check file type
+        if (!file.type.match('image.*')) {
+          showTemporaryAlert('danger', 'يرجى اختيار صورة صالحة.');
+          updateUploadStatus('error', 'نوع الملف غير مدعوم. يرجى اختيار صورة.');
+          return;
+        }
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload to Cloudinary
+        uploadToCloudinary(file);
+      }
+    }
+    
+    function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      
+      // Show progress container
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      updateUploadStatus('uploading', 'جاري رفع الصورة... <i class="fas fa-spinner fa-spin"></i>');
+      
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', CLOUDINARY_URL, true);
+      
+      // Track upload progress
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percentComplete + '%';
+          updateUploadStatus('uploading', `جاري الرفع... ${percentComplete}% <i class="fas fa-spinner fa-spin"></i>`);
+        }
+      };
+      
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          chapterIMGInput.value = response.secure_url;
+          
+          // Update status
+          updateUploadStatus('success', 'تم رفع الصورة بنجاح! <i class="fas fa-check-circle"></i>');
+          
+          // Show success message
+          showTemporaryAlert('success', 'تم رفع الصورة بنجاح!');
+        } else {
+          updateUploadStatus('error', 'حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى. <i class="fas fa-exclamation-circle"></i>');
+          showTemporaryAlert('danger', 'حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى.');
+        }
+        
+        // Hide progress container after a short delay
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+        }, 1000);
+      };
+      
+      xhr.onerror = function() {
+        updateUploadStatus('error', 'حدث خطأ في الاتصال. يرجى التحقق من اتصالك بالإنترنت. <i class="fas fa-exclamation-circle"></i>');
+        showTemporaryAlert('danger', 'حدث خطأ أثناء رفع الصورة. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.');
+        progressContainer.style.display = 'none';
+      };
+      
+      xhr.send(formData);
+    }
+    
+    function updateUploadStatus(status, message) {
+      uploadStatus.innerHTML = message;
+      uploadStatus.className = 'upload-status'; // Clear previous classes
+      uploadStatus.classList.add(status);
+      uploadStatus.style.display = 'flex';
+      
+      // Auto-hide success status after 5 seconds
+      if (status === 'success') {
+        setTimeout(() => {
+          uploadStatus.style.display = 'none';
+        }, 5000);
+      }
+    }
+    
+    function showTemporaryAlert(type, message) {
+      successAlert.className = 'alert alert-' + type;
+      successMessage.textContent = message;
+      successAlert.style.display = 'flex';
+      
+      // Add a close button to the alert
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'alert-close';
+      closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+      closeBtn.onclick = function() {
+        successAlert.style.display = 'none';
+        // Remove the close button after hiding
+        if (successAlert.contains(closeBtn)) {
+          successAlert.removeChild(closeBtn);
+        }
+      };
+      
+      // Add the close button to the alert if it doesn't already have one
+      if (!successAlert.querySelector('.alert-close')) {
+        successAlert.appendChild(closeBtn);
+      }
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        successAlert.style.display = 'none';
+        // Remove the close button after hiding
+        if (successAlert.contains(closeBtn)) {
+          successAlert.removeChild(closeBtn);
+        }
+      }, 5000);
+    }
+    
+    // Save draft functionality
+    document.getElementById('chapterForm').addEventListener('submit', function(e) {
+      const chapterName = document.getElementById('chapterName').value.trim();
+      const chapterGrade = document.getElementById('chapterGrade').value;
+      
+      if (!chapterName) {
+        e.preventDefault();
+        showTemporaryAlert('danger', 'يرجى إدخال اسم الفصل');
+        return;
+      }
+      
+      if (!chapterGrade) {
+        e.preventDefault();
+        showTemporaryAlert('danger', 'يرجى اختيار المرحلة الدراسية');
+        return;
+      }
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<%- include('./partials/head.ejs') %>
+  <style>
+    .create-form {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+    
+    .form-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-subtitle {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+    
+    .form-input {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-select {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .form-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .specific-content {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      border: 2px dashed #e2e8f0;
+    }
+    
+    .specific-content.show {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      color: white;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .generated-codes {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .codes-header {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .codes-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+    
+    .codes-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .codes-table {
+      overflow-x: auto;
+    }
+    
+    .codes-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .codes-table th {
+      background: #f8fafc;
+      padding: 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.9rem;
+    }
+    
+    .codes-table td {
+      padding: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    
+    .codes-table tr:hover {
+      background: #f8fafc;
+    }
+    
+    .code-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .code-badge.primary {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+    }
+    
+    .code-badge.success {
+      background: rgba(74, 222, 128, 0.1);
+      color: #22c55e;
+    }
+    
+    .code-badge.warning {
+      background: rgba(251, 191, 36, 0.1);
+      color: #f59e0b;
+    }
+    
+    .code-badge.info {
+      background: rgba(96, 165, 250, 0.1);
+      color: #3b82f6;
+    }
+    
+    .code-display {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #667eea;
+      background: #f8fafc;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .copy-btn {
+      padding: 0.5rem;
+      border: none;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+      background: #5a67d8;
+      transform: scale(1.05);
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid #667eea;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Progress Section Styles */
+    .progress-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .progress-header h3 {
+      margin: 0;
+      color: #1e293b;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .progress-stats {
+      display: flex;
+      gap: 1rem;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .progress-bar-container {
+      margin-bottom: 1rem;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    .progress-status {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    /* Success Animation */
+    .progress-section.success {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-color: #22c55e;
+    }
+    
+    .progress-section.success .progress-fill {
+      background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+      
+      .codes-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+      
+      .codes-actions {
+        justify-content: center;
+      }
+      
+      .progress-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .progress-stats {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+  <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+  <%- include('./partials/top.ejs') %>
+
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title">إنشاء أكواد جديدة</h1>
+          <div class="page-actions">
+            <a href="/teacher/codes" class="btn btn-secondary">
+              <i class="fas fa-arrow-right"></i>
+              العودة للأكواد
+            </a>
+          </div>
+        </div>
+        
+        <!-- Create Form -->
+        <div class="create-form">
+          <div class="form-header">
+            <h2 class="form-title">إنشاء أكواد جديدة</h2>
+            <p class="form-subtitle">قم بإنشاء أكواد للطلاب للوصول إلى المحتوى التعليمي</p>
+          </div>
+
+          <!-- Progress Section (Hidden by default) -->
+          <div id="progressSection" class="progress-section" style="display: none;">
+            <div class="progress-header">
+              <h3>جاري إنشاء الأكواد...</h3>
+              <div class="progress-stats">
+                <span id="progressText">0 من 0</span>
+                <span id="progressPercentage">0%</span>
+              </div>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+            </div>
+            <div class="progress-status" id="progressStatus">
+              جاري إنشاء الأكواد...
+            </div>
+          </div>
+
+          <!-- Excel Upload Section -->
+          <div class="excel-upload-section" style="margin-bottom: 2rem; padding: 2rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 2px dashed #667eea;">
+            <div class="upload-header" style="text-align: center; margin-bottom: 1.5rem;">
+              <h3 style="color: #1e293b; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">
+                <i class="fas fa-file-excel" style="color: #22c55e; margin-left: 0.5rem;"></i>
+                رفع ملف Excel بالأكواد
+              </h3>
+              <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">قم برفع ملف Excel يحتوي على الأكواد في عمود "الكود" أو "Code"</p>
+              
+              <!-- Instructions -->
+              <div style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: right;">
+                <h4 style="color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem;">تعليمات:</h4>
+                <ul style="color: #6b7280; font-size: 0.8rem; margin: 0; padding-right: 1rem;">
+                  <li>يجب أن تكون الأكواد أرقام فقط (12 رقم)</li>
+                  <li>يجب أن يكون عمود الأكواد بعنوان "الكود" أو "Code"</li>
+                  <li>يمكن رفع ملفات .xlsx أو .xls</li>
+                  <li>سيتم تجاهل الأكواد المكررة تلقائياً</li>
+                </ul>
+              </div>
+              
+              <button type="button" class="btn btn-secondary" onclick="downloadTemplate()" style="margin-top: 0.5rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+                <i class="fas fa-download"></i>
+                تحميل نموذج Excel
+              </button>
+            </div>
+            
+            <div class="upload-form" style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+              <div class="file-upload-area" id="fileUploadArea" style="
+                width: 100%;
+                max-width: 400px;
+                padding: 2rem;
+                border: 2px dashed #667eea;
+                border-radius: 8px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: white;
+              ">
+                <i class="fas fa-file-excel" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+                <p style="margin: 0; color: #374151; font-weight: 600;">اضغط لاختيار ملف Excel</p>
+                <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.8rem;">أو اسحب الملف هنا</p>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;">
+              </div>
+              
+              <div class="upload-options" style="width: 100%; max-width: 400px;">
+                <div class="form-group">
+                  <label for="uploadCodeType">نوع الكود</label>
+                  <select class="form-select" id="uploadCodeType" name="uploadCodeType" required>
+                    <option value="">اختر نوع الكود</option>
+                    <option value="Chapter">فصل محدد</option>
+                    <option value="Video">فيديو محدد</option>
+                    <option value="Quiz">اختبار محدد</option>
+                    <option value="PDF">ملف PDF محدد</option>
+                    <option value="GeneralChapter">فصل عام</option>
+                    <option value="GeneralVideo">فيديو عام</option>
+                    <option value="GeneralQuiz">اختبار عام</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="uploadGrade">الصف</label>
+                  <select class="form-select" id="uploadGrade" name="uploadGrade" required>
+                    <option value="">اختر الصف</option>
+                    <option value="Grade1">الصف الأول الثانوي</option>
+                    <option value="Grade2">الصف الثاني الثانوي</option>
+                    <option value="Grade3">الصف الثالث الثانوي</option>
+                    <option value="AllGrades">جميع الصفوف</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="uploadIsGeneral">نوع الوصول</label>
+                  <select class="form-select" id="uploadIsGeneral" name="uploadIsGeneral">
+                    <option value="false">محتوى محدد</option>
+                    <option value="true">وصول عام</option>
+                  </select>
+                </div>
+                
+                <div class="form-group" id="uploadSpecificContent" style="display: none;">
+                  <label for="uploadChapterId">الفصل</label>
+                  <select class="form-select" id="uploadChapterId" name="uploadChapterId">
+                    <option value="">اختر الفصل</option>
+                    <% chapters.forEach(chapter => { %>
+                      <option value="<%= chapter._id %>" data-grade="<%= chapter.chapterGrade %>">
+                        <%= chapter.chapterName %> - <%= chapter.chapterGrade %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+                
+                <div class="form-group" id="uploadContentIdGroup" style="display: none;">
+                  <label for="uploadContentId">المحتوى المحدد</label>
+                  <select class="form-select" id="uploadContentId" name="uploadContentId">
+                    <option value="">اختر المحتوى</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button type="button" class="btn btn-primary" id="uploadBtn" style="margin-top: 1rem;" disabled>
+                <i class="fas fa-upload"></i>
+                رفع الأكواد من الملف
+              </button>
+            </div>
+            
+            <!-- Upload Progress -->
+            <div id="uploadProgress" class="progress-section" style="display: none; margin-top: 1.5rem;">
+              <div class="progress-header">
+                <h3>جاري رفع الأكواد...</h3>
+                <div class="progress-stats">
+                  <span id="uploadProgressText">0 من 0</span>
+                  <span id="uploadProgressPercentage">0%</span>
+                </div>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="uploadProgressFill"></div>
+                </div>
+              </div>
+              <div class="progress-status" id="uploadProgressStatus">
+                جاري قراءة الملف...
+              </div>
+            </div>
+          </div>
+
+          <form method="POST" action="/teacher/codes/create" id="createForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="codeType">نوع الكود</label>
+                <select class="form-select" id="codeType" name="codeType" required>
+                  <option value="">اختر نوع الكود</option>
+                  <option value="Chapter">فصل محدد</option>
+                  <option value="Video">فيديو محدد</option>
+                  <option value="Quiz">اختبار محدد</option>
+                  <option value="PDF">ملف PDF محدد</option>
+                  <option value="GeneralChapter">فصل عام</option>
+                  <option value="GeneralVideo">فيديو عام</option>
+                  <option value="GeneralQuiz">اختبار عام</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="count">عدد الأكواد</label>
+                <input type="number" class="form-input" id="count" name="count" min="1" max="100" value="1" required>
+                <small style="color: #6b7280; font-size: 0.8rem;">سيتم إنشاء أكواد رقمية من 12 رقم</small>
+              </div>
+
+              <div class="form-group">
+                <label for="grade">الصف</label>
+                <select class="form-select" id="grade" name="grade" required>
+                  <option value="">اختر الصف</option>
+                  <option value="Grade1">الصف الأول الثانوي</option>
+                  <option value="Grade2">الصف الثاني الثانوي</option>
+                  <option value="Grade3">الصف الثالث الثانوي</option>
+                  <option value="AllGrades">جميع الصفوف</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="isGeneral">نوع الوصول</label>
+                <select class="form-select" id="isGeneral" name="isGeneral">
+                  <option value="false">محتوى محدد</option>
+                  <option value="true">وصول عام</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Specific Content Selection -->
+            <div id="specificContent" class="specific-content" style="display: none;">
+              <h4 style="margin-bottom: 1rem; color: #374151;">اختيار المحتوى المحدد</h4>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="chapterId">الفصل</label>
+                  <select class="form-select" id="chapterId" name="chapterId">
+                    <option value="">اختر الفصل</option>
+                    <% chapters.forEach(chapter => { %>
+                      <option value="<%= chapter._id %>" data-grade="<%= chapter.chapterGrade %>">
+                        <%= chapter.chapterName %> - <%= chapter.chapterGrade %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="contentId">المحتوى المحدد</label>
+                  <select class="form-select" id="contentId" name="contentId">
+                    <option value="">اختر المحتوى</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-plus"></i>
+                إنشاء الأكواد
+              </button>
+              <a href="/teacher/codes" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                العودة للأكواد
+              </a>
+            </div>
+          </form>
+        </div>
+
+        <!-- Generated Codes Display -->
+        <% if (generatedCodes && generatedCodes.length > 0) { %>
+          <div class="generated-codes">
+            <div class="codes-header">
+              <h3 class="codes-title">الأكواد المنشأة</h3>
+              <div class="codes-actions">
+                <button class="btn btn-primary" onclick="copyAllCodes()">
+                  <i class="fas fa-copy"></i>
+                  نسخ الكل
+                </button>
+                <button class="btn btn-secondary" onclick="exportCodes()">
+                  <i class="fas fa-download"></i>
+                  تصدير
+                </button>
+                  </div>
+                </div>
+            
+            <div class="codes-table">
+              <table>
+                      <thead>
+                        <tr>
+                          <th>الكود</th>
+                          <th>النوع</th>
+                          <th>الصف</th>
+                          <th>المحتوى</th>
+                    <th>الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                  <% generatedCodes.forEach(code => { %>
+                    <tr>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                          <span class="code-display"><%= code.Code %></span>
+                          <button class="copy-btn" onclick="copyCode('<%= code.Code %>')" title="نسخ الكود">
+                            <i class="fas fa-copy"></i>
+                          </button>
+                        </div>
+                      </td>
+                            <td>
+                              <% if (code.codeType === 'Chapter') { %>
+                          <span class="code-badge primary">فصل</span>
+                              <% } else if (code.codeType === 'Video') { %>
+                          <span class="code-badge success">فيديو</span>
+                              <% } else if (code.codeType === 'Quiz') { %>
+                          <span class="code-badge warning">اختبار</span>
+                              <% } else if (code.codeType === 'PDF') { %>
+                          <span class="code-badge info">PDF</span>
+                              <% } else if (code.codeType === 'GeneralChapter') { %>
+                          <span class="code-badge primary">فصل عام</span>
+                              <% } else if (code.codeType === 'GeneralVideo') { %>
+                          <span class="code-badge success">فيديو عام</span>
+                              <% } else if (code.codeType === 'GeneralQuiz') { %>
+                          <span class="code-badge warning">اختبار عام</span>
+                        <% } else { %>
+                          <span class="code-badge info"><%= code.codeType %></span>
+                              <% } %>
+                            </td>
+                      <td>
+                        <% if (code.codeGrade === 'AllGrades') { %>
+                          جميع الصفوف
+                        <% } else { %>
+                          <%= code.codeGrade %>
+                        <% } %>
+                      </td>
+                      <td><%= code.contentName || code.chapterName || 'عام' %></td>
+                      <td>
+                        <button class="copy-btn" onclick="copyCode('<%= code.Code %>')" title="نسخ الكود">
+                          <i class="fas fa-copy"></i>
+                        </button>
+                      </td>
+                          </tr>
+                        <% }); %>
+                      </tbody>
+                    </table>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </main>
+</div>
+
+<script>
+    // Handle code type change
+    document.getElementById('codeType').addEventListener('change', function() {
+      const codeType = this.value;
+      const specificContent = document.getElementById('specificContent');
+      const isGeneral = document.getElementById('isGeneral');
+      
+      if (codeType.startsWith('General')) {
+        specificContent.style.display = 'none';
+        specificContent.classList.remove('show');
+        isGeneral.value = 'true';
+      } else {
+        specificContent.style.display = 'block';
+        specificContent.classList.add('show');
+        isGeneral.value = 'false';
+      }
+      
+      updateContentOptions();
+    });
+
+    // Handle grade change
+    document.getElementById('grade').addEventListener('change', function() {
+      updateContentOptions();
+    });
+
+    // Handle chapter change
+    document.getElementById('chapterId').addEventListener('change', function() {
+      updateContentOptions();
+    });
+
+    function updateContentOptions() {
+      const codeType = document.getElementById('codeType').value;
+      const grade = document.getElementById('grade').value;
+      const chapterId = document.getElementById('chapterId').value;
+      const contentSelect = document.getElementById('contentId');
+      
+      // Clear current options
+      contentSelect.innerHTML = '<option value="">اختر المحتوى</option>';
+      
+      if (!codeType || codeType.startsWith('General')) {
+      return;
+    }
+    
+      // Filter chapters by grade
+      const chapterSelect = document.getElementById('chapterId');
+      const chapters = Array.from(chapterSelect.options);
+      
+      chapters.forEach(option => {
+        if (option.value && option.dataset.grade === grade) {
+          option.style.display = '';
+        } else if (option.value) {
+          option.style.display = 'none';
+        }
+      });
+      
+      // If specific content type is selected, populate content options
+      if (codeType === 'Video' && chapterId) {
+        // Load videos for the selected chapter
+        fetch(`/teacher/api/videos/chapter/${chapterId}`)
+      .then(response => response.json())
+      .then(data => {
+            if (data.success && data.videos) {
+              contentSelect.innerHTML = '<option value="">اختر الفيديو</option>';
+          data.videos.forEach(video => {
+            const option = document.createElement('option');
+            option.value = video._id;
+                option.textContent = video.title;
+                contentSelect.appendChild(option);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error loading videos:', error);
+            contentSelect.innerHTML = '<option value="">خطأ في تحميل الفيديوهات</option>';
+          });
+      } else if (codeType === 'Quiz' && grade) {
+        // Load quizzes for the selected grade
+        fetch(`/teacher/api/quizzes/grade/${grade}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.quizzes) {
+              contentSelect.innerHTML = '<option value="">اختر الاختبار</option>';
+              data.quizzes.forEach(quiz => {
+                const option = document.createElement('option');
+                option.value = quiz._id;
+                option.textContent = quiz.quizName;
+                contentSelect.appendChild(option);
+              });
+        }
+      })
+      .catch(error => {
+            console.error('Error loading quizzes:', error);
+            contentSelect.innerHTML = '<option value="">خطأ في تحميل الاختبارات</option>';
+          });
+      }
+    }
+
+    // Form submission
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const submitBtn = document.getElementById('submitBtn');
+      const progressSection = document.getElementById('progressSection');
+      const progressText = document.getElementById('progressText');
+      const progressPercentage = document.getElementById('progressPercentage');
+      const progressFill = document.getElementById('progressFill');
+      const progressStatus = document.getElementById('progressStatus');
+      
+      // Show progress section
+      progressSection.style.display = 'block';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...';
+      
+      // Simulate progress (since we can't track real-time server progress)
+      const totalCodes = parseInt(formData.get('count'));
+      let currentProgress = 0;
+      
+      const progressInterval = setInterval(() => {
+        currentProgress += Math.random() * 15 + 5; // Random increment between 5-20%
+        if (currentProgress > 90) currentProgress = 90; // Don't reach 100% until server responds
+        
+        const percentage = Math.min(currentProgress, 90);
+        progressText.textContent = `${Math.floor((percentage / 100) * totalCodes)} من ${totalCodes}`;
+        progressPercentage.textContent = `${Math.floor(percentage)}%`;
+        progressFill.style.width = `${percentage}%`;
+        
+        if (percentage < 30) {
+          progressStatus.textContent = 'جاري إنشاء الأكواد...';
+        } else if (percentage < 60) {
+          progressStatus.textContent = 'جاري حفظ الأكواد في قاعدة البيانات...';
+        } else if (percentage < 90) {
+          progressStatus.textContent = 'جاري إعداد ملف التصدير...';
+        }
+      }, 200);
+      
+      // Submit form via AJAX
+      fetch('/teacher/codes/create', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        clearInterval(progressInterval);
+        
+        if (data.success) {
+          // Complete progress
+          progressText.textContent = `${totalCodes} من ${totalCodes}`;
+          progressPercentage.textContent = '100%';
+          progressFill.style.width = '100%';
+          progressStatus.textContent = 'تم إنشاء الأكواد بنجاح! جاري تحميل الملف...';
+          progressSection.classList.add('success');
+          
+          // Auto download Excel file
+          setTimeout(() => {
+            downloadExcelFile(data.codes);
+            showToast('success', `تم إنشاء ${totalCodes} كود بنجاح وتم تحميل الملف تلقائياً`);
+            
+            // Reset form and hide progress
+            setTimeout(() => {
+              progressSection.style.display = 'none';
+              progressSection.classList.remove('success');
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="fas fa-plus"></i> إنشاء الأكواد';
+            }, 2000);
+          }, 1000);
+        } else {
+          progressStatus.textContent = 'حدث خطأ أثناء إنشاء الأكواد';
+          showToast('error', data.message || 'حدث خطأ أثناء إنشاء الأكواد');
+          
+          setTimeout(() => {
+            progressSection.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-plus"></i> إنشاء الأكواد';
+          }, 3000);
+        }
+      })
+      .catch(error => {
+        clearInterval(progressInterval);
+        console.error('Error:', error);
+        progressStatus.textContent = 'حدث خطأ في الاتصال';
+        showToast('error', 'حدث خطأ في الاتصال بالخادم');
+        
+        setTimeout(() => {
+          progressSection.style.display = 'none';
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-plus"></i> إنشاء الأكواد';
+        }, 3000);
+      });
+    });
+
+    // Download Excel file function
+    function downloadExcelFile(codes) {
+      // Create Excel content
+      const headers = ['الكود', 'النوع', 'الصف', 'المحتوى', 'تاريخ الإنشاء'];
+      const rows = codes.map(code => [
+        code.Code,
+        getCodeTypeName(code.codeType),
+        code.codeGrade,
+        code.contentName || code.chapterName || 'عام',
+        new Date().toLocaleDateString('ar-SA')
+      ]);
+      
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+      
+      // Create and download file
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `codes_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Helper function to get code type name
+    function getCodeTypeName(codeType) {
+      const typeNames = {
+        'Chapter': 'فصل',
+        'Video': 'فيديو',
+        'Quiz': 'اختبار',
+        'PDF': 'PDF',
+        'GeneralChapter': 'فصل عام',
+        'GeneralVideo': 'فيديو عام',
+        'GeneralQuiz': 'اختبار عام'
+      };
+      return typeNames[codeType] || codeType;
+    }
+
+    // Copy single code
+    function copyCode(code) {
+      navigator.clipboard.writeText(code).then(function() {
+        showToast('success', 'تم نسخ الكود: ' + code);
+      }, function(err) {
+        console.error('Could not copy text: ', err);
+        showToast('error', 'فشل في نسخ الكود');
+      });
+    }
+
+    // Copy all codes
+    function copyAllCodes() {
+      const codes = [];
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const codeCell = row.querySelector('.code-display');
+        if (codeCell) {
+          codes.push(codeCell.textContent);
+        }
+      });
+      
+      const codesText = codes.join('\n');
+      navigator.clipboard.writeText(codesText).then(function() {
+        showToast('success', 'تم نسخ جميع الأكواد');
+      }, function(err) {
+        console.error('Could not copy text: ', err);
+        showToast('error', 'فشل في نسخ الأكواد');
+      });
+    }
+
+    // Export codes
+    function exportCodes() {
+      const codes = [];
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 4) {
+          codes.push({
+            code: cells[0].querySelector('.code-display').textContent,
+            type: cells[1].textContent.trim(),
+            grade: cells[2].textContent.trim(),
+            content: cells[3].textContent.trim()
+          });
+        }
+      });
+      
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "الكود,النوع,الصف,المحتوى\n"
+        + codes.map(row => `${row.code},${row.type},${row.grade},${row.content}`).join("\n");
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "codes.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast('success', 'تم تصدير الأكواد بنجاح');
+    }
+
+    // Toast notification function
+    function showToast(type, message) {
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        max-width: 300px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      `;
+      
+      // Set background color based on type
+      if (type === 'success') {
+        toast.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+      } else if (type === 'error') {
+        toast.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      } else if (type === 'warning') {
+        toast.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+      } else {
+        toast.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+      }
+      
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      // Animate in
+      setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+      }, 100);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+
+    // ==================== Excel Upload Functionality ====================
+    
+    // File upload area interactions
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const excelFileInput = document.getElementById('excelFile');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const uploadProgressText = document.getElementById('uploadProgressText');
+    const uploadProgressPercentage = document.getElementById('uploadProgressPercentage');
+    const uploadProgressFill = document.getElementById('uploadProgressFill');
+    const uploadProgressStatus = document.getElementById('uploadProgressStatus');
+
+    // Handle file selection
+    fileUploadArea.addEventListener('click', () => {
+      excelFileInput.click();
+    });
+
+    // Handle drag and drop
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.style.borderColor = '#22c55e';
+      fileUploadArea.style.background = 'rgba(34, 197, 94, 0.05)';
+    });
+
+    fileUploadArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      fileUploadArea.style.borderColor = '#667eea';
+      fileUploadArea.style.background = 'white';
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.style.borderColor = '#667eea';
+      fileUploadArea.style.background = 'white';
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        excelFileInput.files = files;
+        handleFileSelection();
+      }
+    });
+
+    excelFileInput.addEventListener('change', handleFileSelection);
+
+    function handleFileSelection() {
+      const file = excelFileInput.files[0];
+      if (file) {
+        // Validate file type
+        const validTypes = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel'
+        ];
+        
+        if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/)) {
+          showToast('error', 'يرجى اختيار ملف Excel صحيح (.xlsx أو .xls)');
+          return;
+        }
+
+        // Update UI
+        fileUploadArea.innerHTML = `
+          <i class="fas fa-check-circle" style="font-size: 2rem; color: #22c55e; margin-bottom: 1rem;"></i>
+          <p style="margin: 0; color: #374151; font-weight: 600;">تم اختيار الملف</p>
+          <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.8rem;">${file.name}</p>
+        `;
+        
+        uploadBtn.disabled = false;
+        showToast('success', 'تم اختيار الملف بنجاح');
+      }
+    }
+
+    // Handle upload form interactions
+    document.getElementById('uploadCodeType').addEventListener('change', function() {
+      const codeType = this.value;
+      const specificContent = document.getElementById('uploadSpecificContent');
+      const isGeneral = document.getElementById('uploadIsGeneral');
+      
+      if (codeType.startsWith('General')) {
+        specificContent.style.display = 'none';
+        specificContent.classList.remove('show');
+        isGeneral.value = 'true';
+      } else {
+        specificContent.style.display = 'block';
+        specificContent.classList.add('show');
+        isGeneral.value = 'false';
+      }
+      
+      updateUploadContentOptions();
+    });
+
+    document.getElementById('uploadGrade').addEventListener('change', function() {
+      updateUploadContentOptions();
+    });
+
+    document.getElementById('uploadChapterId').addEventListener('change', function() {
+      updateUploadContentOptions();
+    });
+
+    function updateUploadContentOptions() {
+      const codeType = document.getElementById('uploadCodeType').value;
+      const grade = document.getElementById('uploadGrade').value;
+      const chapterId = document.getElementById('uploadChapterId').value;
+      const contentSelect = document.getElementById('uploadContentId');
+      const contentGroup = document.getElementById('uploadContentIdGroup');
+      
+      // Clear current options
+      contentSelect.innerHTML = '<option value="">اختر المحتوى</option>';
+      
+      if (!codeType || codeType.startsWith('General')) {
+        contentGroup.style.display = 'none';
+        return;
+      }
+      
+      contentGroup.style.display = 'block';
+      
+      // Filter chapters by grade
+      const chapterSelect = document.getElementById('uploadChapterId');
+      const chapters = Array.from(chapterSelect.options);
+      
+      chapters.forEach(option => {
+        if (option.value && option.dataset.grade === grade) {
+          option.style.display = '';
+        } else if (option.value) {
+          option.style.display = 'none';
+        }
+      });
+      
+      // If specific content type is selected, populate content options
+      if (codeType === 'Video' && chapterId) {
+        // Load videos for the selected chapter
+        fetch(`/teacher/api/videos/chapter/${chapterId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.videos) {
+              contentSelect.innerHTML = '<option value="">اختر الفيديو</option>';
+              data.videos.forEach(video => {
+                const option = document.createElement('option');
+                option.value = video._id;
+                option.textContent = video.title;
+                contentSelect.appendChild(option);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error loading videos:', error);
+            contentSelect.innerHTML = '<option value="">خطأ في تحميل الفيديوهات</option>';
+          });
+      } else if (codeType === 'Quiz' && grade) {
+        // Load quizzes for the selected grade
+        fetch(`/teacher/api/quizzes/grade/${grade}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.quizzes) {
+              contentSelect.innerHTML = '<option value="">اختر الاختبار</option>';
+              data.quizzes.forEach(quiz => {
+                const option = document.createElement('option');
+                option.value = quiz._id;
+                option.textContent = quiz.quizName;
+                contentSelect.appendChild(option);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('Error loading quizzes:', error);
+            contentSelect.innerHTML = '<option value="">خطأ في تحميل الاختبارات</option>';
+          });
+      }
+    }
+
+    // Handle upload button click
+    uploadBtn.addEventListener('click', function() {
+      const file = excelFileInput.files[0];
+      if (!file) {
+        showToast('error', 'يرجى اختيار ملف Excel أولاً');
+        return;
+      }
+
+      const codeType = document.getElementById('uploadCodeType').value;
+      const grade = document.getElementById('uploadGrade').value;
+      const isGeneral = document.getElementById('uploadIsGeneral').value;
+      const chapterId = document.getElementById('uploadChapterId').value;
+      const contentId = document.getElementById('uploadContentId').value;
+
+      if (!codeType || !grade) {
+        showToast('error', 'يرجى ملء جميع الحقول المطلوبة');
+        return;
+      }
+
+      if (!isGeneral || isGeneral === 'false') {
+        if (!chapterId) {
+          showToast('error', 'يرجى اختيار الفصل');
+          return;
+        }
+        if (codeType !== 'Chapter' && !contentId) {
+          showToast('error', 'يرجى اختيار المحتوى المحدد');
+          return;
+        }
+      }
+
+      // Show progress
+      uploadProgress.style.display = 'block';
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الرفع...';
+      
+      // Create FormData
+      const formData = new FormData();
+      formData.append('excelFile', file);
+      formData.append('codeType', codeType);
+      formData.append('grade', grade);
+      formData.append('isGeneral', isGeneral);
+      formData.append('chapterId', chapterId);
+      formData.append('contentId', contentId);
+
+      // Simulate progress
+      let currentProgress = 0;
+      const progressInterval = setInterval(() => {
+        currentProgress += Math.random() * 15 + 5;
+        if (currentProgress > 90) currentProgress = 90;
+        
+        const percentage = Math.min(currentProgress, 90);
+        uploadProgressText.textContent = `جاري المعالجة...`;
+        uploadProgressPercentage.textContent = `${Math.floor(percentage)}%`;
+        uploadProgressFill.style.width = `${percentage}%`;
+        
+        if (percentage < 30) {
+          uploadProgressStatus.textContent = 'جاري قراءة ملف Excel...';
+        } else if (percentage < 60) {
+          uploadProgressStatus.textContent = 'جاري استخراج الأكواد...';
+        } else if (percentage < 90) {
+          uploadProgressStatus.textContent = 'جاري حفظ الأكواد في قاعدة البيانات...';
+        }
+      }, 200);
+
+      // Upload file
+      fetch('/teacher/codes/upload-excel', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        clearInterval(progressInterval);
+        
+        if (data.success) {
+          // Complete progress
+          uploadProgressText.textContent = `${data.codes.length} من ${data.codes.length}`;
+          uploadProgressPercentage.textContent = '100%';
+          uploadProgressFill.style.width = '100%';
+          uploadProgressStatus.textContent = 'تم رفع الأكواد بنجاح!';
+          uploadProgress.classList.add('success');
+          
+          showToast('success', `تم رفع ${data.codes.length} كود بنجاح`);
+          
+          // Reset form
+          setTimeout(() => {
+            uploadProgress.style.display = 'none';
+            uploadProgress.classList.remove('success');
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fas fa-upload"></i> رفع الأكواد من الملف';
+            
+            // Reset file input
+            excelFileInput.value = '';
+            fileUploadArea.innerHTML = `
+              <i class="fas fa-file-excel" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+              <p style="margin: 0; color: #374151; font-weight: 600;">اضغط لاختيار ملف Excel</p>
+              <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.8rem;">أو اسحب الملف هنا</p>
+            `;
+            uploadBtn.disabled = true;
+          }, 2000);
+          
+          // Reload page to show new codes
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        } else {
+          uploadProgressStatus.textContent = 'حدث خطأ أثناء رفع الأكواد';
+          showToast('error', data.message || 'حدث خطأ أثناء رفع الأكواد');
+          
+          setTimeout(() => {
+            uploadProgress.style.display = 'none';
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fas fa-upload"></i> رفع الأكواد من الملف';
+          }, 3000);
+        }
+      })
+      .catch(error => {
+        clearInterval(progressInterval);
+        console.error('Error:', error);
+        uploadProgressStatus.textContent = 'حدث خطأ في الاتصال';
+        showToast('error', 'حدث خطأ في الاتصال بالخادم');
+        
+        setTimeout(() => {
+          uploadProgress.style.display = 'none';
+          uploadBtn.disabled = false;
+          uploadBtn.innerHTML = '<i class="fas fa-upload"></i> رفع الأكواد من الملف';
+        }, 3000);
+      });
+    });
+
+    // Download template function
+    function downloadTemplate() {
+      // Create a simple Excel template with sample data
+      const headers = ['الكود', 'Code'];
+      const sampleCodes = [
+        ['123456789012', '123456789012'],
+        ['234567890123', '234567890123'],
+        ['345678901234', '345678901234']
+      ];
+      
+      // Create CSV content
+      const csvContent = [
+        headers.join(','),
+        ...sampleCodes.map(row => row.join(','))
+      ].join('\n');
+      
+      // Create and download file
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'codes_template.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast('success', 'تم تحميل نموذج Excel بنجاح');
+    }
+</script> 
+</body>
+</html> 

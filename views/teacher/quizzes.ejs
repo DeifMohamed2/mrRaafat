@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <%- include('./partials/head.ejs') %>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title">إدارة الاختبارات</h1>
+          <div class="page-actions">
+            <a href="/teacher/quizzes/create" class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              إنشاء اختبار جديد
+            </a>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-clipboard-question"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= totalQuizzes %></h3>
+              <p class="stat-label">إجمالي الاختبارات</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= activeQuizzes %></h3>
+              <p class="stat-label">اختبارات نشطة</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= totalAttempts %></h3>
+              <p class="stat-label">إجمالي المحاولات</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+              <h3 class="stat-value"><%= Math.round(averageScore) %></h3>
+              <p class="stat-label">متوسط الدرجات</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-container">
+          <form action="/teacher/quizzes" method="GET" class="filters-form">
+            <div class="filter-group">
+              <label for="grade">الصف</label>
+              <select name="grade" id="grade" class="form-select">
+                <option value="">الكل</option>
+                <option value="Grade1" <%= filters.grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                <option value="Grade2" <%= filters.grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                <option value="Grade3" <%= filters.grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="chapter">الفصل</label>
+              <select name="chapter" id="chapter" class="form-select">
+                <option value="">الكل</option>
+                <% chapters.forEach(function(chapter) { %>
+                  <option value="<%= chapter._id %>" <%= filters.chapter === chapter._id.toString() ? 'selected' : '' %>>
+                    <%= chapter.chapterName %>
+                  </option>
+                <% }); %>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="search">بحث</label>
+              <input type="text" name="search" id="search" class="form-input" value="<%= filters.search || '' %>" placeholder="اسم الاختبار...">
+            </div>
+            
+            <div class="filter-actions">
+              <button type="submit" class="btn btn-primary">تطبيق</button>
+              <a href="/teacher/quizzes" class="btn btn-outline">إعادة ضبط</a>
+            </div>
+          </form>
+        </div>
+        
+        <!-- View Toggles -->
+        <div class="view-toggles">
+          <button class="view-toggle active" data-view="table">
+            <i class="fas fa-table"></i>
+            جدول
+          </button>
+          <button class="view-toggle" data-view="cards">
+            <i class="fas fa-th-large"></i>
+            بطاقات
+          </button>
+        </div>
+        
+        <!-- Table View -->
+        <div class="view-container" id="tableView">
+          <div class="teacher-table-container">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>الصف</th>
+                  <th>عدد الأسئلة</th>
+                  <th>المحاولات</th>
+                  <th>متوسط الدرجات</th>
+                  <th>الحالة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% quizzes.forEach(function(quiz) { %>
+                  <tr>
+                    <td>
+                      <div class="table-cell-primary">
+                        <span><%= quiz.quizName %></span>
+                      </div>
+                    </td>
+                    <td>
+                      <% let gradeName = ''; %>
+                      <% if (quiz.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+                      <% if (quiz.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+                      <% if (quiz.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+                      <%= gradeName %>
+                    </td>
+                    <td>
+                      <div style="text-align: center;">
+                        <div style="font-weight: 600; color: var(--primary-color);"><%= quiz.questionsToShow || quiz.questionsCount || 0 %> من <%= quiz.Questions ? quiz.Questions.length : (quiz.questionsCount || 0) %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">سؤال</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="text-align: center;">
+                        <div style="font-weight: 600; color: var(--primary-color);"><%= quiz.stats.totalAttempts %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">محاولة</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="text-align: center;">
+                        <div style="font-weight: 600; color: var(--primary-color);"><%= quiz.stats.averageScoreDisplay %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">متوسط</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="status-badge <%= quiz.isQuizActive ? 'active' : 'inactive' %>">
+                        <%= quiz.isQuizActive ? 'نشط' : 'غير نشط' %>
+                      </span>
+                    </td>
+                    <td>
+                      <div class="table-actions">
+                        <a href="/teacher/quizzes/<%= quiz._id %>" class="btn btn-sm btn-outline" title="عرض">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="/teacher/quizzes/<%= quiz._id %>/edit" class="btn btn-sm btn-outline" title="تعديل">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="/teacher/quizzes/<%= quiz._id %>/results" class="btn btn-sm btn-outline" title="النتائج">
+                          <i class="fas fa-chart-bar"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline delete-btn" data-id="<%= quiz._id %>" title="حذف">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+                
+                <% if (quizzes.length === 0) { %>
+                  <tr>
+                    <td colspan="7" class="empty-table">
+                      <div class="empty-state">
+                        <i class="fas fa-clipboard-question"></i>
+                        <p>لا توجد اختبارات متاحة</p>
+                        <a href="/teacher/quizzes/create" class="btn btn-primary">إنشاء اختبار جديد</a>
+                      </div>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Cards View -->
+        <div class="view-container hidden" id="cardsView">
+          <div class="cards-grid">
+            <% quizzes.forEach(function(quiz) { %>
+              <div class="quiz-card">
+                <div class="quiz-card-header">
+                  <h3 class="quiz-card-title"><%= quiz.quizName %></h3>
+                  <span class="status-badge <%= quiz.isQuizActive ? 'active' : 'inactive' %>">
+                    <%= quiz.isQuizActive ? 'نشط' : 'غير نشط' %>
+                  </span>
+                </div>
+                
+                <div class="quiz-card-content">
+                  <div class="quiz-card-stats">
+                    <div class="quiz-stat">
+                      <i class="fas fa-question-circle"></i>
+                      <span><%= quiz.questionsToShow || quiz.questionsCount || 0 %> من <%= quiz.Questions ? quiz.Questions.length : quiz.questionsCount || 0 %> أسئلة</span>
+                    </div>
+                    <div class="quiz-stat">
+                      <i class="fas fa-users"></i>
+                      <span><%= quiz.stats.totalAttempts %> محاولة</span>
+                    </div>
+                    <div class="quiz-stat">
+                      <i class="fas fa-star"></i>
+                      <span><%= quiz.stats.averageScoreDisplay %> متوسط</span>
+                    </div>
+                  </div>
+                  
+                  <div class="quiz-card-grade">
+                    <% let gradeName = ''; %>
+                    <% if (quiz.Grade === 'Grade1') gradeName = 'الصف الأول الثانوي'; %>
+                    <% if (quiz.Grade === 'Grade2') gradeName = 'الصف الثاني الثانوي'; %>
+                    <% if (quiz.Grade === 'Grade3') gradeName = 'الصف الثالث الثانوي'; %>
+                    <%= gradeName %>
+                  </div>
+                </div>
+                
+                <div class="quiz-card-actions">
+                  <a href="/teacher/quizzes/<%= quiz._id %>" class="btn btn-sm btn-outline" title="عرض">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="/teacher/quizzes/<%= quiz._id %>/edit" class="btn btn-sm btn-outline" title="تعديل">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <a href="/teacher/quizzes/<%= quiz._id %>/results" class="btn btn-sm btn-outline" title="النتائج">
+                    <i class="fas fa-chart-bar"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline delete-btn" data-id="<%= quiz._id %>" title="حذف">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            <% }); %>
+            
+            <% if (quizzes.length === 0) { %>
+              <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-clipboard-question"></i>
+                <p>لا توجد اختبارات متاحة</p>
+                <a href="/teacher/quizzes/create" class="btn btn-primary">إنشاء اختبار جديد</a>
+              </div>
+            <% } %>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div class="pagination">
+            <% if (currentPage > 1) { %>
+              <a href="/teacher/quizzes?page=<%= currentPage - 1 %>&grade=<%= filters.grade || '' %>&chapter=<%= filters.chapter || '' %>&search=<%= filters.search || '' %>" class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            <% } %>
+            
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a href="/teacher/quizzes?page=<%= i %>&grade=<%= filters.grade || '' %>&chapter=<%= filters.chapter || '' %>&search=<%= filters.search || '' %>" 
+                 class="pagination-item <%= i === currentPage ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            <% } %>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="/teacher/quizzes?page=<%= currentPage + 1 %>&grade=<%= filters.grade || '' %>&chapter=<%= filters.chapter || '' %>&search=<%= filters.search || '' %>" class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    // View Toggle
+    const viewToggles = document.querySelectorAll('.view-toggle');
+    const tableView = document.getElementById('tableView');
+    const cardsView = document.getElementById('cardsView');
+    
+    viewToggles.forEach(toggle => {
+      toggle.addEventListener('click', function() {
+        viewToggles.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const view = this.getAttribute('data-view');
+        if (view === 'table') {
+          tableView.classList.remove('hidden');
+          cardsView.classList.add('hidden');
+        } else {
+          tableView.classList.add('hidden');
+          cardsView.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // Delete Quiz
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const quizId = this.getAttribute('data-id');
+        
+        confirmAction(
+          'حذف الاختبار',
+          'هل أنت متأكد من رغبتك في حذف هذا الاختبار؟ هذا الإجراء لا يمكن التراجع عنه.',
+          'نعم، حذف الاختبار',
+          function() {
+            // Send DELETE request to server
+            fetch(`/teacher/quizzes/${quizId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('success', 'تم حذف الاختبار بنجاح');
+                // Reload page after successful deletion
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
+              } else {
+                showToast('error', data.message || 'حدث خطأ أثناء حذف الاختبار');
+              }
+            })
+            .catch(error => {
+              showToast('error', 'حدث خطأ أثناء الاتصال بالخادم');
+              console.error('Error:', error);
+            });
+          }
+        );
+      });
+    });
+  </script>
+</body>
+</html> 

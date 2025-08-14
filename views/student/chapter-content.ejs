@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= chapter.chapterName %> - محتوى الفصل</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/student-modern.css">
+    
+    <style>
+        .chapter-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .progress-bar-custom {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-badge:hover {
+            transform: translateY(-2px);
+        }
+        
+        .purchase-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .purchase-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .purchase-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        
+        .purchase-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .purchase-card.recommended {
+            border-color: #28a745;
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, white 100%);
+        }
+        
+        .video-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .video-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            border: 1px solid #f0f2f5;
+            position: relative;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border-color: #e3e6ea;
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            height: 180px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .video-play-icon {
+            font-size: 3rem;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        
+        .video-card:hover .video-play-icon {
+            opacity: 0.8;
+        }
+        
+        .video-info {
+            padding: 1.5rem;
+        }
+        
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .video-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+            background: #f8f9fa;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+        }
+        
+        .watches-remaining {
+            background: #e8f4fd;
+            color: #0066cc;
+            border: 1px solid #cce7ff;
+            font-weight: 500;
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-free {
+            background: #d4f6d4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-paid {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-owned {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .video-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .btn-video {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .btn-video:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-watch {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-watch:hover {
+            color: white;
+        }
+        
+        .btn-purchase {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-purchase:hover {
+            color: white;
+        }
+        
+        .btn-info {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #e9ecef;
+            padding: 0.75rem;
+            width: 42px;
+            height: 42px;
+            justify-content: center;
+        }
+        
+        .btn-info:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .section-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-left: 4px solid;
+            border: 1px solid #f0f2f5;
+        }
+        
+        .section-lectures { border-left-color: #3b82f6; }
+        .section-summaries { border-left-color: #10b981; }
+        .section-solvings { border-left-color: #f59e0b; }
+        
+        .section-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .section-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .code-input-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content-custom {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success-modern {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-warning-modern {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .price-display {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f59e0b;
+        }
+        
+        @media (max-width: 768px) {
+            .chapter-hero {
+                padding: 2rem 0;
+                margin-bottom: 1rem;
+            }
+            
+            .purchase-cards {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .video-cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .video-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn-info {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+          <%- include('partials/aside') %>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Chapter Hero Section -->
+            <div class="chapter-hero">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-3">
+                                <a href="/student/chapters" class="btn btn-light btn-modern me-3">
+                                    <i class="fas fa-arrow-right"></i>
+                                    العودة للأبواب
+                                </a>
+                                <div class="badge bg-primary">
+                                    <%= chapter.chapterGrade %>
+                                </div>
+                            </div>
+                            <h1 class="display-5 fw-bold mb-3"><%= chapter.chapterName %></h1>
+                            <p class="lead mb-0"><%= chapter.chapterDescription || 'استكشف محتوى هذا الباب التعليمي' %></p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-grid">
+                                <div class="stat-badge">
+                                    <div class="h4 mb-1"><%= totalVideos %></div>
+                                    <small>فيديو</small>
+                                </div>
+                                <div class="stat-badge">
+                                    <div class="h4 mb-1"><%= totalQuizzes %></div>
+                                    <small>اختبار</small>
+                                </div>
+                                <div class="stat-badge">
+                                    <div class="h4 mb-1"><%= chapterPDFs ? chapterPDFs.length : 0 %></div>
+                                    <small>ملف</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Section -->
+                    <div class="progress-section">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-semibold">تقدم الإنجاز</span>
+                            <span class="badge bg-light text-dark"><%= Math.round(progressPercentage || 0) %>%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: <%= Math.round(progressPercentage || 0) %>%"></div>
+                        </div>
+                        <small class="mt-2 d-block opacity-75">
+                            تم إنجاز <%= completedContent || 0 %> من أصل <%= totalContent || 0 %> عنصر
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <!-- Messages -->
+                <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <%= error === 'invalid_code' ? 'الكود المدخل غير صحيح أو مستخدم من قبل' : 
+                        error === 'grade_mismatch' ? 'هذا المحتوى غير متاح لصفك الدراسي' :
+                        error === 'purchase_failed' ? 'فشل في عملية الشراء، حاول مرة أخرى' :
+                        error === 'video_not_found' ? 'الفيديو غير موجود' :
+                        error === 'chapter_not_found' ? 'الفصل غير موجود' :
+                        error === 'no_attempts' ? 'لا توجد محاولات متبقية لمشاهدة هذا الفيديو' :
+                        'حدث خطأ، حاول مرة أخرى' %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <% } %>
+                
+                <% if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <%= success === 'chapter_purchased' ? 'تم شراء الفصل بنجاح!' :
+                        success === 'video_purchased' ? 'تم شراء الفيديو بنجاح!' :
+                        'تمت العملية بنجاح!' %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <% } %>
+
+                <!-- Purchase Section -->
+                <% if (!hasChapterAccess && chapter.chapterAccessibility === 'EnterInPay') { %>
+                <div class="mb-5">
+                    <h3 class="text-center mb-4">اختر طريقة الوصول للمحتوى</h3>
+                    <div class="purchase-cards">
+                        <!-- Full Chapter Purchase -->
+                        <div class="purchase-card recommended">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h4 class="fw-bold">شراء الفصل كاملاً</h4>
+                                <span class="badge bg-success">الأفضل قيمة</span>
+                            </div>
+                            <div class="text-center mb-4">
+                                <div class="display-6 fw-bold text-success"><%= chapter.chapterPrice %></div>
+                                <small class="text-muted">جنيه مصري</small>
+                            </div>
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>جميع الفيديوهات (<%= totalVideos %>)</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>جميع الملخصات والمراجعات</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>جميع الحلول والتطبيقات</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>وصول دائم بلا حدود</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>تحديثات مجانية</li>
+                            </ul>
+                            <button class="btn btn-success-modern w-100" onclick="showCodeModal('chapter', '<%= chapter._id %>', 'شراء الفصل كاملاً')">
+                                <i class="fas fa-key"></i>
+                                أدخل كود الفصل
+                            </button>
+                        </div>
+
+                        <!-- Individual Videos -->
+                        <div class="purchase-card">
+                            <h4 class="fw-bold mb-3">شراء فيديوهات منفردة</h4>
+                            <div class="text-center mb-4">
+                                <div class="h4 text-primary">متنوع</div>
+                                <small class="text-muted">حسب الفيديو</small>
+                            </div>
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>اختيار الفيديوهات المطلوبة فقط</li>
+                                <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>توفير في التكلفة</li>
+                                <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>مرونة في الاختيار</li>
+                                <li class="mb-2"><i class="fas fa-info-circle text-warning me-2"></i>وصول محدود للفيديو المشترى فقط</li>
+                            </ul>
+                            <a href="#videos-section" class="btn btn-primary-modern w-100">
+                                <i class="fas fa-play-circle"></i>
+                                تصفح الفيديوهات
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Videos Section -->
+                <div id="videos-section">
+                    <!-- Lectures -->
+                    <% if (chapter.chapterLectures && chapter.chapterLectures.length > 0) { %>
+                    <div class="section-header section-lectures">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">
+                                <i class="fas fa-play-circle text-primary me-2"></i>
+                                الدروس الأساسية
+                            </h3>
+                            <span class="section-badge"><%= chapter.chapterLectures.length %> درس</span>
+                        </div>
+                    </div>
+                    <div class="video-cards-grid">
+                        <% chapter.chapterLectures.forEach((lecture, index) => { 
+                            const videoInfo = userData.videosInfo ? userData.videosInfo.find(v => v._id.toString() === lecture._id.toString()) : null;
+                            const watchesLeft = videoInfo ? videoInfo.videoAllowedAttemps : 3;
+                            const hasAccess = lecture.paymentStatus === 'Free' || (userData.videosPaid && userData.videosPaid.includes(lecture._id.toString())) || hasChapterAccess;
+                        %>
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <% if (lecture.imgURL && lecture.imgURL.trim() !== '') { %>
+                                    <img src="<%= lecture.imgURL %>" alt="<%= lecture.lectureName || lecture.videoName %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% } else { %>
+                                    <i class="fas fa-play-circle video-play-icon text-primary"></i>
+                                <% } %>
+                            </div>
+                            <div class="video-info">
+                                <h5 class="video-title"><%= lecture.lectureName || lecture.videoName %></h5>
+                                <div class="video-meta">
+                               
+                                    <div class="meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span><%= lecture.views || 0 %></span>
+                                    </div>
+                                    <% if (hasAccess && videoInfo) { %>
+                                    <div class="meta-item watches-remaining">
+                                        <i class="fas fa-redo"></i>
+                                        <span><%= watchesLeft %> متبقية</span>
+                                    </div>
+                                    <% } %>
+                                    <div class="ms-auto">
+                                        <% if (lecture.paymentStatus === 'Free') { %>
+                                        <span class="status-badge status-free">مجاني</span>
+                                        <% } else if (hasAccess) { %>
+                                        <span class="status-badge status-owned">مملوك</span>
+                                        <% } else { %>
+                                        <span class="status-badge status-paid"><%= lecture.lecturePrice || lecture.price || '25' %> جنيه</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="video-actions">
+                                    <% if (hasAccess) { %>
+                                        <% if (watchesLeft <= 0) { %>
+                                        <div class="btn btn-secondary btn-lg" style="cursor: not-allowed;">
+                                            <i class="fas fa-check-circle ms-2"></i>
+                                            تم المشاهدة بالكامل
+                                        </div>
+                                    <% } else { %>
+                                        <a href="/student/chapter/<%= chapter._id %>/video/<%= lecture._id %>" class="btn-video btn-watch">
+                                            <i class="fas fa-play"></i>
+                                            مشاهدة
+                                        </a>
+                                        <% } %>
+                                    <% } else { %>
+                                        <button class="btn-video btn-purchase" onclick="showCodeModal('video', '<%= lecture._id %>', '<%= lecture.lectureName || lecture.videoName %>', '<%= chapter._id %>')">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            شراء (<span class="price-display"><%= lecture.lecturePrice || lecture.price || '25' %> ج</span>)
+                                        </button>
+                                    <% } %>
+                                    <button class="btn-video btn-info" title="معلومات الدرس">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <% } %>
+
+                    <!-- Summaries -->
+                    <% if (chapter.chapterSummaries && chapter.chapterSummaries.length > 0) { %>
+                    <div class="section-header section-summaries mt-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">
+                                <i class="fas fa-bookmark text-success me-2"></i>
+                                الملخصات والمراجعات
+                            </h3>
+                            <span class="section-badge"><%= chapter.chapterSummaries.length %> ملخص</span>
+                        </div>
+                    </div>
+                    <div class="video-cards-grid">
+                        <% chapter.chapterSummaries.forEach((summary, index) => { 
+                            const videoInfo = userData.videosInfo ? userData.videosInfo.find(v => v._id.toString() === summary._id.toString()) : null;
+                            const watchesLeft = videoInfo ? Math.max(0, (videoInfo.videoAllowedAttemps || 3) - (videoInfo.numberOfWatches || 0)) : 3;
+                            const hasAccess = summary.paymentStatus === 'Free' || (userData.videosPaid && userData.videosPaid.includes(summary._id.toString())) || hasChapterAccess;
+                        %>
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <% if (summary.imgURL && summary.imgURL.trim() !== '') { %>
+                                    <img src="<%= summary.imgURL %>" alt="<%= summary.lectureName || summary.videoName %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% } else { %>
+                                    <i class="fas fa-play-circle video-play-icon text-success"></i>
+                                <% } %>
+                            </div>
+                            <div class="video-info">
+                                <h5 class="video-title"><%= summary.lectureName || summary.videoName %></h5>
+                                <div class="video-meta">
+                                 
+                                    <div class="meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span><%= summary.views || 0 %></span>
+                                    </div>
+                                    <% if (hasAccess && videoInfo) { %>
+                                    <div class="meta-item watches-remaining">
+                                        <i class="fas fa-redo"></i>
+                                        <span><%= watchesLeft %> متبقية</span>
+                                    </div>
+                                    <% } %>
+                                    <div class="ms-auto">
+                                        <% if (summary.paymentStatus === 'Free') { %>
+                                        <span class="status-badge status-free">مجاني</span>
+                                        <% } else if (hasAccess) { %>
+                                        <span class="status-badge status-owned">مملوك</span>
+                                        <% } else { %>
+                                        <span class="status-badge status-paid"><%= summary.lecturePrice || summary.price || '15' %> جنيه</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="video-actions">
+                                    <% if (hasAccess) { %>
+                                        <% if (watchesLeft <= 0) { %>
+                                        <div class="btn btn-secondary btn-lg" style="cursor: not-allowed;">
+                                            <i class="fas fa-check-circle ms-2"></i>
+                                            تم المشاهدة بالكامل
+                                        </div>
+                                    <% } else { %>
+                                        <a href="/student/chapter/<%= chapter._id %>/video/<%= summary._id %>" class="btn-video btn-watch">
+                                            <i class="fas fa-play"></i>
+                                            مشاهدة
+                                        </a>
+                                        <% } %>
+                                    <% } else { %>
+                                        <button class="btn-video btn-purchase" onclick="showCodeModal('video', '<%= summary._id %>', '<%= summary.lectureName || summary.videoName %>', '<%= chapter._id %>')">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            شراء (<span class="price-display"><%= summary.lecturePrice || summary.price || '15' %> ج</span>)
+                                        </button>
+                                    <% } %>
+                                    <button class="btn-video btn-info" title="معلومات الملخص">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <% } %>
+
+                    <!-- Solvings -->
+                    <% if (chapter.chapterSolvings && chapter.chapterSolvings.length > 0) { %>
+                    <div class="section-header section-solvings mt-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0">
+                                <i class="fas fa-calculator text-warning me-2"></i>
+                                الحلول والتطبيقات
+                            </h3>
+                            <span class="section-badge"><%= chapter.chapterSolvings.length %> تطبيق</span>
+                        </div>
+                    </div>
+                    <div class="video-cards-grid">
+                        <% chapter.chapterSolvings.forEach((solving, index) => { 
+                            const videoInfo = userData.videosInfo ? userData.videosInfo.find(v => v._id.toString() === solving._id.toString()) : null;
+                            const watchesLeft = videoInfo ? Math.max(0, (videoInfo.videoAllowedAttemps || 3) - (videoInfo.numberOfWatches || 0)) : 3;
+                            const hasAccess = solving.paymentStatus === 'Free' || (userData.videosPaid && userData.videosPaid.includes(solving._id.toString())) || hasChapterAccess;
+                        %>
+                        <div class="video-card">
+                            <div class="video-thumbnail">
+                                <% if (solving.imgURL && solving.imgURL.trim() !== '') { %>
+                                    <img src="<%= solving.imgURL %>" alt="<%= solving.lectureName || solving.videoName %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% } else { %>
+                                    <i class="fas fa-play-circle video-play-icon text-warning"></i>
+                                <% } %>
+                            </div>
+                            <div class="video-info">
+                                <h5 class="video-title"><%= solving.lectureName || solving.videoName %></h5>
+                                <div class="video-meta">
+                                 
+                                    <div class="meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span><%= solving.views || 0 %></span>
+                                    </div>
+                                    <% if (hasAccess && videoInfo) { %>
+                                    <div class="meta-item watches-remaining">
+                                        <i class="fas fa-redo"></i>
+                                        <span><%= watchesLeft %> متبقية</span>
+                                    </div>
+                                    <% } %>
+                                    <div class="ms-auto">
+                                        <% if (solving.paymentStatus === 'Free') { %>
+                                        <span class="status-badge status-free">مجاني</span>
+                                        <% } else if (hasAccess) { %>
+                                        <span class="status-badge status-owned">مملوك</span>
+                                        <% } else { %>
+                                        <span class="status-badge status-paid"><%= solving.lecturePrice || solving.price || '20' %> جنيه</span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="video-actions">
+                                    <% if (hasAccess) { %>
+                                        <% if (watchesLeft <= 0) { %>
+                                        <div class="btn btn-secondary btn-lg" style="cursor: not-allowed;">
+                                            <i class="fas fa-check-circle ms-2"></i>
+                                            تم المشاهدة بالكامل
+                                        </div>
+                                    <% } else { %>
+                                        <a href="/student/chapter/<%= chapter._id %>/video/<%= solving._id %>" class="btn-video btn-watch">
+                                            <i class="fas fa-play"></i>
+                                            مشاهدة
+                                        </a>
+                                        <% } %>
+                                    <% } else { %>
+                                        <button class="btn-video btn-purchase" onclick="showCodeModal('video', '<%= solving._id %>', '<%= solving.lectureName || solving.videoName %>', '<%= chapter._id %>')">
+                                            <i class="fas fa-shopping-cart"></i>
+                                            شراء (<span class="price-display"><%= solving.lecturePrice || solving.price || '20' %> ج</span>)
+                                        </button>
+                                    <% } %>
+                                    <button class="btn-video btn-info" title="معلومات التطبيق">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+                    <% } %>
+
+                    <!-- No Videos Message -->
+                    <% if ((!chapter.chapterLectures || chapter.chapterLectures.length === 0) && 
+                           (!chapter.chapterSummaries || chapter.chapterSummaries.length === 0) && 
+                           (!chapter.chapterSolvings || chapter.chapterSolvings.length === 0)) { %>
+                    <div class="text-center py-5">
+                        <i class="fas fa-video fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">لا توجد فيديوهات متاحة حالياً</h4>
+                        <p class="text-muted">سيتم إضافة المحتوى قريباً</p>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Code Input Modal -->
+    <div class="code-input-modal" id="codeModal">
+        <div class="modal-content-custom">
+            <h4 class="mb-3" id="modalTitle">أدخل الكود</h4>
+            <form id="codeForm">
+                <input type="hidden" id="purchaseType">
+                <input type="hidden" id="itemId">
+                <input type="hidden" id="chapterId" value="<%= chapter._id %>">
+                <input type="text" class="form-control mb-3" id="codeInput" placeholder="أدخل الكود هنا" required style="text-align: center; font-family: monospace; letter-spacing: 2px;">
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary flex-fill" onclick="hideCodeModal()">إلغاء</button>
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <span class="spinner-border spinner-border-sm d-none me-2"></span>
+                        تفعيل
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none;">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showCodeModal(type, id, title, chapterId = null) {
+            document.getElementById('purchaseType').value = type;
+            document.getElementById('itemId').value = id;
+            if (chapterId) document.getElementById('chapterId').value = chapterId;
+            document.getElementById('modalTitle').textContent = `شراء: ${title}`;
+            document.getElementById('codeModal').style.display = 'flex';
+            document.getElementById('codeInput').focus();
+        }
+
+        function hideCodeModal() {
+            document.getElementById('codeModal').style.display = 'none';
+            document.getElementById('codeForm').reset();
+        }
+
+        document.getElementById('codeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const type = document.getElementById('purchaseType').value;
+            const itemId = document.getElementById('itemId').value;
+            const chapterId = document.getElementById('chapterId').value;
+            const code = document.getElementById('codeInput').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const spinner = submitBtn.querySelector('.spinner-border');
+            
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            
+            try {
+                let url, formData = new FormData();
+                formData.append('code', code);
+                
+                if (type === 'chapter') {
+                    url = `/student/chapters/${chapterId}/buy`;
+                } else if (type === 'video') {
+                    url = `/student/chapter/${chapterId}/video/${itemId}/buy`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = result.redirect || window.location.href;
+                } else {
+                    alert(result.message || 'فشل في عملية الشراء');
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                    }
+                }
+            } catch (error) {
+                console.error('Purchase error:', error);
+                alert('حدث خطأ في عملية الشراء');
+            } finally {
+                submitBtn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        });
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('open');
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideCodeModal();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('codeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideCodeModal();
+            }
+        });
+
+        // Mobile responsive handling
+        function handleResize() {
+            if (window.innerWidth <= 1024) {
+                document.querySelector('.mobile-menu-toggle').style.display = 'block';
+            } else {
+                document.querySelector('.mobile-menu-toggle').style.display = 'none';
+                document.querySelector('.sidebar').classList.remove('open');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    </script>
+</body>
+</html> 

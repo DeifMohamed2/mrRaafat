@@ -1,235 +1,935 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
-<%- include("./partials/head.ejs") %>
-
-
-
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعدادات - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <style>
+    .settings-container {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: var(--spacing-xl);
+    }
+    
+    .settings-sidebar {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-200);
+      height: fit-content;
+      position: sticky;
+      top: var(--spacing-xl);
+    }
+    
+    .settings-nav {
+      padding: var(--spacing-lg);
+    }
+    
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-md);
+      color: var(--gray-700);
+      text-decoration: none;
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+      margin-bottom: var(--spacing-xs);
+      cursor: pointer;
+    }
+    
+    .settings-nav-item:hover {
+      background: var(--gray-100);
+      color: var(--primary-color);
+    }
+    
+    .settings-nav-item.active {
+      background: var(--primary-color);
+      color: var(--white);
+    }
+    
+    .settings-nav-icon {
+      margin-left: var(--spacing-md);
+      width: 20px;
+      height: 20px;
+    }
+    
+    .settings-content {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+    }
+    
+    .settings-section {
+      display: none;
+      padding: var(--spacing-xl);
+    }
+    
+    .settings-section.active {
+      display: block;
+    }
+    
+    .section-header {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .section-subtitle {
+      color: var(--gray-600);
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: var(--spacing-md);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      background: var(--white);
+      cursor: pointer;
+    }
+    
+    .profile-photo-section {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      padding: var(--spacing-lg);
+      background: var(--gray-50);
+      border-radius: var(--radius);
+    }
+    
+    .profile-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--white);
+      box-shadow: var(--shadow);
+      background: var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: var(--gray-500);
+      overflow: hidden;
+    }
+    
+    .profile-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-upload {
+      flex: 1;
+    }
+    
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .upload-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .stat-card {
+      background: var(--gray-50);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius);
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+    
+    .achievement-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .achievement-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--secondary-color);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .achievement-details {
+      flex: 1;
+    }
+    
+    .achievement-title {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .achievement-description {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+    
+    .notification-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+    
+    .notification-content {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .notification-text {
+      flex: 1;
+    }
+    
+    .notification-title {
+      font-weight: 500;
+      color: var(--gray-900);
+      margin-bottom: var(--spacing-xs);
+    }
+    
+    .notification-description {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: var(--gray-300);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .toggle-switch.active {
+      background: var(--primary-color);
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--white);
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+    
+    .toggle-switch.active::after {
+      transform: translateX(26px);
+    }
+    
+    .danger-zone {
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius);
+      padding: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+    }
+    
+    .danger-title {
+      color: var(--error);
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .danger-description {
+      color: var(--gray-600);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .btn-danger {
+      background: var(--error);
+      color: var(--white);
+      border: none;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+  </style>
+</head>
 <body>
-    <%- include("./partials/preloader.ejs") %>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-xl-2 col-md-1">
-                <%- include("./partials/aside.ejs") %>
+  <div class="main-container">
+    <div id="userDataMeta" data-last-score="<%= userData ? userData.totalScore : 0 %>" style="display:none"></div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+          <i class="fas fa-graduation-cap"></i>
+          منصة الشهادة
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="/student/dash" class="nav-link">
+            <i class="material-icons-outlined nav-icon">dashboard</i>
+            <span>لوحة التحكم</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/chapters" class="nav-link">
+            <i class="material-icons-outlined nav-icon">library_books</i>
+            <span>الأبواب التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/exams" class="nav-link">
+            <i class="material-icons-outlined nav-icon">quiz</i>
+            <span>الامتحانات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/PDFs" class="nav-link">
+            <i class="material-icons-outlined nav-icon">description</i>
+            <span>المواد التعليمية</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/ranking" class="nav-link">
+            <i class="material-icons-outlined nav-icon">leaderboard</i>
+            <span>التصنيف</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/settings" class="nav-link active">
+            <i class="material-icons-outlined nav-icon">settings</i>
+            <span>الإعدادات</span>
+          </a>
+        </div>
+        
+        <div class="nav-item">
+          <a href="/student/logOut" class="nav-link">
+            <i class="material-icons-outlined nav-icon">logout</i>
+            <span>تسجيل الخروج</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <header class="dashboard-header slide-in-up">
+        <div class="welcome-message">إعدادات الحساب</div>
+        <div class="welcome-subtitle">قم بإدارة ملفك الشخصي وتفضيلات حسابك</div>
+      </header>
+
+      <!-- Settings Container -->
+      <div class="settings-container slide-in-up">
+        <!-- Settings Sidebar -->
+        <div class="settings-sidebar">
+          <nav class="settings-nav">
+            <div class="settings-nav-item active" onclick="showSection('profile')">
+              <i class="material-icons-outlined settings-nav-icon">person</i>
+              <span>الملف الشخصي</span>
             </div>
-            <!--------------------END ASIDE  ------------------>
+            
+            <div class="settings-nav-item" onclick="showSection('stats')">
+              <i class="material-icons-outlined settings-nav-icon">analytics</i>
+              <span>الإحصائيات</span>
+            </div>
+            
+            <div class="settings-nav-item" onclick="showSection('achievements')">
+              <i class="material-icons-outlined settings-nav-icon">emoji_events</i>
+              <span>الإنجازات</span>
+            </div>
+            
+            <div class="settings-nav-item" onclick="showSection('notifications')">
+              <i class="material-icons-outlined settings-nav-icon">notifications</i>
+              <span>الإشعارات</span>
+            </div>
+            
+            <div class="settings-nav-item" onclick="showSection('security')">
+              <i class="material-icons-outlined settings-nav-icon">security</i>
+              <span>الأمان</span>
+            </div>
+          </nav>
+        </div>
 
-            <div class="col-xl-9 col-md-9 ">
+        <!-- Settings Content -->
+        <div class="settings-content">
+          <!-- Profile Section -->
+          <div class="settings-section active" id="profile">
+            <div class="section-header">
+              <div class="section-title">الملف الشخصي</div>
+              <div class="section-subtitle">قم بتحديث معلوماتك الشخصية وصورتك الشخصية</div>
+            </div>
 
-
-                <div class="left">
-                    <div class="top">
-                        <button id="menu-btn">
-                            <span class="material-icons-sharp">
-                                menu
-                            </span>
+            <!-- Profile Photo -->
+            <div class="profile-photo-section">
+              <div class="profile-photo">
+                <% if (userData && userData.userPhoto) { %>
+                  <img src="<%= userData.userPhoto %>" alt="الصورة الشخصية">
+                <% } else { %>
+                  <i class="material-icons-outlined">person</i>
+                <% } %>
+              </div>
+              <div class="photo-upload">
+                <h4 style="margin-bottom: var(--spacing-sm);">الصورة الشخصية</h4>
+                <p style="color: var(--gray-600); margin-bottom: var(--spacing-md);">ارفع صورة شخصية لحسابك</p>
+                <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
+                  <i class="material-icons-outlined">upload</i>
+                  رفع صورة جديدة
                         </button>
-                        <div class="theme-toggler">
-                            <span class="material-icons-sharp active">
-                                light_mode
-                            </span>
-                            <span class="material-icons-sharp">
-                                dark_mode
-                            </span>
+                <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="uploadPhoto(this)">
+              </div>
+            </div>
+
+            <!-- Profile Form -->
+            <form action="/student/settings" method="POST" id="profileForm">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                <div class="form-group">
+                  <label for="username" class="form-label">الاسم الكامل</label>
+                  <input type="text" id="username" name="Username" class="form-input" value="<%= userData ? userData.Username : '' %>" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="phone" class="form-label">رقم الهاتف</label>
+                  <input type="text" id="phone" class="form-input" value="<%= userData ? userData.phone : '' %>" readonly style="background: var(--gray-100);">
                         </div>
                     </div>
-                    <!-- END OF TOP -->                   
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                <div class="form-group">
+                  <label for="gov" class="form-label">المحافظة</label>
+                  <select id="gov" name="gov" class="form-select" required>
+                                      <option value="القاهرة" <%= userData && userData.gov === 'القاهرة' ? 'selected' : '' %>>القاهرة</option>
+                  <option value="الجيزة" <%= userData && userData.gov === 'الجيزة' ? 'selected' : '' %>>الجيزة</option>
+                  <option value="الإسكندرية" <%= userData && userData.gov === 'الإسكندرية' ? 'selected' : '' %>>الإسكندرية</option>
+                  <option value="المنيا" <%= userData && userData.gov === 'المنيا' ? 'selected' : '' %>>المنيا</option>
+                  <option value="أسوان" <%= userData && userData.gov === 'أسوان' ? 'selected' : '' %>>أسوان</option>
+                  <option value="أسيوط" <%= userData && userData.gov === 'أسيوط' ? 'selected' : '' %>>أسيوط</option>
+                  <option value="الأقصر" <%= userData && userData.gov === 'الأقصر' ? 'selected' : '' %>>الأقصر</option>
+                  <option value="البحر الأحمر" <%= userData && userData.gov === 'البحر الأحمر' ? 'selected' : '' %>>البحر الأحمر</option>
+                  </select>
                 </div>
 
+                <div class="form-group">
+                  <label for="markez" class="form-label">المركز</label>
+                  <input type="text" id="markez" name="Markez" class="form-input" value="<%= userData ? userData.Markez : '' %>" required>
+                </div>
+              </div>
 
-                <main>
-                    <div class="settings">
-                        <form action="/student/settings" method="post">
-                     <% if (userData) { %>
-                        <div class="profile-photo mx-auto">
-                            <img src="<%= userData.userPhoto %>"  >
-                        </div>
-                        <h2>  تعديل الصوره </h2>
-                        <input type="file"  id="userPhotoBtn">
-                        <div class="progress">
-                            <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0% ;   background-color:#20ade5!important;" aria-valuenow="0" >0%</div>
-                        </div>
-                        <input type="text" vlaue="<%= userData.userPhoto %>" name="userPhoto" id="userPhoto" style="width: 0.5px; height: 0.5px; border: none; color: transparent;">
-                        <button id="BtnPhotoUpload" class="btn btn-primary" type="button">رفع الصوره</button>
-                        <h2>  تعديل البيانات </h2>
-                      
-               
-                         
-                  
-                        <div id="UserInfo">
-                            <label for="newUserName">اسمك  </label><input type="text" name="Username" placeholder="الاسم الجديد" value="<%= userData.Username %>"> 
-                            <h2 style="font-weight: bolder;"> الكود الخاص بك :  <span ><%=  userData.Code  %></span> </h2> 
-                            <h2 style="font-weight: bolder;"> رقم الهاتف الخاص بك :   <span  ><%=  userData.phone  %></span> </h2> 
-                            <h2 style="font-weight: bolder;">رقم هاتف ولي الامر  :  <span  ><%=  userData.parentPhone  %></span> </h2> 
-                            <label for="government">المحافطه   </label><input type="text" name="gov"  value="<%=  userData.gov  %> "   > 
-                            
-                            <button class="saveUserInfoBtn" type="submit" id="saveChanges" >حفظ التغيرات  </button>
-                        </div>
-                        <% } %>
-
-                    </form>
-                    
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                <div class="form-group">
+                  <label for="grade" class="form-label">الصف الدراسي</label>
+                  <input type="text" id="grade" class="form-input" value="<%= userData ? (userData.Grade === 'Grade1' ? 'الصف الأول الثانوي' : userData.Grade === 'Grade2' ? 'الصف الثاني الثانوي' : 'الصف الثالث الثانوي') : 'غير محدد' %>" readonly style="background: var(--gray-100);">
+                </div>
                 
-                    </div> 
-                </main>
+                <div class="form-group">
+                  <label for="code" class="form-label">كود الطالب</label>
+                  <input type="text" id="code" class="form-input" value="<%= userData ? userData.Code : '' %>" readonly style="background: var(--gray-100);">
+                        </div>
+                        </div>
+
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                  <i class="material-icons-outlined" style="margin-left: 8px;">save</i>
+                  حفظ التغييرات
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Stats Section -->
+          <div class="settings-section" id="stats">
+            <div class="section-header">
+              <div class="section-title">إحصائياتك التعليمية</div>
+              <div class="section-subtitle">تتبع تقدمك وأداءك في المنصة</div>
             </div>
 
-            <!-------------------- END OF MAIN --------------------->
-           
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value"><%= userData ? userData.totalScore : 0 %></div>
+                <div class="stat-label">إجمالي النقاط</div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-value"><%= userData ? userData.examsEnterd : 0 %></div>
+                <div class="stat-label">الامتحانات المكتملة</div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-value"><%= userData ? userData.totalQuestions : 0 %></div>
+                <div class="stat-label">الأسئلة المجابة</div>
+                        </div>
+              
+              <div class="stat-card">
+                <div class="stat-value"><%= userData ? userData.totalSubscribed : 0 %></div>
+                <div class="stat-label">الدروس المشتركة</div>
+              </div>
+            </div>
+
+            <!-- Progress Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">تطور الأداء</div>
+              </div>
+              <div class="card-body">
+                <canvas id="progressChart" height="300"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Achievements Section -->
+          <div class="settings-section" id="achievements">
+            <div class="section-header">
+              <div class="section-title">الإنجازات والشهادات</div>
+              <div class="section-subtitle">انجازاتك وشهاداتك المحققة في المنصة</div>
+            </div>
+
+            <div class="achievement-item">
+              <div class="achievement-icon">
+                <i class="material-icons-outlined">school</i>
+              </div>
+              <div class="achievement-details">
+                <div class="achievement-title">طالب مبتدئ</div>
+                <div class="achievement-description">أكمل أول امتحان بنجاح</div>
+              </div>
+            </div>
+
+            <div class="achievement-item">
+              <div class="achievement-icon" style="background: var(--accent-orange);">
+                <i class="material-icons-outlined">quiz</i>
+              </div>
+              <div class="achievement-details">
+                <div class="achievement-title">محب للامتحانات</div>
+                <div class="achievement-description">أكمل 5 امتحانات</div>
+              </div>
+            </div>
+
+            <div class="achievement-item">
+              <div class="achievement-icon" style="background: var(--accent-purple);">
+                <i class="material-icons-outlined">emoji_events</i>
+              </div>
+              <div class="achievement-details">
+                <div class="achievement-title">متفوق</div>
+                <div class="achievement-description">حصل على أكثر من 80% في 3 امتحانات</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div class="settings-section" id="notifications">
+            <div class="section-header">
+              <div class="section-title">إعدادات الإشعارات</div>
+              <div class="section-subtitle">تحكم في الإشعارات التي تريد استلامها</div>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-content">
+                <div class="notification-icon">
+                  <i class="material-icons-outlined">quiz</i>
+                </div>
+                <div class="notification-text">
+                  <div class="notification-title">إشعارات الامتحانات</div>
+                  <div class="notification-description">تلقي إشعارات عند توفر امتحان جديد</div>
+                </div>
+              </div>
+              <div class="toggle-switch active" onclick="toggleNotification(this)"></div>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-content">
+                <div class="notification-icon" style="background: var(--secondary-color);">
+                  <i class="material-icons-outlined">video_library</i>
+                </div>
+                <div class="notification-text">
+                  <div class="notification-title">إشعارات الدروس</div>
+                  <div class="notification-description">تلقي إشعارات عند إضافة درس جديد</div>
+                </div>
+              </div>
+              <div class="toggle-switch active" onclick="toggleNotification(this)"></div>
+            </div>
+
+            <div class="notification-item">
+              <div class="notification-content">
+                <div class="notification-icon" style="background: var(--accent-orange);">
+                  <i class="material-icons-outlined">email</i>
+                </div>
+                <div class="notification-text">
+                  <div class="notification-title">إشعارات البريد الإلكتروني</div>
+                  <div class="notification-description">تلقي ملخص أسبوعي عن أدائك</div>
+                </div>
+              </div>
+              <div class="toggle-switch" onclick="toggleNotification(this)"></div>
+            </div>
+                    </div> 
+
+          <!-- Security Section -->
+          <div class="settings-section" id="security">
+            <div class="section-header">
+              <div class="section-title">الأمان والخصوصية</div>
+              <div class="section-subtitle">إدارة كلمة المرور وإعدادات الأمان</div>
+            </div>
+
+            <form id="passwordForm">
+              <div class="form-group">
+                <label for="currentPassword" class="form-label">كلمة المرور الحالية</label>
+                <input type="password" id="currentPassword" class="form-input" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
+                <input type="password" id="newPassword" class="form-input" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="confirmPassword" class="form-label">تأكيد كلمة المرور الجديدة</label>
+                <input type="password" id="confirmPassword" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                  <i class="material-icons-outlined" style="margin-left: 8px;">lock</i>
+                  تغيير كلمة المرور
+                </button>
+              </div>
+            </form>
+
+            <!-- Active Devices UI removed: students cannot manage devices -->
+
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+              <div class="danger-title">منطقة الخطر</div>
+              <div class="danger-description">
+                هذه الإجراءات لا يمكن التراجع عنها. يرجى التأكد قبل المتابعة.
+              </div>
+              <button class="btn-danger" onclick="confirmDeleteAccount()">
+                <i class="material-icons-outlined" style="margin-left: 8px;">delete_forever</i>
+                حذف الحساب نهائياً
+              </button>
+            </div>
+          </div>
         </div>
     </div>
+    </main>
+  </div>
 
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" onclick="toggleSidebar()" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 1001; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: var(--radius); box-shadow: var(--shadow-lg);">
+    <i class="fas fa-bars"></i>
+  </button>
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <script>
+    // Settings navigation
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.settings-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Remove active class from all nav items
+      document.querySelectorAll('.settings-nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+      
+      // Add active class to clicked nav item
+      event.target.closest('.settings-nav-item').classList.add('active');
+      
+      // Initialize chart if stats section is shown
+      if (sectionId === 'stats') {
+        setTimeout(() => initProgressChart(), 100);
+      }
+    }
 
-    <script src="/assest/bootstrap.bundle.min.js"></script>
-    <script src="/assest/bootstrap.min.js"></script>
-
-
-<script type="module">
-            // Import the functions you need from the SDKs you need
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js";
-            import {
-                getDatabase,
-                ref,
-                set,
-                onValue,
-                child,
-                get,
-                update,
-                remove,
-                push,
-            } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-database.js";
-            import {
-                getAuth,
-                createUserWithEmailAndPassword,
-                signInWithEmailAndPassword,
-                signOut,
-                GoogleAuthProvider,
-                signInWithPopup,
-                signInWithRedirect,
-                FacebookAuthProvider,
-                onAuthStateChanged,
-            } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-auth.js";
-            import {
-                getStorage,
-                ref as sRef,
-                uploadBytesResumable,
-                getDownloadURL,
-            } from "https://www.gstatic.com/firebasejs/9.9.3/firebase-storage.js";
-
-            // Your web app's Firebase configuration
-            const dbfirebaseConfig = {
-                apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
-                authDomain: "allasharaf.firebaseapp.com",
-                databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
-                projectId: "allasharaf",
-                storageBucket: "allasharaf.appspot.com",
-                messagingSenderId: "638342504235",
-                appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
-            };
-            const storageConfig = {
-                apiKey: "AIzaSyC0VUgV2B_ClqKImLQAafbklwKZRabod0A",
-                authDomain: "biodiva-fa1b0.firebaseapp.com",
-                databaseURL: "https://biodiva-fa1b0-default-rtdb.firebaseio.com",
-                projectId: "biodiva-fa1b0",
-                storageBucket: "biodiva-fa1b0.appspot.com",
-                messagingSenderId: "262124821606",
-                appId: "1:262124821606:web:09311e0be3fc9b7634a1a7"
-            };
-            const storageApp = initializeApp(storageConfig, "storage");
-            const dbApp = initializeApp(dbfirebaseConfig, "db");
-            const db = getDatabase(dbApp);
-            const authConfig = {
-                apiKey: "AIzaSyChX6oD8uA1tWR_hNzcVzOOZMYwXsLW-TA",
-                authDomain: "allasharaf.firebaseapp.com",
-                databaseURL: "https://allasharaf-default-rtdb.firebaseio.com",
-                projectId: "allasharaf",
-                storageBucket: "allasharaf.appspot.com",
-                messagingSenderId: "638342504235",
-                appId: "1:638342504235:web:f3350e5bb8a63e41bc2f6e"
-            };
-            const authApp = initializeApp(authConfig, "auth");
-            const auth = getAuth(authApp);
-            const dbRef = ref(db);
-
-
-
-
-
-
-            let files = [];
-            let reader = new FileReader();
-            let imgUrl;
-            var input = document.getElementById("userPhotoBtn");
-            var UpBtn = document.getElementById("BtnPhotoUpload");
-
-
-            input.onchange = (e) => {
-                files = e.target.files;
-                reader.readAsDataURL(files[0]);
-            };
-
-            reader.onload = function () {
-                // SelBtn.remove();
-                // editPhotoBtn.style.display = "inline";
-                // document.getElementById("imgUploaded").classList.remove("d-none");
-                // document.getElementById("imgUploaded").src = reader.result;
-
-            };
-
-
-
-            UpBtn.onclick = () => {
-                uploadphoto();
+    // Progress chart
+    function initProgressChart() {
+      const ctx = document.getElementById('progressChart');
+      if (!ctx) return;
+      const lastScoreEl = document.getElementById('userDataMeta');
+      const lastScore = Number((lastScoreEl && lastScoreEl.dataset && lastScoreEl.dataset.lastScore) || 0);
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4', 'الأسبوع 5', 'الأسبوع 6'],
+          datasets: [{
+            label: 'النقاط',
+            data: [10, 25, 45, 60, 75, lastScore],
+            borderColor: 'var(--primary-color)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
             }
-
-            async function uploadphoto() {
-                var imgToUpload = files[0];
-
-                const metaData = {
-                    contentType: imgToUpload.type,
-                };
-
-                const storage = getStorage(storageApp);
-                console.log(imgToUpload);
-                const stroageRef = sRef(
-                    storage,
-                    "BioDiva/" + "New/" + files[0].name
-                );
-                const UploadTask = uploadBytesResumable(stroageRef, imgToUpload, metaData);
-                UploadTask.on(
-                    "state-changed",
-                    (snapshot) => {
-                        var progess = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        UpBtn.innerHTML = progess.toFixed(2) + "%";
-                    },
-                    (error) => {
-                        console.log(error)
-
-                    },
-                    () => {
-                        getDownloadURL(UploadTask.snapshot.ref).then((downloadURL) => {
-                            imgUrl = downloadURL;
-                            document.getElementById('userPhoto').setAttribute('value', imgUrl)
-                            document.getElementById('BtnPhotoUpload').innerHTML = "تم الرفع"
-
-                            document.getElementById('BtnVideoUpload').removeAttribute('disabled')
-                        });
-                    }
-                );
+          },
+          scales: {
+            y: {
+              beginAtZero: true
             }
+          }
+        }
+      });
+    }
 
-            document.getElementById('BtnVideoUpload').addEventListener('click',()=>{
-                document.getElementById('BtnVideoUpload').innerHTML = "يتم التجهيز للرفع برجاء عدم اغلاق الصفحه نهائيا"
-            })
+    // Photo upload
+    function uploadPhoto(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          // Create hidden input for the photo URL
+          let photoInput = document.querySelector('input[name="userPhoto"]');
+          if (!photoInput) {
+            photoInput = document.createElement('input');
+            photoInput.type = 'hidden';
+            photoInput.name = 'userPhoto';
+            document.getElementById('profileForm').appendChild(photoInput);
+          }
+          photoInput.value = e.target.result;
+          
+          // Update preview
+          const profilePhoto = document.querySelector('.profile-photo');
+          profilePhoto.innerHTML = `<img src="${e.target.result}" alt="الصورة الشخصية">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
 
-       
+    // Toggle notifications
+    function toggleNotification(toggle) {
+      toggle.classList.toggle('active');
+    }
 
-        
-</script>
+    // Password form
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (newPassword !== confirmPassword) {
+        alert('كلمات المرور غير متطابقة');
+                return;
+            }
+      
+      if (newPassword.length < 6) {
+        alert('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+                    return;
+                }
 
+      // Here you would send the password change request
+      alert('تم تغيير كلمة المرور بنجاح');
+      this.reset();
+    });
+
+    // Delete account confirmation
+    function confirmDeleteAccount() {
+      if (confirm('هل أنت متأكد من أنك تريد حذف حسابك نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+        if (confirm('تأكيد أخير: سيتم حذف جميع بياناتك ولن تتمكن من استعادتها.')) {
+          // Here you would send the delete account request
+          alert('تم حذف حسابك بنجاح');
+          window.location.href = '/';
+        }
+      }
+    }
+
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+    }
+
+    // Mobile responsive handling
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        document.querySelector('.mobile-menu-toggle').style.display = 'block';
+        document.querySelector('.settings-container').style.gridTemplateColumns = '1fr';
+      } else {
+        document.querySelector('.mobile-menu-toggle').style.display = 'none';
+        document.querySelector('.settings-container').style.gridTemplateColumns = '300px 1fr';
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    // Add loading animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.querySelectorAll('.slide-in-up');
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+        }, index * 100);
+            });
+        });
+    </script>
+
+  <style>
+    .slide-in-up {
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+    }
+    
+    @media (max-width: 1024px) {
+      .mobile-menu-toggle {
+        display: block !important;
+      }
+      
+      .settings-container {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .settings-sidebar {
+        position: static;
+        margin-bottom: var(--spacing-lg);
+      }
+      
+      .settings-nav {
+        display: flex;
+        overflow-x: auto;
+        gap: var(--spacing-sm);
+      }
+      
+      .settings-nav-item {
+        white-space: nowrap;
+        margin-bottom: 0;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .profile-photo-section {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .form-group {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
 </body>
-
-
 </html>

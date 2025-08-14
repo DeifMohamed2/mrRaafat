@@ -1,18 +1,13 @@
 /* Root VARAIBLES */
 :root {
-  --color-primary: #fe9720;
+  --color-primary: #fec900;
   --color-danger: #ff7782;
   --color-success: #41f1b6;
   --color-warning: #ffbb55;
-  --color-white: #202528;
-  --color-info-dark: #edeffd;
+  --color-info-dark: #7d8da1;
   --color-info-light: #dce1eb;
 
-  --color-dark: #ffffff;
-  --color-light: rgba(0, 0, 0, 0.4);
   --color-primary-variant: #111e88;
-  --color-dark-variant: #ffffff;
-  --color-background: #181a1e;
   --card-border-radius: 2rem;
   --border-radius-1: 0.4rem;
   --border-radius-2: 0.8rem;
@@ -20,6 +15,12 @@
   --card-padding: 1.8rem;
   --padding-1: 1.2rem;
   --box-shadow: 0 2rem 3rem var(--color-light);
+
+  --color-background: #181a1e;
+  --color-white: #202528;
+  --color-dark: #edeffd;
+  --color-dark-variant: #a3bdcc;
+  --color-light: rgba(0, 0, 0, 0.4);
 }
 
 button:disabled{
@@ -273,10 +274,11 @@ aside .close {
 aside .sidebar {
   display: flex;
   flex-direction: column;
-  height: 86vh;
+  height:100vh;
   position: relative;
   top: 3rem;
-}
+
+  }
 
 aside h3 {
   font-weight: 500;
@@ -2269,7 +2271,6 @@ font-weight: bolder;
 
 }
 .quiz-info input[type="radio"] + label {
-  color: #000;
   font-size: 20px;
   line-height: 25px;
   background-color: var(--color-info-dark);  
@@ -2284,7 +2285,6 @@ font-weight: bolder;
   overflow: hidden;
   cursor: pointer;
 }
-
 .quiz-info input[type="radio"]:checked + label  {
   background-color:#f75742f3;  
   color: rgb(226, 226, 226);
@@ -2389,8 +2389,20 @@ font-weight: bolder;
 
 
 
-@media screen and (max-width:600px) {
+@media screen and (max-width:700px) {
   
+aside .sidebar a,
+aside .sidebar button {
+  display: flex;
+  color: var(--color-info-dark);
+  margin-right: 2rem;
+  gap: 1rem;
+  align-items: center;
+  position: relative;
+  height: 3.3rem;
+  border-top-left-radius: 1rem;
+  transition: all 400ms;
+}
   .quiz-info h2{
     font-size: 1.5rem;
     font-weight: bolder;
@@ -2508,13 +2520,12 @@ font-weight: bolder;
   border-radius: 2rem !important;
   background-color: #fff !important;
 }
-.green-answer {
-  background-color:  #01b176 !important;
-  color: #fff !important;
+.green-answer{
+  background-color:  #009765 !important;;
 }
 .right-answer {
   background: rgb(221,76,57);
-  background: linear-gradient(131deg, rgba(221,76,57,1) 50%, #01b176 50%);
+  background: linear-gradient(131deg, rgba(221,76,57,1) 50%, rgba(0,151,101,1) 50%);
 }
 /* .quiz-info .red-answer input[type="radio"]:checked +  label  {
   background-color:  #c21f09 !important;

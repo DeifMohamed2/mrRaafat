@@ -1,0 +1,422 @@
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+p {
+  opacity: 1 !important;
+}
+
+.main-container section {
+  position: relative;
+  width: 45%;
+  overflow: hidden;
+}
+/* 
+.Sign-Right {
+  position: absolute;
+  object-fit: cover;
+  background-image: url("../img/vectorLogin.png");
+  background-size: cover;
+  background-position: center;
+  height: 100%;
+  width: 100%;
+  right: 0;
+  top: 0;
+  z-index: -1;
+} */
+
+.Sign-Left {
+  direction: rtl;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.Sign-Left .title {
+  margin-bottom: 30px;
+  font-size: 22px;
+}
+
+.Sign-Left p {
+  font-size: 15px;
+  margin: 40px 0px;
+}
+
+.Sign-Left .title i {
+  margin-left: 5px;
+  color: var(--primary-color);
+}
+
+.Sign-Left .title span {
+  color: var(--primary-color);
+}
+
+.Sign-Left .password-forget,
+.Sign-Left .password-account {
+  font-size: 14px;
+}
+
+.Sign-Left .password-forget a,
+.password-account a {
+  opacity: 1;
+  margin-right: 2px;
+}
+
+.Sign-Left .password-forget a:hover,
+.password-account a:hover {
+  text-decoration: none;
+}
+
+.Sign-Left .password-forget a:active,
+.password-account a:hover {
+  text-decoration: none;
+}
+
+.Sign-Left .password-forget a,
+.password-account a {
+  font-size: 15px;
+  text-decoration: underline;
+  color: var(--danger--color);
+}
+
+.Sign-Left .password-account a {
+  color: var(--primary-color);
+}
+
+.unshowPassword {
+  visibility: hidden;
+}
+
+.password-icon {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+}
+@font-face {
+  font-family: "Segoe UI";
+  src: url('/path-to-font/SegoeUI.woff2') format('woff2'),
+       url('/path-to-font/SegoeUI.woff') format('woff');
+  font-display: swap;
+}
+.input-container {
+  font-weight: 500;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.inputs-form {
+  position: relative;
+  width: 100%;
+  border-left: 1px solid #ccc;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom: 2px solid #ccc;
+  transition: opacity 0.3s ease-in-out, border-bottom 0.3s ease-in-out;
+}
+
+.Sign-Left.up .inputs-form.inputs-formActive {
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.Sign-Left .inputs-form.inputs-formActive {
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.inputs-form input {
+  height: 50px;
+  border: none;
+  width: 100%;
+  color: var(--tags-color);
+  outline: none;
+  background-color: transparent;
+  font-size: 20px;
+  padding-right: 3px;
+  z-index: 1;
+}
+
+.input-details {
+  position: absolute;
+  opacity: 0.8;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: top 0.2s ease-in-out, font-size 0.2s ease-in-out,
+    var(--secoundery-transition), opacity 0.2s ease-in-out;
+  display: flex;
+  color: var(--tags-color);
+  z-index: -1;
+  align-items: center;
+  gap: 5px;
+  font-size: 20px;
+}
+
+.activeinput {
+  opacity: 1;
+  top: -10px;
+  font-size: 17px;
+}
+
+.Sign-Left.up .activeinput {
+  color: var(--primary-color);
+}
+
+.Sign-Left .activeinput {
+  color: var(--primary-color);
+}
+
+.Sign-Left.up .inputs-form i {
+  color: var(--primary-color);
+}
+
+.Sign-Left .inputs-form i {
+  color: var(--primary-color);
+}
+
+/* Start Sign up */
+.Sign-Left.up .title i {
+  color: var(--primary-color);
+}
+
+.Sign-Left.up .title span {
+  color: var(--primary-color);
+}
+
+.Sign-Left.up .input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.Sign-Left .Landing-btn-book {
+  border: 2px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: #111827;
+  transform: perspective(1px) translateZ(0);
+  transition-duration: 0.3s;
+  transition-property: transform;
+  border: none;
+  font-size: 1.125rem;
+  padding: 10px 25px;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.3s ease-in-out;
+}
+
+.Sign-Left .Landing-btn-book:hover {
+  transform: scale(1.06);
+  /* border:1px solid var(--primary-color);
+  background-color: transparent; */
+}
+
+.Sign-Left .Landing-btn-book:active {
+  transform: scale(1.15);
+}
+
+/* Dropdown container */
+.dropdown-container {
+  position: relative;
+  width: 100%; /* Adjust based on your layout */
+  cursor: pointer;
+  color: white;
+}
+
+/* Selected item display */
+.dropdown-selected {
+  font-weight: 500;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--tags-color);
+  border: none;
+  padding: 10px;
+  height: 45px;
+  border-radius: 5px;
+  font-size: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+  transition: var(--main-transition), var(--secoundery-transition);
+}
+
+/* Arrow icon */
+.dropdown-arrow {
+  height: 16px;
+  width: 25px;
+  border-right: 2px solid #eee;
+  fill: var(--tags-color);
+  transform: rotate(90deg);
+  transition: transform 0.3s ease, var(--secoundery-transition);
+}
+
+/* Dropdown options container */
+.dropdown-options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  background-color: var(--body-color);
+  transition: var(--main-transition), var(--secoundery-transition);
+  border: 0.5px solid #ccc;
+  border-radius: 5px;
+  display: none;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.dropdown-options.two {
+  height: 250px;
+  overflow-y: auto;
+}
+
+/* Show options when active */
+.dropdown-options-show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Rotate arrow when active */
+.dropdown-arrow-rotate {
+  transform: rotate(0deg);
+}
+
+/* Individual option styling */
+.dropdown-option {
+  padding: 10px;
+  font-size: 19px;
+  background-color: var(--body-color);
+  color: var(--tags-color);
+  border-radius: 5px;
+  transition: var(--main-transition), var(--secoundery-transition);
+}
+
+/* Hide radio inputs */
+.dropdown-options input[type="radio"] {
+  display: none;
+}
+
+/* Labels for each option */
+.dropdown-option-label {
+  display: block;
+  padding: 10px;
+  font-size: 19px;
+  background-color: var(--body-color);
+  color: var(--tags-color);
+  border-radius: 5px;
+  transition: var(--main-transition);
+  cursor: pointer;
+}
+
+.dropdown-option-label:hover {
+  background-color: var(--light-bg);
+}
+
+.dropdown-option-label:active {
+  background-color: var(--light-bg);
+}
+
+.dropdown-option-label::before {
+  content: attr(data-txt);
+}
+
+/* Bold text for selected option */
+.dropdown-options input[type="radio"]:checked + .dropdown-option-label {
+  font-weight: bold;
+}
+
+.sign-in-join {
+  margin-right: 2px;
+  font-size: 15px;
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.sign-in-join:hover {
+  text-decoration: none;
+}
+
+.errors{
+  color: crimson;
+  font-size: 15px;
+}
+.success-message{
+  border: 1px solid green;
+  padding: 10px;
+  border-top-right-radius: 30px;
+  border-bottom-left-radius: 30px;
+  background-color: #d4edda;
+  max-width:500px;
+}
+.Code{
+  color:var(--primary-color);
+  font-size: 23px;
+  font-weight: 900;
+}
+
+@media (max-width: 992px) {
+  .main-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 50px;
+  }
+
+  .Sign-Right {
+    display: none;
+  }
+
+  .Sign-Left {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .Sign-Left.up .input-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 576px) {
+
+  .Sign-Left .password-forget,
+  .Sign-Left .password-account {
+    font-size: 12px;
+  }
+
+  .Sign-Left .password-forget a,
+  .password-account a {
+    font-size: 13px;
+  }
+
+  .sign-in-join {
+    font-size: 13px;
+  }
+
+  .Sign-Left p {
+    font-size: 12px;
+  }
+
+  .Sign-Left.up .input-container {
+    flex-direction: column;
+  }
+
+  .main-container {
+    padding: 0 30px;
+  }
+
+  .Sign-Left .Landing-btn-book {
+    font-size: 0.875rem;
+    padding: 8px 20px;
+  }
+}

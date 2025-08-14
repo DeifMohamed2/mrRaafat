@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= chapter.chapterName %> - المواد التعليمية</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/student-modern.css">
+    
+    <style>
+        .page-hero {
+            background: linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%);
+            color: #2c3e50;
+            padding: 2.5rem 0;
+            margin-bottom: 2rem;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pdfs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .pdf-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            position: relative;
+        }
+        
+        .pdf-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+        
+        .pdf-thumbnail {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .pdf-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            opacity: 0.8;
+        }
+        
+        .pdf-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pdf-card:hover .pdf-overlay {
+            opacity: 1;
+        }
+        
+        .pdf-info {
+            padding: 1.5rem;
+        }
+        
+        .pdf-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .pdf-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .pdf-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .pdf-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-free {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-paid {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-owned {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        
+        .btn-success-modern {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn-danger-modern {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        
+        .btn-outline-modern {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            color: #495057;
+        }
+        
+        .btn-outline-modern:hover {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        .access-denied {
+            background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%);
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .floating-stats {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .pdf-type-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .pdfs-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .page-hero {
+                padding: 1.5rem 0;
+            }
+            
+            .pdf-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+  <body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/student/dash" class="sidebar-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    منصة الشهادة
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/student/dash" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">dashboard</i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="/student/chapters" class="nav-link active">
+                        <i class="material-icons-outlined nav-icon">library_books</i>
+                        <span>الأبواب التعليمية</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="/student/exams" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">quiz</i>
+                        <span>الامتحانات</span>
+                    </a>
+        </div>
+                
+                <div class="nav-item">
+                    <a href="/student/PDFs" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">description</i>
+                        <span>المواد التعليمية</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="/student/ranking" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">leaderboard</i>
+                        <span>التصنيف</span>
+                    </a>
+              </div>
+                
+                <div class="nav-item">
+                    <a href="/student/settings" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">settings</i>
+                        <span>الإعدادات</span>
+                    </a>
+            </div>
+            
+                <div class="nav-item">
+                    <a href="/student/logOut" class="nav-link">
+                        <i class="material-icons-outlined nav-icon">logout</i>
+                        <span>تسجيل الخروج</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Hero -->
+            <div class="page-hero">
+                <div class="container">
+                    <div class="d-flex align-items-center mb-3">
+                        <a href="/student/chapter/<%= chapterId %>" class="btn btn-dark btn-modern me-3">
+                            <i class="fas fa-arrow-right"></i>
+                            العودة للباب
+                    </a>
+                        <div class="badge bg-danger">مواد تعليمية</div>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-2"><%= chapter.chapterName %></h1>
+                    <p class="lead mb-0">استكشف جميع المذكرات والملفات التعليمية في هذا الباب</p>
+              </div>
+            </div>
+
+            <div class="container">
+            
+            <!-- Header Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="chapter-header p-4 rounded" style="background: linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%); color: #2c3e50;">
+                  <div class="d-flex align-items-center">
+                    <a href="/student/chapter/<%= chapterId %>" class="btn btn-dark btn-sm me-3">
+                      <i class="fas fa-arrow-right"></i> العودة للباب
+                    </a>
+                    <div>
+                      <h2 class="mb-1"><%= chapter.chapterName %></h2>
+                      <p class="mb-0 opacity-75">المذكرات والملفات التعليمية</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Alert -->
+            <% if (!hasChapterAccess) { %>
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="alert alert-warning text-center">
+                  <i class="fas fa-lock fs-3 mb-2"></i>
+                  <h5>هذا الباب غير متاح</h5>
+                  <p>يجب شراء الباب أولاً للوصول إلى مذكراته</p>
+                  <a href="/student/chapter/<%= chapterId %>" class="btn btn-primary">شراء الباب</a>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Access Alert -->
+            <% if (!hasChapterAccess) { %>
+                <div class="access-denied">
+                    <i class="fas fa-lock fa-3x text-danger mb-3"></i>
+                    <h4 class="text-danger">هذا الباب غير متاح</h4>
+                    <p class="text-muted mb-3">يجب شراء الباب أولاً للوصول إلى جميع مذكراته</p>
+                    <a href="/student/chapter/<%= chapterId %>" class="btn btn-danger-modern">
+                        <i class="fas fa-key"></i>
+                        شراء الباب
+                    </a>
+            </div>
+            <% } %>
+
+            <!-- PDFs Grid -->
+            <div class="pdfs-grid">
+                <% if (pdfs && pdfs.length > 0) { %>
+                    <% pdfs.forEach((pdf, index) => { 
+                        const hasAccess = hasChapterAccess || 
+                                        (userData.PDFsPaid && userData.PDFsPaid.includes(pdf._id.toString())) || 
+                                        !pdf.pdfPrice || 
+                                        pdf.pdfPrice === '0' || 
+                                        pdf.pdfStatus === 'Free';
+                        const isFree = !pdf.pdfPrice || pdf.pdfPrice === '0' || pdf.pdfStatus === 'Free';
+                    %>
+                        <div class="pdf-card">
+                        <div class="pdf-thumbnail">
+                            <i class="pdf-icon fas fa-file-pdf"></i>
+                            <div class="pdf-type-badge">PDF</div>
+                            <div class="floating-stats">
+                                <div class="meta-item">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <span><%= pdf.pdfGrade %></span>
+                                </div>
+                                <% if (pdf.pdfSize) { %>
+                                <div class="meta-item">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span><%= pdf.pdfSize || 'غير محدد' %></span>
+                                </div>
+                                <% } %>
+                            </div>
+                            <div class="pdf-overlay">
+                                <% if (hasAccess) { %>
+                                    <a href="/student/chapter/<%= chapterId %>/pdf/<%= pdf._id %>" 
+                                       class="btn btn-danger-modern btn-lg" target="_blank">
+                                  <i class="fas fa-eye"></i>
+                                        عرض المذكرة
+                                </a>
+                              <% } else { %>
+                                    <button class="btn btn-danger-modern btn-lg" 
+                                            onclick="showPurchaseModal('<%= pdf._id %>', '<%= pdf.pdfName %>', '<%= pdf.pdfPrice || 20 %>')">
+                                        <i class="fas fa-lock"></i>
+                                        <%= pdf.pdfPrice || 20 %> جنيه
+                                </button>
+                              <% } %>
+                            </div>
+                        </div>
+                        <div class="pdf-info">
+                            <h5 class="pdf-title"><%= pdf.pdfName %></h5>
+                            <p class="pdf-description">
+                                <%= pdf.pdfDescription || 'مذكرة تعليمية شاملة تحتوي على المفاهيم الأساسية والتمارين المهمة في هذا الموضوع' %>
+                            </p>
+                            <div class="pdf-meta">
+                                <div class="d-flex gap-2">
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span><%= new Date(pdf.createdAt || Date.now()).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) %></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-download"></i>
+                                        <span><%= pdf.downloadCount || 0 %></span>
+                                    </div>
+                                </div>
+                                <% if (isFree) { %>
+                                <span class="status-badge status-free">مجاني</span>
+                                <% } else if (hasAccess) { %>
+                                <span class="status-badge status-owned">مملوك</span>
+                                <% } else { %>
+                                <span class="status-badge status-paid"><%= pdf.pdfPrice || 20 %> جنيه</span>
+                                <% } %>
+                            </div>
+                            <div class="pdf-actions">
+                                <% if (hasAccess) { %>
+                                    <a href="/student/chapter/<%= chapterId %>/pdf/<%= pdf._id %>" 
+                                       class="btn btn-danger-modern flex-fill" target="_blank">
+                                        <i class="fas fa-eye"></i>
+                                        عرض المذكرة
+                                    </a>
+                                <% } else { %>
+                                    <button class="btn btn-outline-modern flex-fill" 
+                                            onclick="showPurchaseModal('<%= pdf._id %>', '<%= pdf.pdfName %>', '<%= pdf.pdfPrice || 20 %>')">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        شراء المذكرة
+                                    </button>
+                                <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      <% }); %>
+              <% } else { %>
+                    <div class="text-center py-5" style="grid-column: 1 / -1;">
+                        <i class="fas fa-file-pdf fa-4x text-muted mb-4"></i>
+                      <h4 class="text-muted">لا توجد مذكرات متاحة حالياً</h4>
+                      <p class="text-muted">سيتم إضافة المذكرات التعليمية قريباً</p>
+              </div>
+              <% } %>
+            </div>
+
+            <!-- PDF Categories -->
+            <% if (pdfs && pdfs.length > 0) { %>
+            <div class="row mt-5">
+              <div class="col-12">
+                <div class="categories-section">
+                  <h4 class="mb-4"><i class="fas fa-folder-open me-2"></i>تصنيف الملفات</h4>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="category-card">
+                        <div class="category-icon bg-danger">
+                          <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="category-content">
+                          <h3><%= pdfs.length %></h3>
+                          <p>إجمالي الملفات</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="category-card">
+                        <div class="category-icon bg-success">
+                          <i class="fas fa-unlock"></i>
+                        </div>
+                        <div class="category-content">
+                                                     <% const freePdfs = pdfs.filter(pdf => !pdf.pdfPrice || pdf.pdfPrice === '0' || pdf.pdfStatus === 'Free').length %>
+                          <h3><%= freePdfs %></h3>
+                          <p>ملفات مجانية</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="category-card">
+                        <div class="category-icon bg-warning">
+                          <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="category-content">
+                                                     <% const paidPdfs = pdfs.filter(pdf => pdf.pdfPrice && pdf.pdfPrice !== '0' && pdf.pdfStatus === 'Paid').length %>
+                          <h3><%= paidPdfs %></h3>
+                          <p>ملفات مدفوعة</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Study Tips -->
+            <div class="row mt-5">
+              <div class="col-12">
+                <div class="tips-section">
+                  <h4 class="mb-4"><i class="fas fa-lightbulb me-2"></i>نصائح للدراسة</h4>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <div class="tip-card">
+                        <div class="tip-icon">
+                          <i class="fas fa-download text-primary"></i>
+                        </div>
+                        <div class="tip-content">
+                          <h6>حمل الملفات</h6>
+                          <p>قم بتحميل المذكرات لتتمكن من مراجعتها دون الحاجة للإنترنت</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <div class="tip-card">
+                        <div class="tip-icon">
+                          <i class="fas fa-bookmark text-success"></i>
+                        </div>
+                        <div class="tip-content">
+                          <h6>اصنع علامات</h6>
+                          <p>استخدم علامات في أماكن مهمة لسهولة الرجوع إليها لاحقاً</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <div class="tip-card">
+                        <div class="tip-icon">
+                          <i class="fas fa-clock text-warning"></i>
+                        </div>
+                        <div class="tip-content">
+                          <h6>نظم وقتك</h6>
+                          <p>حدد وقت ثابت يومياً لمراجعة المذكرات والتدريب على الأسئلة</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <div class="tip-card">
+                        <div class="tip-icon">
+                          <i class="fas fa-question-circle text-info"></i>
+                        </div>
+                        <div class="tip-content">
+                          <h6>اسأل واستفسر</h6>
+                          <p>لا تتردد في السؤال عن أي جزء غير واضح من المذكرات</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div class="modal fade" id="purchaseModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">شراء المذكرة</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body text-center">
+            <i class="fas fa-file-pdf fs-1 text-danger mb-3"></i>
+            <h5 id="pdfName"></h5>
+            <p class="text-muted">هل تريد شراء هذه المذكرة؟</p>
+            <h4 class="text-danger" id="pdfPrice"></h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-danger" id="confirmPurchase">شراء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include("./partials/footer.ejs") %>
+
+    <style>
+    .chapter-header {
+      border-radius: 15px !important;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .pdf-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      border: none;
+    }
+
+    .pdf-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    .pdf-header {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      color: #2c3e50;
+      padding: 1.5rem;
+      position: relative;
+      text-align: center;
+    }
+
+    .pdf-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pdf-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+    }
+
+    .pdf-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .pdf-details {
+      margin-bottom: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .detail-item i {
+      width: 20px;
+      margin-left: 8px;
+    }
+
+    .card-footer {
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      padding: 1.25rem;
+    }
+
+    .btn-block {
+      width: 100%;
+      padding: 0.75rem;
+      font-weight: 600;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-block:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .categories-section, .tips-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .category-card, .tip-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .category-card:hover, .tip-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .category-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .tip-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .category-content h3, .tip-content h6 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: #2c3e50;
+    }
+
+    .tip-content h6 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .category-content p, .tip-content p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .bg-danger { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%) !important; }
+    .bg-success { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%) !important; }
+    .bg-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important; }
+    </style>
+
+    <script>
+    let selectedPdfId = '';
+
+    function showPurchaseModal(pdfId, pdfName, price) {
+      selectedPdfId = pdfId;
+      document.getElementById('pdfName').textContent = pdfName;
+      document.getElementById('pdfPrice').textContent = price + ' جنيه';
+      new bootstrap.Modal(document.getElementById('purchaseModal')).show();
+    }
+
+    document.getElementById('confirmPurchase').addEventListener('click', async function() {
+      if (selectedPdfId) {
+        try {
+          // Show loading state
+          this.disabled = true;
+          this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الشراء...';
+          
+          // Create purchase request
+          const formData = new FormData();
+          formData.append('code', prompt('أدخل كود شراء المذكرة:'));
+          
+          if (!formData.get('code')) {
+            this.disabled = false;
+            this.innerHTML = 'شراء';
+            return;
+          }
+          
+          const response = await fetch(`/student/chapter/<%= chapterId %>/pdf/${selectedPdfId}/buy`, {
+            method: 'POST',
+            body: formData
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('تم شراء المذكرة بنجاح!');
+            window.location.reload();
+          } else {
+            alert(result.message || 'فشل في عملية الشراء');
+            this.disabled = false;
+            this.innerHTML = 'شراء';
+          }
+          
+          // Hide modal
+          bootstrap.Modal.getInstance(document.getElementById('purchaseModal')).hide();
+        } catch (error) {
+          console.error('Purchase error:', error);
+          alert('حدث خطأ في عملية الشراء');
+          this.disabled = false;
+          this.innerHTML = 'شراء';
+        }
+      }
+    });
+    </script>
+  </body>
+</html> 

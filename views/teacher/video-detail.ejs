@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفاصيل الفيديو - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    .table-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+    
+    .table-container .teacher-table {
+      margin-bottom: 0;
+    }
+    
+    .table-container .teacher-table thead th {
+      position: sticky;
+      top: 0;
+      background-color: var(--surface-color);
+      z-index: 10;
+      box-shadow: 0 1px 0 var(--border-color);
+    }
+    
+    .stats-card {
+      background: var(--surface-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      height: 100%;
+    }
+    
+    .stats-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stats-value {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .stats-label {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    
+    .tab-container {
+      margin-bottom: 1rem;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .tab {
+      padding: 0.75rem 1.5rem;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    
+    .tab.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .no-data-container {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    
+    .no-data-icon {
+      font-size: 3rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <header class="teacher-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">تفاصيل الفيديو</h1>
+        </div>
+        
+        <div class="header-right">
+          <div style="display: flex; gap: 0.5rem;">
+            <a href="/teacher/videos/<%= video._id %>/edit" class="btn btn-primary">
+              <i class="fas fa-edit"></i>
+              تعديل
+            </a>
+            <button class="btn btn-danger delete-video" data-id="<%= video._id %>">
+              <i class="fas fa-trash"></i>
+              حذف
+            </button>
+            <a href="/teacher/chapters/<%= chapter._id %>" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للفصل
+            </a>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="form-grid">
+          <!-- Video Player -->
+          <div class="form-section">
+            <h3 class="section-title"><%= video.videoTitle || video.lectureName %></h3>
+            
+            <div style="margin-bottom: 1.5rem;">
+              <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--radius-lg);">
+                <iframe src="<%= video.videoURL %>" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
+              </div>
+            </div>
+            
+            <!-- Stats -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+              <div class="stats-card">
+                <div class="stats-icon" style="background: var(--info-color);">
+                  <i class="fas fa-eye" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+                <div>
+                  <h4 class="stats-value"><%= totalWatches || 0 %></h4>
+                  <p class="stats-label">عدد المشاهدات</p>
+                </div>
+              </div>
+              
+              <div class="stats-card">
+                <div class="stats-icon" style="background: var(--success-color);">
+                  <i class="fas fa-users" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+                <div>
+                  <h4 class="stats-value"><%= uniqueViewers || 0 %></h4>
+                  <p class="stats-label">المشاهدين الفريدين</p>
+                </div>
+              </div>
+              
+              <div class="stats-card">
+                <div class="stats-icon" style="background: var(--primary-color);">
+                  <i class="fas fa-chart-line" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+                <div>
+                  <h4 class="stats-value"><%= uniqueViewers > 0 ? Math.round((totalWatches / uniqueViewers) * 10) / 10 : 0 %></h4>
+                  <p class="stats-label">متوسط المشاهدات لكل طالب</p>
+                </div>
+              </div>
+              
+              <div class="stats-card">
+                <div class="stats-icon" style="background: var(--warning-color);">
+                  <i class="fas fa-user-slash" style="font-size: 1.5rem; color: white;"></i>
+                </div>
+                <div>
+                  <h4 class="stats-value" id="unwatchedCount">0</h4>
+                  <p class="stats-label">لم يشاهدوا بعد</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Video Details -->
+            <div class="dashboard-card" style="margin-bottom: 1.5rem;">
+              <h3 class="section-title">تفاصيل الفيديو</h3>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div>
+                  <div style="margin-bottom: 1rem;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">نوع الفيديو</p>
+                    <p style="margin: 0; font-weight: 600;">
+                      <% if (videoType === 'lecture') { %>
+                        <i class="fas fa-chalkboard-teacher" style="color: var(--info-color); margin-left: 0.5rem;"></i> محاضرة
+                      <% } else if (videoType === 'summary') { %>
+                        <i class="fas fa-file-alt" style="color: var(--accent-color); margin-left: 0.5rem;"></i> ملخص
+                      <% } else if (videoType === 'solving') { %>
+                        <i class="fas fa-tasks" style="color: var(--success-color); margin-left: 0.5rem;"></i> حل تمارين
+                      <% } %>
+                    </p>
+                  </div>
+                  
+                  <div style="margin-bottom: 1rem;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">حالة الدفع</p>
+                    <p style="margin: 0; font-weight: 600;">
+                      <% if (video.paymentStatus === 'Free') { %>
+                        <i class="fas fa-unlock" style="color: var(--success-color); margin-left: 0.5rem;"></i> مجاني
+                      <% } else { %>
+                        <i class="fas fa-lock" style="color: var(--warning-color); margin-left: 0.5rem;"></i> مدفوع
+                        <% if (video.videoPrice) { %>
+                          (<%= video.videoPrice %> جنيه)
+                        <% } %>
+                      <% } %>
+                    </p>
+                  </div>
+                  
+                  <div style="margin-bottom: 1rem;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">المتطلبات المسبقة</p>
+                    <p style="margin: 0; font-weight: 600;">
+                      <% if (!video.prerequisites) { %>
+                        <i class="fas fa-check-circle" style="color: var(--success-color); margin-left: 0.5rem;"></i> بدون متطلبات
+                      <% } else if (video.prerequisites === 'WithExam') { %>
+                        <i class="fas fa-clipboard-check" style="color: var(--info-color); margin-left: 0.5rem;"></i> مع اختبار
+                      <% } else if (video.prerequisites === 'WithHw') { %>
+                        <i class="fas fa-book" style="color: var(--accent-color); margin-left: 0.5rem;"></i> مع واجب
+                      <% } else if (video.prerequisites === 'WithExamaAndHw') { %>
+                        <i class="fas fa-tasks" style="color: var(--warning-color); margin-left: 0.5rem;"></i> مع اختبار وواجب
+                      <% } %>
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <div style="margin-bottom: 1rem;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">عدد المشاهدات المسموح بها</p>
+                    <p style="margin: 0; font-weight: 600;">
+                      <i class="fas fa-play-circle" style="color: var(--primary-color); margin-left: 0.5rem;"></i> <%= video.videoAllowedAttemps || 3 %> مشاهدات
+                    </p>
+                  </div>
+                  
+                  <% if (video.PDFURL) { %>
+                    <div style="margin-bottom: 1rem;">
+                      <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">ملف PDF</p>
+                      <p style="margin: 0; font-weight: 600;">
+                        <i class="fas fa-file-pdf" style="color: var(--danger-color); margin-left: 0.5rem;"></i>
+                        <a href="<%= video.PDFURL %>" target="_blank" style="color: var(--primary-color); text-decoration: none;">عرض الملف</a>
+                      </p>
+                    </div>
+                  <% } %>
+                  
+                  <div style="margin-bottom: 1rem;">
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">تاريخ الإنشاء</p>
+                    <p style="margin: 0; font-weight: 600;">
+                      <i class="fas fa-calendar-alt" style="color: var(--secondary-color); margin-left: 0.5rem;"></i> <%= new Date(video.createdAt).toLocaleString('ar-EG') %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <% if (video.videoDescription) { %>
+                <div style="margin-top: 1.5rem;">
+                  <p style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.875rem;">الوصف</p>
+                  <p style="margin: 0; padding: 1rem; background: var(--surface-color); border-radius: var(--radius-md);">
+                    <%= video.videoDescription %>
+                  </p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Students Stats Tabs -->
+        <div class="dashboard-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 class="section-title" style="margin: 0;">إحصائيات المشاهدة</h3>
+            
+            <div class="tabs">
+              <div class="tab active" data-tab="watched">الطلاب الذين شاهدوا</div>
+              <div class="tab" data-tab="unwatched">الطلاب الذين لم يشاهدوا</div>
+            </div>
+          </div>
+          
+          <!-- Tab Content -->
+          <div class="tab-content active" id="watched-tab">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+              <button type="button" class="btn btn-outline" id="exportWatchedBtn">
+                <i class="fas fa-file-excel"></i>
+                تصدير Excel
+              </button>
+            </div>
+            
+            <% if (studentsStats && studentsStats.filter(s => s.numberOfWatches > 0).length > 0) { %>
+              <div class="table-container">
+                <table class="teacher-table" id="watched-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 5%;">#</th>
+                      <th style="width: 15%;">الطالب</th>
+                      <th style="width: 8%;">الكود</th>
+                      <th style="width: 8%;">الصف</th>
+                      <th style="width: 12%;">رقم الهاتف</th>
+                      <th style="width: 12%;">هاتف ولي الأمر</th>
+                      <th style="width: 8%;">المشاهدات</th>
+                      <th style="width: 8%;">المتبقي</th>
+                      <th style="width: 10%;">آخر مشاهدة</th>
+                      <th style="width: 8%;">حالة الدفع</th>
+                      <th style="width: 10%;">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% let watchedStudents = studentsStats.filter(s => s.numberOfWatches > 0); %>
+                    <% watchedStudents.forEach((student, index) => { %>
+                      <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= student.studentName %></td>
+                        <td><%= student.studentCode %></td>
+                        <td><%= student.grade %></td>
+                        <td><%= student.phone %></td>
+                        <td><%= student.parentPhone %></td>
+                        <td><%= student.numberOfWatches %></td>
+                        <td><%= student.videoAllowedAttemps - student.numberOfWatches %></td>
+                        <td><%= student.lastWatch ? new Date(student.lastWatch).toLocaleString('ar-EG') : 'غير متوفر' %></td>
+                        <td>
+                          <span class="status-badge <%= student.purchaseStatus ? 'active' : 'pending' %>">
+                            <%= student.purchaseStatus ? 'مدفوع' : 'غير مدفوع' %>
+                          </span>
+                        </td>
+                        <td>
+                          <button class="btn btn-sm btn-primary increase-watches" 
+                                  data-student-id="<%= student.studentId %>" 
+                                  data-student-name="<%= student.studentName %>"
+                                  data-current-attempts="<%= student.videoAllowedAttemps %>">
+                            <i class="fas fa-plus"></i>
+                            زيادة المشاهدات
+                          </button>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="no-data-container">
+                <i class="fas fa-video-slash no-data-icon"></i>
+                <h4 style="margin-bottom: 0.5rem;">لم يشاهد أي طالب هذا الفيديو بعد</h4>
+                <p style="color: var(--text-secondary);">سيظهر هنا إحصائيات المشاهدة عندما يبدأ الطلاب في مشاهدة الفيديو</p>
+              </div>
+            <% } %>
+          </div>
+          
+          <div class="tab-content" id="unwatched-tab">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+              <button type="button" class="btn btn-outline" id="exportUnwatchedBtn">
+                <i class="fas fa-file-excel"></i>
+                تصدير Excel
+              </button>
+            </div>
+            
+            <% if (studentsStats && studentsStats.filter(s => s.numberOfWatches === 0).length > 0) { %>
+              <div class="table-container">
+                <table class="teacher-table" id="unwatched-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 5%;">#</th>
+                      <th style="width: 15%;">الطالب</th>
+                      <th style="width: 8%;">الكود</th>
+                      <th style="width: 8%;">الصف</th>
+                      <th style="width: 12%;">رقم الهاتف</th>
+                      <th style="width: 12%;">هاتف ولي الأمر</th>
+                      <th style="width: 10%;">المشاهدات المتاحة</th>
+                      <th style="width: 10%;">حالة الدفع</th>
+                      <th style="width: 20%;">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% let unwatchedStudents = studentsStats.filter(s => s.numberOfWatches === 0); %>
+                    <% unwatchedStudents.forEach((student, index) => { %>
+                      <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= student.studentName %></td>
+                        <td><%= student.studentCode %></td>
+                        <td><%= student.grade %></td>
+                        <td><%= student.phone %></td>
+                        <td><%= student.parentPhone %></td>
+                        <td><%= student.videoAllowedAttemps %></td>
+                        <td>
+                          <span class="status-badge <%= student.purchaseStatus ? 'active' : 'pending' %>">
+                            <%= student.purchaseStatus ? 'مدفوع' : 'غير مدفوع' %>
+                          </span>
+                        </td>
+                        <td>
+                          <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-outline send-reminder" 
+                                    data-student="<%= student.studentName %>" 
+                                    data-code="<%= student.studentCode %>">
+                              <i class="fas fa-bell"></i>
+                              تذكير
+                            </button>
+                            <button class="btn btn-sm btn-primary increase-watches" 
+                                    data-student-id="<%= student.studentId %>" 
+                                    data-student-name="<%= student.studentName %>"
+                                    data-current-attempts="<%= student.videoAllowedAttemps %>">
+                              <i class="fas fa-plus"></i>
+                              زيادة المشاهدات
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="no-data-container">
+                <i class="fas fa-check-circle no-data-icon" style="color: var(--success-color);"></i>
+                <h4 style="margin-bottom: 0.5rem;">جميع الطلاب شاهدوا الفيديو!</h4>
+                <p style="color: var(--text-secondary);">لا يوجد طلاب لم يشاهدوا الفيديو بعد</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">تأكيد الحذف</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i>
+          <p>هل أنت متأكد من حذف الفيديو "<%= video.videoTitle || video.lectureName %>"؟</p>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">لا يمكن التراجع عن هذا الإجراء</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">إلغاء</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">حذف</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Increase Watches Modal -->
+  <div class="modal-overlay" id="increaseWatchesModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">زيادة عدد المشاهدات</h3>
+        <button class="modal-close" onclick="closeIncreaseWatchesModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1.5rem;">
+          <p>إضافة مشاهدات للطالب: <strong id="studentNameDisplay"></strong></p>
+          
+          <div class="form-group">
+            <label class="form-label">عدد المشاهدات الإضافية</label>
+            <input type="number" class="form-input" id="additionalWatches" min="1" value="1">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">عدد المشاهدات الحالي</label>
+            <input type="text" class="form-input" id="currentWatches" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">العدد الإجمالي بعد الزيادة</label>
+            <input type="text" class="form-input" id="totalWatches" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeIncreaseWatchesModal()">إلغاء</button>
+        <button class="btn btn-primary" id="confirmIncreaseBtn">تأكيد</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    // Sidebar Toggle
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    
+    // Tab functionality
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        
+        // Remove active class from all tabs and contents
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // Add active class to current tab and content
+        this.classList.add('active');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+    
+    // Update unwatched count
+    const unwatchedCount = document.getElementById('unwatchedCount');
+    unwatchedCount.textContent = '<%= unwatchedCount %>';
+    
+    // Export to Excel functions
+    function exportTableToExcel(tableId, fileName) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      
+      // Convert table to worksheet
+      const ws = XLSX.utils.table_to_sheet(table, {raw: true});
+      
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+      
+      // Generate Excel file and trigger download
+      XLSX.writeFile(wb, `${fileName}.xlsx`);
+    }
+    
+    // Export watched students
+    document.getElementById('exportWatchedBtn').addEventListener('click', function() {
+      exportTableToExcel('watched-table', 'students_watched_video_<%= video._id %>');
+    });
+    
+    // Export unwatched students
+    document.getElementById('exportUnwatchedBtn').addEventListener('click', function() {
+      exportTableToExcel('unwatched-table', 'students_unwatched_video_<%= video._id %>');
+    });
+    
+    // Send reminder functionality
+    const reminderButtons = document.querySelectorAll('.send-reminder');
+    reminderButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const studentName = this.getAttribute('data-student');
+        const studentCode = this.getAttribute('data-code');
+        
+        // Show temporary notification
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i> تم';
+        this.disabled = true;
+        
+        setTimeout(() => {
+          this.innerHTML = originalText;
+          this.disabled = false;
+        }, 3000);
+        
+        // In a real implementation, you would send an AJAX request to the server
+        console.log(`Sending reminder to ${studentName} (${studentCode})`);
+      });
+    });
+    
+    // Increase watches functionality
+    let currentStudentId = null;
+    const increaseWatchesButtons = document.querySelectorAll('.increase-watches');
+    const additionalWatchesInput = document.getElementById('additionalWatches');
+    const currentWatchesInput = document.getElementById('currentWatches');
+    const totalWatchesInput = document.getElementById('totalWatches');
+    
+    function showIncreaseWatchesModal() {
+      document.getElementById('increaseWatchesModal').classList.add('show');
+    }
+    
+    function closeIncreaseWatchesModal() {
+      document.getElementById('increaseWatchesModal').classList.remove('show');
+    }
+    
+    // Update total watches when additional watches input changes
+    additionalWatchesInput.addEventListener('input', function() {
+      const additional = parseInt(this.value) || 0;
+      const current = parseInt(currentWatchesInput.value) || 0;
+      totalWatchesInput.value = current + additional;
+    });
+    
+    increaseWatchesButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const studentId = this.getAttribute('data-student-id');
+        const studentName = this.getAttribute('data-student-name');
+        const currentAttempts = parseInt(this.getAttribute('data-current-attempts')) || 0;
+        
+        // Set current student ID for the confirmation button
+        currentStudentId = studentId;
+        
+        // Update modal content
+        document.getElementById('studentNameDisplay').textContent = studentName;
+        currentWatchesInput.value = currentAttempts;
+        additionalWatchesInput.value = 1;
+        totalWatchesInput.value = currentAttempts + 1;
+        
+        // Show modal
+        showIncreaseWatchesModal();
+      });
+    });
+    
+    // Handle confirm increase button click
+    document.getElementById('confirmIncreaseBtn').addEventListener('click', function() {
+      if (!currentStudentId) return;
+      
+      const additionalWatches = parseInt(additionalWatchesInput.value) || 1;
+      
+      // Disable button and show loading state
+      this.disabled = true;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+      
+      fetch(`/teacher/videos/<%= video._id %>/increase-watches/${currentStudentId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ additionalWatches })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Close modal
+          closeIncreaseWatchesModal();
+          
+          // Show success message
+          alert(data.message);
+          
+          // Reload page to reflect changes
+          location.reload();
+        } else {
+          alert(`حدث خطأ: ${data.message}`);
+          this.disabled = false;
+          this.innerHTML = 'تأكيد';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء زيادة عدد المشاهدات');
+        this.disabled = false;
+        this.innerHTML = 'تأكيد';
+      });
+    });
+    
+    // Delete video functionality
+    const deleteBtn = document.querySelector('.delete-video');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    
+    function showDeleteModal() {
+      document.getElementById('deleteModal').classList.add('show');
+    }
+    
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('show');
+    }
+    
+    deleteBtn.addEventListener('click', function() {
+      const videoId = this.getAttribute('data-id');
+      showDeleteModal();
+      
+      confirmDeleteBtn.onclick = function() {
+        fetch(`/teacher/videos/${videoId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/teacher/chapters/<%= chapter._id %>';
+          } else {
+            alert('حدث خطأ أثناء حذف الفيديو');
+            closeDeleteModal();
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('حدث خطأ أثناء حذف الفيديو');
+          closeDeleteModal();
+        });
+      };
+    });
+    
+    // Close modal when clicking outside
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('show');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

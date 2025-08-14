@@ -1,25 +1,518 @@
-<div class="top">
-    <button id="menu-btn">
-      <span class="material-icons-sharp">menu</span>
+<header class="teacher-header">
+  <div class="header-left">
+    <button class="menu-btn" id="menu-btn">
+      <i class="fas fa-bars"></i>
     </button>
-    <div class="theme-toggler">
-      <span class="material-icons-sharp active">light_mode</span
-      ><span class="material-icons-sharp">dark_mode</span>
+    <h1 class="page-title"><%= typeof title !== 'undefined' ? title : 'لوحة التحكم' %></h1>
+  </div>
+  
+  <div class="header-right">
+    <div class="header-actions">
+      <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun light-icon"></i>
+        <i class="fas fa-moon dark-icon"></i>
+      </div>
+      
+      <div class="notifications-dropdown">
+        <button class="notifications-btn">
+          <i class="fas fa-bell"></i>
+          <% if (typeof notifications !== 'undefined' && notifications && notifications.length > 0) { %>
+            <span class="notifications-badge"><%= notifications.length %></span>
+          <% } %>
+        </button>
+        <div class="notifications-menu">
+          <div class="notifications-header">
+            <h3>الإشعارات</h3>
+            <button class="mark-all-read">تعيين الكل كمقروء</button>
+          </div>
+          <div class="notifications-list">
+            <% if (typeof notifications !== 'undefined' && notifications && notifications.length > 0) { %>
+              <% notifications.forEach(notification => { %>
+                <div class="notification-item <%= notification.isRead ? '' : 'unread' %>">
+                  <div class="notification-icon <%= notification.type %>">
+                    <i class="fas <%= notification.type === 'success' ? 'fa-check-circle' : notification.type === 'warning' ? 'fa-exclamation-triangle' : notification.type === 'info' ? 'fa-info-circle' : 'fa-bell' %>"></i>
+                  </div>
+                  <div class="notification-content">
+                    <p class="notification-text"><%= notification.message %></p>
+                    <span class="notification-time"><%= notification.time %></span>
+                  </div>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <div class="empty-notifications">
+                <i class="fas fa-bell-slash"></i>
+                <p>لا توجد إشعارات جديدة</p>
+              </div>
+            <% } %>
+          </div>
+          <div class="notifications-footer">
+            <a href="/teacher/notifications">عرض كل الإشعارات</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="user-dropdown">
+        <button class="user-btn">
+          <div class="user-avatar">
+            <% if (typeof teacherData !== 'undefined' && teacherData.userPhoto) { %>
+              <img src="<%= teacherData.userPhoto %>" alt="<%= teacherData.Username %>">
+            <% } else { %>
+              <i class="fas fa-user"></i>
+            <% } %>
+          </div>
+          <span class="user-name">
+            <% if (typeof teacherData !== 'undefined' && teacherData.Username) { %>
+              <%= teacherData.Username %>
+            <% } else { %>
+              المعلم
+            <% } %>
+          </span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="user-menu">
+          <a href="/teacher/profile" class="user-menu-item">
+            <i class="fas fa-user-circle"></i>
+            الملف الشخصي
+          </a>
+          <a href="/teacher/settings" class="user-menu-item">
+            <i class="fas fa-cog"></i>
+            الإعدادات
+          </a>
+          <div class="menu-divider"></div>
+          <a href="/teacher/logout" class="user-menu-item logout">
+            <i class="fas fa-sign-out-alt"></i>
+            تسجيل الخروج
+          </a>
+        </div>
+      </div>
     </div>
+  </div>
+</header>
 
-  </div>    
-  <script>
-    const sdieMenu = document.querySelector("aside");
-    const menuBtn  =  document.querySelector("#menu-btn");
-    const closeBtn = document.querySelector("#close-btn");
+<style>
+  .teacher-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background-color: var(--surface-color, #fff);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    margin-bottom: 1.5rem;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-primary, #1e293b);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+  }
+  
+  .menu-btn:hover {
+    background-color: var(--background-color, #f1f5f9);
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    margin: 0;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--background-color, #f1f5f9);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .theme-toggle:hover {
+    background-color: var(--background-hover, #e2e8f0);
+  }
+  
+  .theme-toggle .light-icon,
+  .theme-toggle .dark-icon {
+    position: absolute;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .theme-toggle .light-icon {
+    color: #f59e0b;
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  
+  .theme-toggle .dark-icon {
+    color: #6366f1;
+    opacity: 0;
+    transform: rotate(90deg);
+  }
+  
+  .dark-mode .theme-toggle .light-icon {
+    opacity: 0;
+    transform: rotate(-90deg);
+  }
+  
+  .dark-mode .theme-toggle .dark-icon {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+  
+  .notifications-dropdown,
+  .user-dropdown {
+    position: relative;
+  }
+  
+  .notifications-btn,
+  .user-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 0.375rem;
+  }
+  
+  .notifications-btn {
+    position: relative;
+    font-size: 1.25rem;
+    color: var(--text-secondary, #64748b);
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    background-color: var(--background-color, #f1f5f9);
+  }
+  
+  .notifications-btn:hover {
+    background-color: var(--background-hover, #e2e8f0);
+    color: var(--text-primary, #1e293b);
+  }
+  
+  .notifications-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--danger-color, #ef4444);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    padding: 0 5px;
+  }
+  
+  .notifications-menu,
+  .user-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    background-color: var(--surface-color, #fff);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    width: 320px;
+    max-height: 400px;
+    overflow: hidden;
+    display: none;
+    z-index: 1000;
+    border: 1px solid var(--border-color, #e2e8f0);
+  }
+  
+  .notifications-dropdown:hover .notifications-menu,
+  .user-dropdown:hover .user-menu {
+    display: block;
+  }
+  
+  .notifications-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+  }
+  
+  .notifications-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    margin: 0;
+  }
+  
+  .mark-all-read {
+    background: none;
+    border: none;
+    color: var(--primary-color, #3b82f6);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .notifications-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+  }
+  
+  .notification-item:hover {
+    background-color: var(--background-color, #f1f5f9);
+  }
+  
+  .notification-item.unread {
+    background-color: rgba(59, 130, 246, 0.05);
+  }
+  
+  .notification-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .notification-icon.success {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+  }
+  
+  .notification-icon.warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+  
+  .notification-icon.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+  
+  .notification-icon.danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .notification-content {
+    flex: 1;
+  }
+  
+  .notification-text {
+    font-size: 0.875rem;
+    color: var(--text-primary, #1e293b);
+    margin: 0 0 0.25rem;
+    line-height: 1.5;
+  }
+  
+  .notification-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #64748b);
+  }
+  
+  .empty-notifications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-secondary, #64748b);
+  }
+  
+  .empty-notifications i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+  }
+  
+  .notifications-footer {
+    padding: 0.75rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+  }
+  
+  .notifications-footer a {
+    color: var(--primary-color, #3b82f6);
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+  
+  .user-btn {
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--background-color, #f1f5f9);
+    border-radius: 0.5rem;
+  }
+  
+  .user-btn:hover {
+    background-color: var(--background-hover, #e2e8f0);
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--primary-color, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    overflow: hidden;
+  }
+  
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .user-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #1e293b);
+  }
+  
+  .user-menu {
+    left: auto;
+    right: 0;
+    width: 200px;
+  }
+  
+  .user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary, #1e293b);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  
+  .user-menu-item:hover {
+    background-color: var(--background-color, #f1f5f9);
+  }
+  
+  .user-menu-item i {
+    font-size: 1rem;
+    color: var(--text-secondary, #64748b);
+    width: 20px;
+    text-align: center;
+  }
+  
+  .menu-divider {
+    height: 1px;
+    background-color: var(--border-color, #e2e8f0);
+    margin: 0.5rem 0;
+  }
+  
+  .user-menu-item.logout {
+    color: var(--danger-color, #ef4444);
+  }
+  
+  .user-menu-item.logout i {
+    color: var(--danger-color, #ef4444);
+  }
+  
+  @media (max-width: 768px) {
+    .teacher-header {
+      padding: 1rem;
+    }
     
-    menuBtn.addEventListener("click", () => {
-      console.log("clicked");
-      sdieMenu.style.display = "block";
-    });
+    .page-title {
+      font-size: 1.25rem;
+    }
+    
+    .user-name {
+      display: none;
+    }
+    
+    .notifications-menu,
+    .user-menu {
+      width: 280px;
+      right: -100px;
+    }
+  }
+</style>
 
-    closeBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "none";
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    // Check for saved theme preference or respect OS preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      body.classList.add('dark-mode');
+    }
+    
+    // Toggle theme
+    themeToggle.addEventListener('click', function() {
+      body.classList.toggle('dark-mode');
+      const isDarkMode = body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     });
-
-  </script>
+    
+    // Mark all notifications as read
+    const markAllReadBtn = document.querySelector('.mark-all-read');
+    if (markAllReadBtn) {
+      markAllReadBtn.addEventListener('click', function() {
+        const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+        unreadNotifications.forEach(notification => {
+          notification.classList.remove('unread');
+        });
+        
+        // Here you would also make an API call to mark notifications as read in the backend
+        // fetch('/api/notifications/mark-all-read', { method: 'POST' });
+        
+        // Remove notification badge
+        const badge = document.querySelector('.notifications-badge');
+        if (badge) {
+          badge.remove();
+        }
+      });
+    }
+  });
+</script>

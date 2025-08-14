@@ -1,10 +1,14 @@
 {
   "name": "nodejs",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node app.js",
+    "seed-teacher": "node teacherSeedData.js",
+    "seed-data": "node seedData.js",
+    "seed-quizzes": "node quizSeedData.js",
+    "seed-codes": "node codesSeedData.js"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +32,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
+    "node-schedule": "^2.1.1",
     "nodemailer": "^6.9.9",
     "nodemon": "^3.0.2",
     "pdfkit": "^0.14.0",

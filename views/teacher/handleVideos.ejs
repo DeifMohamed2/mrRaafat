@@ -18,29 +18,8 @@
 
                             <div class=" col-md-6 ">
                                 <div class="left float-start ms-3" style="margin-top: 0.2rem;">
-                                    <div class="top">
-                                        <button id="menu-btn">
-                                            <span class="material-icons-sharp">
-                                                menu
-                                            </span>
-                                        </button>
-                                        <div class="theme-toggler">
-                                            <span class="material-icons-sharp active">
-                                                light_mode
-                                            </span>
-                                            <span class="material-icons-sharp">
-                                                dark_mode
-                                            </span>
-                                        </div>
-                                        <div class="profile">
-                                            <div class="info">
-                                                <p>اهلا بك،<b id="userName"> </b></p>
-                                            </div>
-                                            <div class="profile-photo">
-                                                <img src="../images/profile-1.jpg" alt="profile photo">
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <%- include("./partials/top.ejs") %> 
+
                                     <!-- END OF TOP -->
                                 </div>
                             </div>
@@ -116,6 +95,7 @@
                                                         required><%= chapterData.chapterName||"" %></textarea>
                                                 </div>
                                             </div>
+                                            
 
                                             <div class="col-md-3 ">
                                                 <select class="Grade" id="chapterAccessibility"
@@ -219,7 +199,11 @@
                                                     <% } %>
                                                 </div>
                                                 <div class="course__image">
-                                                    <img src="../images/dna.svg">
+                                                    <% if (lec.imgURL && lec.imgURL.trim() !== '') { %>
+                                                        <img src="<%= lec.imgURL %>" alt="<%= lec.videoTitle %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    <% } else { %>
+                                                        <img src="../images/dna.svg">
+                                                    <% } %>
                                                 </div>
                                                 <div class="course__info">
                                                     <h3><%= lec.videoTitle %></h3>
@@ -251,7 +235,11 @@
                                                     <% } %>
                                                 </div>
                                                 <div class="course__image">
-                                                    <img src="../images/dna.svg">
+                                                    <% if (lec.imgURL && lec.imgURL.trim() !== '') { %>
+                                                        <img src="<%= lec.imgURL %>" alt="<%= lec.videoTitle %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    <% } else { %>
+                                                        <img src="../images/dna.svg">
+                                                    <% } %>
                                                 </div>
                                                 <div class="course__info">
                                                     <h3><%= lec.videoTitle %></h3>
@@ -280,7 +268,11 @@
                                                     <% } %>
                                                 </div>
                                                 <div class="course__image">
-                                                    <img src="../images/dna.svg">
+                                                    <% if (lec.imgURL && lec.imgURL.trim() !== '') { %>
+                                                        <img src="<%= lec.imgURL %>" alt="<%= lec.videoTitle %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                                    <% } else { %>
+                                                        <img src="../images/dna.svg">
+                                                    <% } %>
                                                 </div>
                                                 <div class="course__info">
                                                     <h3><%= lec.videoTitle %></h3>
@@ -510,18 +502,7 @@
         <script src="../assest/bootstrap.bundle.min.js"></script>
 
         <script>
-   
-   const sdieMenu = document.querySelector("aside");
-    const menuBtn = document.querySelector("#menu-btn");
-    const closeBtn = document.querySelector("#close-btn");
-  
-    menuBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "block";
-    });
-  
-    closeBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "none";
-    });
+
             const getAllChaptersInHandleForm = document.getElementById('getAllChaptersInHandle')
             const chapterGrade = document.getElementById("chapterGrade")
             chapterGrade.addEventListener('change', () => {

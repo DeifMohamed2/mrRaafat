@@ -1,242 +1,727 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
-    <%- include("./partials/head.ejs") %>
-
-
+<head>
+  <%- include('./partials/head.ejs') %>
+  <style>
+    .codes-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .stat-icon.info {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+    
+    .stat-icon.success {
+      background: linear-gradient(135deg, var(--success-color), #28a745);
+    }
+    
+    .stat-icon.warning {
+      background: linear-gradient(135deg, var(--warning-color), #ffc107);
+    }
+    
+    .stat-icon.danger {
+      background: linear-gradient(135deg, var(--danger-color), #dc3545);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .codes-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .action-btn.primary {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .action-btn.secondary {
+      background: var(--surface-color);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .action-btn.success {
+      background: var(--success-color);
+      color: white;
+    }
+    
+    .action-btn.danger {
+      background: var(--danger-color);
+      color: white;
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .filters-section {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+    
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+    
+    .filter-input {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .filter-select {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    }
+    
+    .codes-table {
+      background: white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+    
+    .table-header {
+      background: var(--surface-color);
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .table-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .table-content {
+      overflow-x: auto;
+    }
+    
+    .codes-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .codes-table th {
+      background: var(--surface-color);
+      padding: 1rem;
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+    
+    .codes-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+    
+    .codes-table tr:hover {
+      background: var(--surface-hover);
+    }
+    
+    .code-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .code-badge.primary {
+      background: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary-color);
+    }
+    
+    .code-badge.success {
+      background: rgba(var(--success-rgb), 0.1);
+      color: var(--success-color);
+    }
+    
+    .code-badge.warning {
+      background: rgba(var(--warning-rgb), 0.1);
+      color: var(--warning-color);
+    }
+    
+    .code-badge.info {
+      background: rgba(var(--info-rgb), 0.1);
+      color: var(--info-color);
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .status-badge.used {
+      background: rgba(var(--danger-rgb), 0.1);
+      color: var(--danger-color);
+    }
+    
+    .status-badge.available {
+      background: rgba(var(--success-rgb), 0.1);
+      color: var(--success-color);
+    }
+    
+    .code-display {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: var(--primary-color);
+      background: var(--surface-color);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+    
+    .copy-btn {
+      padding: 0.5rem;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.05);
+    }
+    
+    .delete-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: var(--danger-color);
+      color: white;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.8rem;
+    }
+    
+    .delete-btn:hover {
+      background: #dc3545;
+      transform: scale(1.05);
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.5rem;
+      background: var(--surface-color);
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .page-link {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .page-link:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .page-link.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state h3 {
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+      margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .codes-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .codes-actions {
+        flex-direction: column;
+      }
+      
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .table-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+      
+      .table-actions {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-2" >
-                <%- include("./partials/nav.ejs") %>
-            </div>
-            <!--------------------END ASIDE  ------------------>
-
-            <div class="col-lg-10 ">
-
-                <main>
-                   
-                    <div class="row">
-                        <div class="col-md-6">
-           
-                        </div>
-                      
-                        <div class=" col-md-6 ">
-                            <div class="left" style="margin-top: 0.2rem;">
-                                <div class="top">
-                                    <button id="menu-btn">
-                                        <span class="material-icons-sharp">
-                                            menu
-                                        </span>
-                                    </button>
-                                    <div class="theme-toggler">
-                                        <span class="material-icons-sharp active">
-                                            light_mode
-                                        </span>
-                                        <span class="material-icons-sharp">
-                                            dark_mode
-                                        </span>
-                                    </div>
-                                    <div class="profile">
-                                        <div class="info">
-                                            <p>اهلا بك،<b id="userName"> </b></p>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <%- include('./partials/top.ejs') %>
+      
+      <!-- Content -->
+      <div class="teacher-content">
+        <div class="page-header">
+          <h1 class="page-title">إدارة الأكواد</h1>
+          <div class="page-actions">
+            <a href="/teacher/codes/create" class="action-btn success">
+              <i class="fas fa-plus"></i>
+              إنشاء أكواد جديدة
+            </a>
+            <a href="/teacher/codes/manage" class="action-btn primary">
+              <i class="fas fa-cog"></i>
+              إدارة الأكواد
+            </a>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="codes-stats">
+          <div class="stat-card">
+            <div class="stat-icon info">
+                <i class="fas fa-qrcode"></i>
                                         </div>
-                                        <div class="profile-photo">
-                                            <img src="../images/profile-1.jpg" alt="profile photo">
-                                        </div>
-                                    </div>
+            <h3 class="stat-value"><%= stats.totalCodes %></h3>
+                <p class="stat-label">إجمالي الأكواد</p>
                                 </div> 
                             
-                             
-                          
-                     
-
-                            </div>
+          <div class="stat-card">
+              <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="stat-value"><%= stats.availableCodes %></h3>
+            <p class="stat-label">الأكواد المتاحة</p>
+          </div>
+          
+          <div class="stat-card">
+              <div class="stat-icon warning">
+              <i class="fas fa-book"></i>
+            </div>
+            <h3 class="stat-value"><%= stats.chapterCodes %></h3>
+            <p class="stat-label">أكواد الفصول</p>
+          </div>
+          
+          <div class="stat-card">
+              <div class="stat-icon danger">
+              <i class="fas fa-question-circle"></i>
+              </div>
+            <h3 class="stat-value"><%= stats.quizCodes %></h3>
+            <p class="stat-label">أكواد الاختبارات</p>
                         </div>
-                    </div>
-
-                    <div class="row chapter_Box"  >
-                    
-
-                        <div class="col-md-7">
-                            <h1>انشاء اكواد مخصصه </h1>
-                            <form action="/teacher/getChptersOrVideosData" method="get" >
-                        
-                                <div class="row">
-                                    <div class="col-md-3 ">
-                                        <select   class="Grade" name="Grade" id="Grade" >
-                                            <option  >اختر الصف الدراسي  </option>
-                                            <option value="Grade1" <%= Grade=="Grade1" ?"selected" : "" %> >الصف الاول الثانوي</option>
-                                            <option value="Grade2" <%= Grade=="Grade2" ?"selected" : "" %> >الصف الثاني الثانوي </option>
-                                            <option value="Grade3" <%= Grade=="Grade3" ?"selected" : "" %> >الصف الثالث الثانوي</option>
-                                        </select>
-                                    </div>
-                               
-                                        <div class="col-md-3 ">
-                                            <select   class="Grade" name="type"  id="type"  required>
-                                                <option  value="" >اختر النوع   </option>
-                                                <option value="Chapter" <%= type == "Chapter"? "selected":"" %> >Chapter</option>
-                                                <option value="Video" <%= type == "Video"? "selected":"" %>>Video</option>
-                                                <option value="Quiz" <%= type == "Quiz"? "selected":"" %>>Quiz</option>
-                                              
-                                            </select>
-                                        </div>
-                                     
-
-                                        <div class="col-md-3 ">
-                                            <button class="me-5 mt-4 Add_New_Chapter" id="GetData"   > Get Data </button>
-                                        </div>
-                                
-                                    </div>     
-                            </form>
-                        </div>
-                        <div class="col-md-7">
-                            <form action="/teacher/createSpecificCodes" method="post" >
-                        
-                                <div class="row mt-5">
-                                            <div class="col-md-4 " style="font-size: 1.3rem;"> 
-                                                <select   class="Grade" name="IDOfVideoOrChapter" required>
-                                                    <option  value="" >اختر الاسم    </option>
-                                                    <% if (data) { %>
-                                                        <% data.forEach(element => { %>
-                                                            <option value="<%= element._id %>"><%= element.Name %></option>
-                                                        <% }) %>
-                                                    <% } %>
-                                                
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-section">
+          <form method="GET" action="/teacher/codes">
+            <div class="filters-grid">
+              <div class="filter-group">
+                <label for="search">البحث</label>
+                <input type="text" id="search" name="search" class="filter-input" 
+                       placeholder="كود أو مستخدم..." 
+                       value="<%= filters && filters.search ? filters.search : '' %>">
+              </div>
+              
+              <div class="filter-group">
+                <label for="type">نوع الكود</label>
+                <select id="type" name="type" class="filter-select">
+                  <option value="">جميع الأنواع</option>
+                  <option value="Chapter" <%= filters && filters.type === 'Chapter' ? 'selected' : '' %>>فصل</option>
+                  <option value="Video" <%= filters && filters.type === 'Video' ? 'selected' : '' %>>فيديو</option>
+                  <option value="Quiz" <%= filters && filters.type === 'Quiz' ? 'selected' : '' %>>اختبار</option>
+                  <option value="PDF" <%= filters && filters.type === 'PDF' ? 'selected' : '' %>>PDF</option>
+                  <option value="GeneralChapter" <%= filters && filters.type === 'GeneralChapter' ? 'selected' : '' %>>فصل عام</option>
+                  <option value="GeneralVideo" <%= filters && filters.type === 'GeneralVideo' ? 'selected' : '' %>>فيديو عام</option>
+                  <option value="GeneralQuiz" <%= filters && filters.type === 'GeneralQuiz' ? 'selected' : '' %>>اختبار عام</option>
                                                 </select>
                                             </div>
                     
-                                            <div class="col-md-4 ">
-                                                <select   class="Grade" name="numberOfCodes" required style="font-size: 1.3rem;">
-                                                    <option  value="" >اختر عدد الاكواد   </option>
-                                                    <option value="50">50</option>
-                                                    <option value="100">100</option>
-                                                    <option value="200">200</option>
-                                                    <option value="300">300</option>
-                                                    <option value="400">400</option>
-                                                    <option value="500">500</option>
-                                                    <option value="600">600</option>
-                                                    <option value="700">700</option>
-                                                    <option value="800">800</option>
-                                                    <option value="900">900</option>
-                                                    <option value="1000">1000</option>
+              <div class="filter-group">
+                <label for="status">الحالة</label>
+                <select id="status" name="status" class="filter-select">
+                  <option value="">جميع الحالات</option>
+                  <option value="unused" <%= filters && filters.status === 'unused' ? 'selected' : '' %>>متاح</option>
+                  <option value="used" <%= filters && filters.status === 'used' ? 'selected' : '' %>>مستخدم</option>
                                                 </select>
                                             </div>
                                             
-                                            <div class="col-md-4 ">
-                                                <button class="me-5 mt-4 Add_New_Chapter" id="Create_Codes"   > Create Codes </button>
-                                            </div>
-                                            <p class="warning mt-4 " style="display: none;" id="createCodeWarning">  يرجي عدم اعاده تحميل الصفحه يتم الان تجهيز الاكواد الخاصه بك انها تأخذ بعض الوقت <span id="numberOfCodesS"></span> / <span id="nCodesFinishedS"></span></p>
+              <div class="filter-group">
+                <label for="grade">الصف</label>
+                <select id="grade" name="grade" class="filter-select">
+                  <option value="">جميع الصفوف</option>
+                  <option value="Grade1" <%= filters && filters.grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                  <option value="Grade2" <%= filters && filters.grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                  <option value="Grade3" <%= filters && filters.grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+                  <option value="AllGrades" <%= filters && filters.grade === 'AllGrades' ? 'selected' : '' %>>جميع الصفوف</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="action-btn primary">
+                  <i class="fas fa-search"></i>
+                  بحث
+                </button>
+              </div>
                                 </div>     
                             </form>
-
-                        </div>
-
-                    </div>
-                    <div class="row chapter_Box w-50"  >
-                    
-
-                        <div class="col-md-7">
-                            <h1>انشاء اكواد عامه </h1>
-                        
-                                <form action="/teacher/createGeneralCodes" method="post" >
-                        
-                                    <div class="row">
-                                     
-                                                <div class="col-md-5 " style="font-size: 1.4rem;">
-                                                    <select   class="Grade" name="numberOfCodes" >
-                                                        <option  value="" >اختر عدد الاكواد   </option>
-                                                        <option value="50">50</option>
-                                                        <option value="100">100</option>
-                                                        <option value="200">200</option>
-                                                        <option value="300">300</option>
-                                                        <option value="400">400</option>
-                                                        <option value="500">500</option>
-                                                        <option value="600">600</option>
-                                                        <option value="700">700</option>
-                                                        <option value="800">800</option>
-                                                        <option value="900">900</option>
-                                                        <option value="1000">1000</option>
-                                                    </select>
-
-                                                </div>
-                                                <div class="col-md-7 mt-2">
-                                                    <button class="me-5 mt-4 Add_New_Chapter" id="Create_GCodes"   > Create Codes </button>
-
-                                                </div>
-                                                <p class="warning my-3 " style="display: none;" id="createGCodeWarning"> يرجي عدم اعاده تحميل الصفحه يتم الان تجهيز الاكواد الخاصه بك انها تأخذ بعض الوقت <span id="numberOfCodesG"></span> / <span id="nCodesFinishedG"></span></p>
-
-                                    </div>     
-                                </form>
-
-                                    <p class="warning mt-5"> ملحوظه : الاكواد العامه لن تعمل مع الفيديوهات التي تم وضع اكواد خاصه لها </p>
-                    
-                        </div>
-                   
-                    </div>
-
-
-
-                   
-                </main>
-
-            </div>
-
-
-            <!-------------------- END OF MAIN --------------------->
-         
         </div>
-    </div>
+        
+        <!-- Codes Table -->
+        <div class="codes-table">
+          <div class="table-header">
+            <h3 class="table-title">قائمة الأكواد</h3>
+            <div class="table-actions">
+              <button class="action-btn secondary" onclick="exportCodes()">
+                <i class="fas fa-download"></i>
+                تصدير
+              </button>
+              <button class="action-btn danger" onclick="deleteUnusedCodes()">
+                <i class="fas fa-trash"></i>
+                حذف غير المستخدمة
+              </button>
+            </div>
+          </div>
+          
+          <div class="table-content">
+            <% if (codes && codes.length > 0) { %>
+              <table>
+              <thead>
+                <tr>
+                  <th>الكود</th>
+                  <th>النوع</th>
+                    <th>الصف</th>
+                    <th>المحتوى المرتبط</th>
+                  <th>المستخدم</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th>تاريخ الاستخدام</th>
+                  <th>الحالة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                  <% codes.forEach((code) => { %>
+                    <tr>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                          <span class="code-display"><%= code.Code %></span>
+                          <button class="copy-btn" onclick="copyCode('<%= code.Code %>')" title="نسخ الكود">
+                            <i class="fas fa-copy"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <% if (code.codeType === 'Chapter') { %>
+                          <span class="code-badge primary">فصل</span>
+                        <% } else if (code.codeType === 'Video') { %>
+                          <span class="code-badge success">فيديو</span>
+                        <% } else if (code.codeType === 'Quiz') { %>
+                          <span class="code-badge warning">اختبار</span>
+                        <% } else if (code.codeType === 'PDF') { %>
+                          <span class="code-badge info">PDF</span>
+                        <% } else if (code.codeType === 'GeneralChapter') { %>
+                          <span class="code-badge primary">فصل عام</span>
+                        <% } else if (code.codeType === 'GeneralVideo') { %>
+                          <span class="code-badge success">فيديو عام</span>
+                        <% } else if (code.codeType === 'GeneralQuiz') { %>
+                          <span class="code-badge warning">اختبار عام</span>
+                        <% } else { %>
+                          <span class="code-badge info"><%= code.codeType %></span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (code.codeGrade === 'AllGrades') { %>
+                          جميع الصفوف
+                        <% } else { %>
+                          <%= code.codeGrade || 'غير محدد' %>
+                        <% } %>
+                      </td>
+                      <td><%= code.contentName || code.chapterName || 'غير محدد' %></td>
+                      <td><%= code.usedBy || 'غير مستخدم' %></td>
+                      <td><%= new Date(code.createdAt).toLocaleString('ar-EG') %></td>
+                      <td><%= code.usageDate ? new Date(code.usageDate).toLocaleString('ar-EG') : 'غير مستخدم' %></td>
+                      <td>
+                        <% if (code.isUsed) { %>
+                          <span class="status-badge used">مستخدم</span>
+                        <% } else { %>
+                          <span class="status-badge available">متاح</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (!code.isUsed) { %>
+                          <button class="delete-btn" onclick="deleteCode('<%= code._id %>')">
+                            <i class="fas fa-trash"></i>
+                            </button>
+                          <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+              </tbody>
+            </table>
+            <% } else { %>
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>لا توجد أكواد متاحة</h3>
+                <p>ابدأ بإنشاء أكواد جديدة للطلاب</p>
+                <a href="/teacher/codes/create" class="action-btn success">
+                  <i class="fas fa-plus"></i>
+                  إنشاء أكواد جديدة
+                </a>
+          </div>
+            <% } %>
+                    </div>
 
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a class="page-link" href="/teacher/codes?page=<%= currentPage - 1 %><%= filters && filters.search ? '&search=' + filters.search : '' %><%= filters && filters.type ? '&type=' + filters.type : '' %><%= filters && filters.status ? '&status=' + filters.status : '' %><%= filters && filters.grade ? '&grade=' + filters.grade : '' %>">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            <% } %>
+            
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <a class="page-link <%= i === currentPage ? 'active' : '' %>" href="/teacher/codes?page=<%= i %><%= filters && filters.search ? '&search=' + filters.search : '' %><%= filters && filters.type ? '&type=' + filters.type : '' %><%= filters && filters.status ? '&status=' + filters.status : '' %><%= filters && filters.grade ? '&grade=' + filters.grade : '' %>">
+                  <%= i %>
+                </a>
+              <% } %>
 
-
-    <script src="../assest/bootstrap.bundle.min.js"></script>
-    <script src="../assest/bootstrap.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+            <% if (currentPage < totalPages) { %>
+                <a class="page-link" href="/teacher/codes?page=<%= currentPage + 1 %><%= filters && filters.search ? '&search=' + filters.search : '' %><%= filters && filters.type ? '&type=' + filters.type : '' %><%= filters && filters.status ? '&status=' + filters.status : '' %><%= filters && filters.grade ? '&grade=' + filters.grade : '' %>">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            <% } %>
+          </div>
+          <% } %>
+          </div>
+      </div>
+    </main>
+  </div>
 
     <script>
-           
-    const sdieMenu = document.querySelector("aside");
-    const menuBtn = document.querySelector("#menu-btn");
-    const closeBtn = document.querySelector("#close-btn");
-  
-    menuBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "block";
-    });
-  
-    closeBtn.addEventListener("click", () => {
-      sdieMenu.style.display = "none";
-    });
-               const socket = io();
-        const Create_Codes= document.getElementById('Create_Codes')
-        Create_Codes.addEventListener('click',()=>{
-            document.getElementById('createCodeWarning').style.display="inline"
-
+    // Copy code function
+    function copyCode(code) {
+      navigator.clipboard.writeText(code).then(function() {
+        showToast('success', 'تم نسخ الكود بنجاح');
+      }, function(err) {
+        console.error('Could not copy text: ', err);
+        showToast('error', 'فشل في نسخ الكود');
+      });
+    }
+    
+    // Delete code function
+    function deleteCode(codeId) {
+      confirmAction(
+        'حذف الكود',
+        'هل أنت متأكد من حذف هذا الكود؟',
+        'حذف',
+        () => {
+          fetch(`/teacher/codes/${codeId}`, {
+            method: 'DELETE',
+        headers: {
+              'Content-Type': 'application/json'
+            }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+              showToast('success', 'تم حذف الكود بنجاح');
+              setTimeout(() => location.reload(), 1000);
+        } else {
+              showToast('error', 'حدث خطأ أثناء حذف الكود');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+            showToast('error', 'حدث خطأ أثناء حذف الكود');
+      });
+        }
+      );
+    }
+    
+    // Export codes function
+    function exportCodes() {
+      const currentUrl = new URL(window.location);
+      const exportUrl = '/teacher/codes/export' + currentUrl.search;
+      window.open(exportUrl, '_blank');
+    }
+    
+    // Delete unused codes function
+    function deleteUnusedCodes() {
+      confirmAction(
+        'حذف الأكواد غير المستخدمة',
+        'هل أنت متأكد من حذف جميع الأكواد غير المستخدمة؟',
+        'حذف الكل',
+        () => {
+          fetch('/teacher/codes/delete-unused', {
+          method: 'DELETE',
+          headers: {
+              'Content-Type': 'application/json'
+          }
         })
-        const Create_gCodes= document.getElementById('Create_GCodes')
-        Create_gCodes.addEventListener('click',()=>{
-            document.getElementById('createGCodeWarning').style.display="inline"
-
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+              showToast('success', 'تم حذف الأكواد غير المستخدمة بنجاح');
+              setTimeout(() => location.reload(), 1000);
+          } else {
+              showToast('error', 'حدث خطأ أثناء حذف الأكواد');
+          }
         })
-
-        socket.on('creatingCodes', (data) => {
-            document.getElementById('createGCodeWarning').style.display="inline"
-            console.log(data)
-       
-                document.getElementById('nCodesFinishedG').innerHTML=data.nCodesFinished
-                document.getElementById('numberOfCodesG').innerHTML=data.numberOfCodes
+        .catch(error => {
+          console.error('Error:', error);
+            showToast('error', 'حدث خطأ أثناء حذف الأكواد');
         });
-        socket.on('creatingSCodes', (data) => {
-            document.getElementById('createCodeWarning').style.display="inline"
-            console.log(data)
-                document.getElementById('nCodesFinishedS').innerHTML=data.nCodesFinished
-                document.getElementById('numberOfCodesS').innerHTML=data.numberOfCodes
-       
-        });
-
- 
+      }
+      );
+    }
     </script>
 </body>
-
-
 </html>

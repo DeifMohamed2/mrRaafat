@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تعديل الاختبار - منصة تعليمية</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/teacher-modern.css">
+  <link rel="stylesheet" href="/css/quiz-modern.css">
+  <link rel="stylesheet" href="/css/quiz-create.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  
+  <!-- JavaScript -->
+  <!-- Removed external script to avoid conflicts with inline JavaScript -->
+</head>
+<body>
+  <div class="teacher-container">
+    <!-- Sidebar -->
+    <%- include('./partials/nav.ejs') %>
+    
+    <!-- Main Content -->
+    <main class="teacher-main">
+      <!-- Header -->
+      <header class="teacher-header">
+        <div class="header-left">
+          <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">تعديل الاختبار: <%= quiz.quizName %></h1>
+        </div>
+        
+        <div class="header-right">
+          <div style="display: flex; gap: 0.5rem;">
+            <a href="/teacher/quizzes/<%= quiz._id %>" class="btn btn-outline">
+              <i class="fas fa-arrow-right"></i>
+              العودة للاختبار
+            </a>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Content -->
+      <div class="teacher-content quiz-create-content">
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <% if (error === 'missing_fields') { %>
+              يرجى ملء جميع الحقول المطلوبة
+            <% } else if (error === 'update_failed') { %>
+              حدث خطأ أثناء تحديث الاختبار
+            <% } else { %>
+              <%= error %>
+            <% } %>
+          </div>
+        <% } %>
+        
+        <form id="quizForm" method="POST" action="/teacher/quizzes/<%= quiz._id %>/edit" class="needs-validation" novalidate>
+          <!-- Quiz Basic Info -->
+          <div class="form-grid">
+            <div class="form-section">
+              <h3 class="section-title">معلومات الاختبار الأساسية</h3>
+              
+              <div class="form-group">
+                <label class="form-label">اسم الاختبار <span style="color: var(--danger-color)">*</span></label>
+                <input type="text" class="form-input" id="quizName" name="quizName" value="<%= quiz.quizName %>" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">الصف الدراسي <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="Grade" name="Grade" required>
+                  <option value="">اختر الصف الدراسي</option>
+                  <option value="Grade1" <%= quiz.Grade === 'Grade1' ? 'selected' : '' %>>الصف الأول الثانوي</option>
+                  <option value="Grade2" <%= quiz.Grade === 'Grade2' ? 'selected' : '' %>>الصف الثاني الثانوي</option>
+                  <option value="Grade3" <%= quiz.Grade === 'Grade3' ? 'selected' : '' %>>الصف الثالث الثانوي</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">الفصل (اختياري)</label>
+                <select class="form-select" id="chapterId" name="chapterId">
+                  <option value="">بدون فصل محدد</option>
+                  <% if (locals.chapters && chapters.length > 0) { %>
+                    <% chapters.forEach(function(chapter) { %>
+                      <option value="<%= chapter._id %>" <%= quiz.chapterId && quiz.chapterId.toString() === chapter._id.toString() ? 'selected' : '' %>>
+                        <%= chapter.chapterName %> (<%= chapter.chapterGrade === 'Grade1' ? 'الأول الثانوي' : chapter.chapterGrade === 'Grade2' ? 'الثاني الثانوي' : 'الثالث الثانوي' %>)
+                      </option>
+                    <% }); %>
+                  <% } %>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">وقت الاختبار (بالدقائق) <span style="color: var(--danger-color)">*</span></label>
+                <input type="number" class="form-input" id="timeOfQuiz" name="timeOfQuiz" min="1" max="180" value="<%= quiz.timeOfQuiz %>" required>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h3 class="section-title">إعدادات الاختبار</h3>
+              
+              <div class="form-group">
+                <label class="form-label">حالة الاختبار</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="isQuizActive" name="isQuizActive" class="checkbox-input" value="true" <%= quiz.isQuizActive ? 'checked' : '' %>>
+                  <label for="isQuizActive">نشط</label>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">الاختبار النشط متاح للطلاب</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">إذن العرض</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="permissionToShow" name="permissionToShow" class="checkbox-input" value="true" <%= quiz.permissionToShow ? 'checked' : '' %>>
+                  <label for="permissionToShow">إظهار الاختبار للطلاب</label>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">إظهار الاختبار في قائمة الاختبارات المتاحة</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">إظهار الإجابات بعد الاختبار</label>
+                <div class="checkbox-group">
+                  <input type="checkbox" id="showAnswersAfterQuiz" name="showAnswersAfterQuiz" class="checkbox-input" value="true" <%= quiz.showAnswersAfterQuiz ? 'checked' : '' %>>
+                  <label for="showAnswersAfterQuiz">إظهار الإجابات الصحيحة</label>
+                </div>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">الطلاب سيرون الإجابات الصحيحة بعد الانتهاء من الاختبار</small>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">حالة الدفع <span style="color: var(--danger-color)">*</span></label>
+                <select class="form-select" id="prepaidStatus" name="prepaidStatus" required>
+                  <option value="false" <%= !quiz.prepaidStatus ? 'selected' : '' %>>مجاني</option>
+                  <option value="true" <%= quiz.prepaidStatus ? 'selected' : '' %>>مدفوع</option>
+                </select>
+              </div>
+              
+              <div class="form-group" id="priceGroup" style="display: <%= quiz.prepaidStatus ? 'block' : 'none' %>;">
+                <label class="form-label">سعر الاختبار</label>
+                <div style="position: relative;">
+                  <input type="number" class="form-input" id="quizPrice" name="quizPrice" min="0" step="0.01" value="<%= quiz.quizPrice %>">
+                  <span style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-secondary);">جنيه</span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">فيديو سيتم فتحه بعد الاختبار (اختياري)</label>
+                <select class="form-select" id="videoWillbeOpen" name="videoWillbeOpen">
+                  <option value="">لا يوجد</option>
+                  <% if (locals.videos && videos.length > 0) { %>
+                    <% videos.forEach(function(video) { %>
+                      <option value="<%= video._id %>" <%= quiz.videoWillbeOpen && quiz.videoWillbeOpen.toString() === video._id.toString() ? 'selected' : '' %>>
+                        <%= video.videoTitle || video.lectureName %>
+                      </option>
+                    <% }); %>
+                  <% } %>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">عدد الأسئلة التي ستظهر للطالب <span style="color: var(--danger-color)">*</span></label>
+                <input type="number" class="form-input" id="questionsToShow" name="questionsToShow" min="1" value="<%= quiz.questionsToShow %>" required>
+                <small style="color: var(--text-secondary); font-size: 0.75rem;">سيتم اختيار هذا العدد من الأسئلة عشوائياً من مجموعة الأسئلة الكاملة</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Questions Management -->
+          <div class="form-section" style="margin-top: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 class="section-title">الأسئلة</h3>
+              <button type="button" id="addQuestionBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                إضافة سؤال
+              </button>
+            </div>
+            
+            <div id="questionsContainer">
+              <!-- Questions will be loaded here dynamically -->
+            </div>
+          </div>
+          
+          <!-- Submit Button -->
+          <div style="display: flex; justify-content: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="fas fa-save"></i>
+              حفظ التغييرات
+            </button>
+          </div>
+          
+          <!-- Hidden input for questions data -->
+          <input type="hidden" id="questionsData" name="questions" value="[]">
+        </form>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Question Template (Hidden) -->
+  <template id="questionTemplate">
+    <div class="question-card">
+      <div class="question-header">
+        <div class="question-number">سؤال #<span class="question-index">1</span></div>
+        <div class="question-actions">
+          <button type="button" class="btn-icon edit-question" title="تعديل السؤال">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button type="button" class="btn-icon delete-question" title="حذف السؤال">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="question-body">
+        <div class="question-text"></div>
+        
+        <div class="question-image-container" style="display: none;">
+          <img src="" alt="صورة السؤال" class="question-image">
+        </div>
+        
+        <div class="question-options">
+          <div class="option" data-option="1">
+            <span class="option-marker">أ</span>
+            <span class="option-text"></span>
+          </div>
+          <div class="option" data-option="2">
+            <span class="option-marker">ب</span>
+            <span class="option-text"></span>
+          </div>
+          <div class="option" data-option="3">
+            <span class="option-marker">ج</span>
+            <span class="option-text"></span>
+          </div>
+          <div class="option" data-option="4">
+            <span class="option-marker">د</span>
+            <span class="option-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <!-- Question Modal -->
+  <div class="modal" id="questionModal">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modalTitle">تعديل السؤال</h3>
+        <button type="button" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">نص السؤال <span style="color: var(--danger-color)">*</span></label>
+          <textarea class="form-input" id="questionTitle" rows="2" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">صورة السؤال (اختياري)</label>
+          <div style="border: 2px dashed var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+            <div id="questionImagePreview" style="width: 100%; height: 150px; margin-bottom: 1rem; border-radius: var(--radius-md); overflow: hidden; display: none;">
+              <img id="questionImageDisplay" src="" alt="صورة السؤال" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            
+            <button type="button" id="uploadQuestionImageBtn" class="btn btn-outline" style="width: 100%;">
+              <i class="fas fa-cloud-upload-alt"></i>
+              تحميل صورة
+            </button>
+            
+            <input type="hidden" id="questionImageURL">
+            <div id="uploadProgress" class="upload-progress-container" style="display: none;">
+              <div class="upload-status">
+                <i class="fas fa-spinner"></i>
+                <span id="uploadStatusText">جاري رفع الصورة...</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="progressText">0%</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="options-container">
+          <div class="form-group">
+            <label class="form-label">اختر الإجابة الصحيحة <span style="color: var(--danger-color)">*</span></label>
+            <select class="form-select" id="correctAnswer" required>
+              <option value="1">الخيار الأول</option>
+              <option value="2">الخيار الثاني</option>
+              <option value="3">الخيار الثالث</option>
+              <option value="4">الخيار الرابع</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الأول <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer1" required>
+              <span class="correct-indicator" data-option="1" style="display: none;">✓</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الثاني <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer2" required>
+              <span class="correct-indicator" data-option="2" style="display: none;">✓</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الثالث <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer3" required>
+              <span class="correct-indicator" data-option="3" style="display: none;">✓</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">الخيار الرابع <span style="color: var(--danger-color)">*</span></label>
+            <div class="option-input-wrapper">
+              <input type="text" class="form-input" id="answer4" required>
+              <span class="correct-indicator" data-option="4" style="display: none;">✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline modal-cancel">إلغاء</button>
+        <button type="button" class="btn btn-primary" id="saveQuestionBtn">حفظ السؤال</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize with existing quiz data
+      let questions = [];
+      let currentQuestionIndex = -1;
+      
+      // Load existing questions from server
+      <% if (quiz.Questions && quiz.Questions.length > 0) { %>
+        questions = <%- JSON.stringify(quiz.Questions) %>;
+        console.log('Loaded questions:', questions);
+        console.log('First question structure:', questions[0]);
+        console.log('Number of questions:', questions.length);
+        
+        // Show question structure in alert for debugging
+        if (questions.length > 0) {
+          const firstQuestion = questions[0];
+          const questionKeys = Object.keys(firstQuestion);
+        //   alert(`Question structure:\nKeys: ${questionKeys.join(', ')}\n\nFirst question: ${JSON.stringify(firstQuestion, null, 2)}`);
+        }
+        
+        renderQuestions();
+      <% } else { %>
+        console.log('No questions found');
+        showNoQuestionsMessage();
+      <% } %>
+      
+      // Handle prepaid status change
+      document.getElementById('prepaidStatus').addEventListener('change', function() {
+        const priceGroup = document.getElementById('priceGroup');
+        if (this.value === 'true') {
+          priceGroup.style.display = 'block';
+        } else {
+          priceGroup.style.display = 'none';
+        }
+      });
+      
+      // Form validation
+      document.getElementById('quizForm').addEventListener('submit', function(e) {
+        const questionsToShow = parseInt(document.getElementById('questionsToShow').value);
+        
+        if (questionsToShow > questions.length) {
+          e.preventDefault();
+          alert(`لا يمكن اختيار ${questionsToShow} سؤال عشوائي لأن عدد الأسئلة الكلي هو ${questions.length} فقط`);
+          return;
+        }
+        
+        // Update hidden input with questions data
+        document.getElementById('questionsData').value = JSON.stringify(questions);
+      });
+      
+      // Add question button
+      document.getElementById('addQuestionBtn').addEventListener('click', function() {
+        currentQuestionIndex = -1; // New question
+        document.getElementById('modalTitle').textContent = 'إضافة سؤال جديد';
+        clearModal();
+        openModal();
+      });
+      
+      // Edit question functionality
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-question')) {
+          console.log('Edit button clicked');
+          const questionCard = e.target.closest('.question-card');
+          currentQuestionIndex = parseInt(questionCard.dataset.index);
+          const question = questions[currentQuestionIndex];
+          
+          console.log('Editing question at index:', currentQuestionIndex);
+          console.log('Question data:', question);
+          
+          document.getElementById('modalTitle').textContent = 'تعديل السؤال';
+          fillModalWithQuestion(question);
+          openModal();
+        }
+      });
+      
+      // Delete question functionality
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-question')) {
+          const questionCard = e.target.closest('.question-card');
+          const index = parseInt(questionCard.dataset.index);
+          
+          if (confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
+            questions.splice(index, 1);
+            renderQuestions();
+          }
+        }
+      });
+      
+      // Save question
+      document.getElementById('saveQuestionBtn').addEventListener('click', function() {
+        const questionData = getQuestionDataFromModal();
+        
+        if (questionData) {
+          if (currentQuestionIndex === -1) {
+            // Add new question
+            questions.push(questionData);
+          } else {
+            // Update existing question
+            questions[currentQuestionIndex] = questionData;
+          }
+          
+          renderQuestions();
+          closeModal();
+        }
+      });
+      
+      // Modal functions
+      function openModal() {
+        console.log('Opening modal');
+        const modal = document.getElementById('questionModal');
+        modal.classList.add('active');
+        console.log('Modal active class added');
+      }
+      
+      function closeModal() {
+        console.log('Closing modal');
+        const modal = document.getElementById('questionModal');
+        modal.classList.remove('active');
+        clearModal();
+      }
+      
+      function clearModal() {
+        document.getElementById('questionTitle').value = '';
+        document.getElementById('questionImageURL').value = '';
+        document.getElementById('answer1').value = '';
+        document.getElementById('answer2').value = '';
+        document.getElementById('answer3').value = '';
+        document.getElementById('answer4').value = '';
+        document.getElementById('correctAnswer').value = '1';
+        document.getElementById('questionImagePreview').style.display = 'none';
+        document.getElementById('questionImageDisplay').src = '';
+      }
+      
+      function fillModalWithQuestion(question) {
+        console.log('Filling modal with question:', question);
+        console.log('Question keys:', Object.keys(question));
+        
+        // Set question text - try multiple possible field names
+        const questionText = question.question || question.questionText || question.title || '';
+        document.getElementById('questionTitle').value = questionText;
+        console.log('Set question title:', questionText);
+        
+        // Set answers - try multiple possible field structures
+        let answers = [];
+        if (question.answers && Array.isArray(question.answers)) {
+          answers = question.answers;
+          console.log('Using question.answers for modal:', answers);
+        } else if (question.options && Array.isArray(question.options)) {
+          answers = question.options;
+          console.log('Using question.options for modal:', answers);
+        } else if (question.answer1 || question.answer2 || question.answer3 || question.answer4) {
+          // Individual answer fields
+          answers = [
+            question.answer1 || '',
+            question.answer2 || '',
+            question.answer3 || '',
+            question.answer4 || ''
+          ];
+          console.log('Using individual answer fields for modal:', answers);
+        } else {
+          console.log('No answers found in question for modal:', question);
+        }
+        
+        document.getElementById('answer1').value = answers[0] || '';
+        document.getElementById('answer2').value = answers[1] || '';
+        document.getElementById('answer3').value = answers[2] || '';
+        document.getElementById('answer4').value = answers[3] || '';
+        console.log('Set modal answers:', answers);
+        
+        // Set correct answer
+        const correctAnswer = (question.correctAnswer || 0) + 1;
+        document.getElementById('correctAnswer').value = correctAnswer;
+        console.log('Set correct answer:', correctAnswer);
+        
+        // Set image if exists
+        if (question.image || question.questionPhoto) {
+          document.getElementById('questionImageURL').value = question.image || question.questionPhoto;
+          document.getElementById('questionImageDisplay').src = question.image || question.questionPhoto;
+          document.getElementById('questionImagePreview').style.display = 'block';
+        }
+      }
+      
+      function getQuestionDataFromModal() {
+        const questionText = document.getElementById('questionTitle').value.trim();
+        const answer1 = document.getElementById('answer1').value.trim();
+        const answer2 = document.getElementById('answer2').value.trim();
+        const answer3 = document.getElementById('answer3').value.trim();
+        const answer4 = document.getElementById('answer4').value.trim();
+        const correctAnswer = parseInt(document.getElementById('correctAnswer').value) - 1;
+        const imageURL = document.getElementById('questionImageURL').value.trim();
+        
+        if (!questionText || !answer1 || !answer2 || !answer3 || !answer4) {
+          alert('يرجى ملء جميع الحقول المطلوبة');
+          return null;
+        }
+        
+        return {
+          question: questionText,
+          answers: [answer1, answer2, answer3, answer4],
+          correctAnswer: correctAnswer,
+          image: imageURL,
+          questionPhoto: imageURL // For backward compatibility
+        };
+      }
+      
+      function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        
+        if (questions.length === 0) {
+          showNoQuestionsMessage();
+          return;
+        }
+        
+        container.innerHTML = '';
+        
+        questions.forEach((question, index) => {
+          const questionCard = createQuestionCard(question, index);
+          container.appendChild(questionCard);
+        });
+      }
+      
+      function createQuestionCard(question, index) {
+        console.log('Creating question card for index:', index, 'Question:', question);
+        console.log('Question keys:', Object.keys(question));
+        
+        const template = document.getElementById('questionTemplate');
+        const clone = template.content.cloneNode(true);
+        
+        const questionCard = clone.querySelector('.question-card');
+        questionCard.dataset.index = index;
+        
+        // Set question number
+        questionCard.querySelector('.question-index').textContent = index + 1;
+        
+        // Set question text - try multiple possible field names
+        const questionText = question.question || question.questionText || question.title || '';
+        questionCard.querySelector('.question-text').textContent = questionText;
+        console.log('Set question text:', questionText);
+        
+        // Set question image if exists
+        if (question.image || question.questionPhoto) {
+          const imageContainer = questionCard.querySelector('.question-image-container');
+          const image = questionCard.querySelector('.question-image');
+          image.src = question.image || question.questionPhoto;
+          imageContainer.style.display = 'block';
+        }
+        
+        // Set options - try multiple possible field names and structures
+        const options = questionCard.querySelectorAll('.option');
+        
+        // Try different possible answer field structures
+        let questionAnswers = [];
+        if (question.answers && Array.isArray(question.answers)) {
+          questionAnswers = question.answers;
+          console.log('Using question.answers:', questionAnswers);
+        } else if (question.options && Array.isArray(question.options)) {
+          questionAnswers = question.options;
+          console.log('Using question.options:', questionAnswers);
+        } else if (question.answer1 || question.answer2 || question.answer3 || question.answer4) {
+          // Individual answer fields
+          questionAnswers = [
+            question.answer1 || '',
+            question.answer2 || '',
+            question.answer3 || '',
+            question.answer4 || ''
+          ];
+          console.log('Using individual answer fields:', questionAnswers);
+        } else {
+          console.log('No answers found in question:', question);
+        }
+        
+        console.log('Final question answers:', questionAnswers);
+        
+        options.forEach((option, optionIndex) => {
+          const optionText = option.querySelector('.option-text');
+          const answerText = questionAnswers[optionIndex] || '';
+          optionText.textContent = answerText;
+          console.log(`Set option ${optionIndex + 1}:`, answerText);
+          
+          // Mark correct answer
+          if (optionIndex === (question.correctAnswer || 0)) {
+            option.classList.add('correct');
+            console.log('Marked option as correct:', optionIndex + 1);
+          }
+        });
+        
+        return questionCard;
+      }
+      
+      function showNoQuestionsMessage() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = `
+          <div class="empty-state" id="noQuestionsMessage">
+            <div style="text-align: center; padding: 2rem;">
+              <i class="fas fa-question-circle" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem;"></i>
+              <h4>لا توجد أسئلة بعد</h4>
+              <p>اضغط على زر "إضافة سؤال" لإضافة أسئلة للاختبار</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Modal close handlers
+      document.querySelector('.modal-close').addEventListener('click', closeModal);
+      document.querySelector('.modal-cancel').addEventListener('click', closeModal);
+      document.querySelector('.modal-overlay').addEventListener('click', closeModal);
+      
+      // Cloudinary upload functionality
+      let myWidget = cloudinary.createUploadWidget({
+        cloudName: 'dusod9wxt',
+        uploadPreset: 'order_project'
+      }, (error, result) => {
+        if (!error && result && result.event === "success") {
+          document.getElementById('questionImageURL').value = result.info.secure_url;
+          document.getElementById('questionImageDisplay').src = result.info.secure_url;
+          document.getElementById('questionImagePreview').style.display = 'block';
+        }
+      });
+      
+      document.getElementById('uploadQuestionImageBtn').addEventListener('click', function() {
+        myWidget.open();
+      });
+      
+      // Correct answer indicator
+      document.getElementById('correctAnswer').addEventListener('change', function() {
+        const indicators = document.querySelectorAll('.correct-indicator');
+        indicators.forEach(indicator => indicator.style.display = 'none');
+        
+        const selectedOption = this.value;
+        const indicator = document.querySelector(`[data-option="${selectedOption}"]`);
+        if (indicator) {
+          indicator.style.display = 'inline-block';
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

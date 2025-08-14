@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحضير الامتحان - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  <link rel="stylesheet" href="/css/quiz-preparation.css">
+  
+  <style>
+    .random-questions-notice {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .notice-icon {
+      color: #d97706;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .notice-text {
+      color: #92400e;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .notice-text strong {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Include Sidebar -->
+    <%- include('partials/aside') %>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-container">
+        
+        <!-- Back Button -->
+        <div class="back-navigation">
+          <a href="/student/exams" class="back-btn">
+            <i class="fas fa-arrow-right"></i>
+            العودة للامتحانات
+          </a>
+        </div>
+
+        <% if (quiz) { %>
+        <!-- Quiz Preparation Card -->
+        <div class="quiz-prep-card">
+          
+          <!-- Quiz Header -->
+          <div class="quiz-prep-header">
+            <div class="quiz-icon">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="quiz-title-section">
+              <h1 class="quiz-title"><%= quiz.quizName %></h1>
+              <div class="quiz-grade">
+                <i class="fas fa-graduation-cap"></i>
+                <% if (quiz.Grade === 'Grade1') { %>
+                  الصف الأول الثانوي
+                <% } else if (quiz.Grade === 'Grade2') { %>
+                  الصف الثاني الثانوي  
+                <% } else if (quiz.Grade === 'Grade3') { %>
+                  الصف الثالث الثانوي
+                <% } else { %>
+                  <%= quiz.Grade %>
+                <% } %>
+              </div>
+            </div>
+            <div class="quiz-status-badge">
+              <i class="fas fa-check-circle"></i>
+              جاهز للبدء
+            </div>
+          </div>
+
+          <!-- Quiz Information Grid -->
+          <% if (quiz.questionsToShow && quiz.questionsToShow !== quiz.questionsCount) { %>
+          <div class="random-questions-notice">
+            <div class="notice-icon">
+              <i class="fas fa-random"></i>
+            </div>
+            <div class="notice-text">
+              <strong>أسئلة عشوائية:</strong> سيتم عرض <%= quiz.questionsToShow %> أسئلة عشوائية من أصل <%= quiz.questionsCount %> سؤال
+            </div>
+          </div>
+          <% } %>
+          <div class="quiz-info-grid">
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-question-circle"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value">
+                  <% if (quiz.questionsToShow && quiz.questionsToShow !== quiz.questionsCount) { %>
+                    <%= quiz.questionsToShow %>
+                  <% } else { %>
+                    <%= quiz.questionsCount %>
+                  <% } %>
+                </div>
+                <div class="info-label">عدد الأسئلة</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value"><%= quiz.timeOfQuiz %></div>
+                <div class="info-label">دقيقة</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value">
+                  <% if (quiz.questionsToShow && quiz.questionsToShow !== quiz.questionsCount) { %>
+                    <%= quiz.questionsToShow %>
+                  <% } else { %>
+                    <%= quiz.questionsCount %>
+                  <% } %>
+                </div>
+                <div class="info-label">الدرجة الكاملة</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">
+                <i class="fas fa-percentage"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-value">50%</div>
+                <div class="info-label">درجة النجاح</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions Section -->
+          <div class="instructions-section">
+            <div class="instructions-header">
+              <div class="instructions-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <h2>تعليمات وقواعد الامتحان</h2>
+            </div>
+
+            <div class="instructions-list">
+              <div class="instruction-item">
+                <div class="instruction-number">1</div>
+                <div class="instruction-content">
+                  <div class="instruction-title">عدم الإعادة</div>
+                  <div class="instruction-text">
+                    لن تتمكن من الدخول إلى الامتحان مرة أخرى بعد الضغط على زر 
+                    <span class="highlight">"بدء الامتحان"</span> 
+                    إلا إذا قام المعلم بفتحه مجدداً
+                  </div>
+                </div>
+              </div>
+
+              <div class="instruction-item">
+                <div class="instruction-number">2</div>
+                <div class="instruction-content">
+                  <div class="instruction-title">عدم الخروج</div>
+                  <div class="instruction-text">
+                    في حال خروجك من الامتحان بدون الضغط على زر 
+                    <span class="highlight">"إنهاء الامتحان"</span> 
+                    فسيتم الحصول على درجة صفر
+                  </div>
+                </div>
+              </div>
+
+              <div class="instruction-item">
+                <div class="instruction-number">3</div>
+                <div class="instruction-content">
+                  <div class="instruction-title">انتهاء الوقت</div>
+                  <div class="instruction-text">
+                    في حال انتهاء وقت الامتحان قبل الضغط على زر 
+                    <span class="highlight">"إنهاء الامتحان"</span> 
+                    ستحصل على درجتك حسب عدد الأسئلة التي أجبت عليها صحيحاً
+                  </div>
+                </div>
+              </div>
+
+              <div class="instruction-item warning">
+                <div class="instruction-number">4</div>
+                <div class="instruction-content">
+                  <div class="instruction-title">تحذير مهم</div>
+                  <div class="instruction-text">
+                    في حال انتهاء وقت الامتحان وأنت خارج هذه الصفحة ستحصل على صفر لأن هذا يعتبر غشاً
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quiz Tips -->
+          <div class="tips-section">
+            <div class="tips-header">
+              <i class="fas fa-lightbulb"></i>
+              نصائح للنجاح
+            </div>
+            <div class="tips-grid">
+              <div class="tip-item">
+                <i class="fas fa-book-open"></i>
+                <span>اقرأ السؤال بعناية قبل الإجابة</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-stopwatch"></i>
+                <span>إدارة الوقت مهمة جداً</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-check-double"></i>
+                <span>راجع إجاباتك قبل التسليم</span>
+              </div>
+              <div class="tip-item">
+                <i class="fas fa-focus"></i>
+                <span>ركز وتجنب التشتت</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-section">
+            <div class="action-buttons">
+              <a href="/student/exams" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                إلغاء
+              </a>
+              <button id="startQuizBtn" class="btn btn-primary btn-start" onclick="startQuiz()">
+                <i class="fas fa-play"></i>
+                بدء الامتحان
+              </button>
+            </div>
+            
+            <div class="action-note">
+              <i class="fas fa-exclamation-triangle"></i>
+              تأكد من اتصالك بالإنترنت قبل بدء الامتحان
+            </div>
+          </div>
+
+        </div>
+        <% } else { %>
+        <!-- No Quiz Found -->
+        <div class="error-card">
+          <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="error-title">لم يتم العثور على الامتحان</div>
+          <div class="error-message">الامتحان المطلوب غير موجود أو غير متاح</div>
+          <a href="/student/exams" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i>
+            العودة للامتحانات
+          </a>
+        </div>
+        <% } %>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Start Quiz Confirmation Modal -->
+  <div class="modal-overlay" id="startModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <h3>تأكيد بدء الامتحان</h3>
+      </div>
+      <div class="modal-body">
+        <p>هل أنت متأكد من أنك مستعد لبدء الامتحان؟</p>
+        <div class="modal-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          لن تتمكن من العودة بعد البدء
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeStartModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="confirmStart()">
+          <i class="fas fa-play"></i>
+          نعم، ابدأ الامتحان
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function startQuiz() {
+      document.getElementById('startModal').classList.add('show');
+    }
+
+    function closeStartModal() {
+      document.getElementById('startModal').classList.remove('show');
+    }
+
+   async function confirmStart() {
+      // Show loading state
+      const startBtn = document.querySelector('#startModal .btn-primary');
+      startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري البدء...';
+      startBtn.disabled = true;
+      
+      try {
+        // First start the quiz timer, then navigate
+        const response = await fetch('/student/start-quiz/<%= quiz._id %>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Navigate to quiz taking page
+          window.location.href = '/student/quiz-taking/<%= quiz._id %>?qNumber=1';
+        } else {
+          alert(data.message || 'حدث خطأ في بدء الامتحان');
+          startBtn.innerHTML = '<i class="fas fa-play"></i> نعم، ابدأ الامتحان';
+          startBtn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error starting quiz:', error);
+        alert('حدث خطأ في بدء الامتحان');
+        startBtn.innerHTML = '<i class="fas fa-play"></i> نعم، ابدأ الامتحان';
+        startBtn.disabled = false;
+      }
+    }
+
+    // Prevent accidental page refresh
+    window.addEventListener('beforeunload', function(e) {
+      // Only show warning if modal is not open
+      if (!document.getElementById('startModal').classList.contains('show')) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    });
+  </script>
+</body>
+</html> 

@@ -1,288 +1,1025 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-    <%- include("./partials/head.ejs") %>
-    <style>
-      .ExamCode{
-          background-color: rgba(21, 23, 21, 0.78) !important;
-          padding: 1rem !important;
-          height: 1rem !important;
-          width: 9rem !important;
-          opacity: 0.6;
-          transition: all 0.5s ease;
-          
-      }.ExamCode:focus{
-          opacity: 1;
-          width: 10rem !important;
-      }
-      .ButtonExamCode{
-         margin-bottom: 0.7rem !important;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الامتحانات - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  
+  <!-- SweetAlert2 for better notifications -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    /* Modern Clean Design */
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* Search and Filter Section */
+    .controls-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+
+    .search-box {
+      position: relative;
+      max-width: 400px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 25px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 20px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-tab:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    .filter-tab.active {
+      background: #667eea;
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Quiz Cards Grid */
+    .quizzes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .quiz-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .quiz-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    /* Quiz Card Header */
+    .quiz-header {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      position: relative;
+    }
+
+    .quiz-status {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .quiz-status.free {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .quiz-status.available {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .quiz-status.completed {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .quiz-status.in-progress {
+      background: #fef3c7;
+      color: #d97706;
+      animation: pulse 2s infinite;
+    }
+
+    .quiz-status.locked {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .quiz-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 2rem 0 1rem;
+      line-height: 1.4;
+    }
+
+    .quiz-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .meta-item {
+      text-align: center;
+      padding: 0.75rem;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .meta-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+
+    .meta-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    /* Quiz Card Body */
+    .quiz-body {
+      padding: 1.5rem;
+    }
+
+    /* Performance Display */
+    .performance-display {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      padding: 1.5rem;
+      border-radius: 15px;
+      margin-bottom: 1.5rem;
+      border: 1px solid #bae6fd;
+    }
+
+    .performance-title {
+      font-weight: 600;
+      color: #0c4a6e;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .performance-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-item {
+      text-align: center;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0c4a6e;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0f2fe;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0ea5e9 0%, #0284c7 100%);
+      transition: width 0.5s ease;
+    }
+
+    /* Access Info */
+    .access-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .access-info.granted {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .access-info.purchase-required {
+      background: #fffbeb;
+      border: 1px solid #fed7aa;
+    }
+
+    .access-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .access-icon.success {
+      color: #16a34a;
+    }
+
+    .access-icon.warning {
+      color: #d97706;
+    }
+
+    .access-message {
+      flex: 1;
+    }
+
+    .access-title {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+    }
+
+    .access-subtitle {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .quiz-price {
+      background: #fed7aa;
+      color: #9a3412;
+      padding: 0.25rem 0.75rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+
+    /* Action Buttons */
+    .quiz-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Code Input */
+    .code-input-section {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      display: none;
+    }
+
+    .code-input {
+      width: 100%;
+      padding: 0.875rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .code-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    /* Loading State */
+    .btn.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn.loading::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 50%;
+      left: 50%;
+      margin-left: -10px;
+      margin-top: -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .page-container {
+        padding: 1rem;
       }
 
+      .page-header {
+        padding: 2rem 1rem;
+      }
 
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .quizzes-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .quiz-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .performance-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filter-tabs {
+        gap: 0.25rem;
+      }
+
+      .filter-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Loading States */
+    .quiz-card.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* No Results */
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: #64748b;
+    }
+
+    .no-results-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
   </style>
-  <title>Student|Exams</title>
-  <body>
-    <%- include("./partials/preloader.ejs") %>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Include Sidebar -->
+    <%- include('partials/aside') %>
 
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-2">
-            <%- include("./partials/aside.ejs") %>
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-container">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-title">الامتحانات والاختبارات</h1>
+          <p class="page-subtitle">اختبر معلوماتك وحسن من أدائك في اللغة العربية</p>
         </div>
-        <div class="col-lg-10">
-          <main>
-            <div class="row">
 
-              <div class="col-lg-8">
+        <!-- Controls Section -->
+        <div class="controls-section">
+          <!-- Search Box -->
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="ابحث عن امتحان..." id="searchInput">
+          </div>
 
-                <div class="alert alert-danger w-50 mt-4" id="alert">
-                 
-                  <button class="BTNAlert"> <i class="fa-solid fa-x"></i></button>
-                  <h1 style="text-align: center; font-size: 18px; margin-bottom: 5px;">الكود خاطئ</h1>
-                  <h2 style="text-align: center; font-size: 14px; margin-bottom: 5px;">الأسباب ممكن تكون:</h2>
-                  <ol type="a" style="font-size: 12px; margin-bottom: 5px;">
-                    <li>الكود مستخدم من قبل</li>
-                    <li>الكود مش بتاع الامتحان</li>
-                    <li>الكود مكتوب غلط</li>
-                  </ol>
+          <!-- Filter Tabs -->
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">
+              <i class="fas fa-list"></i> جميع الامتحانات
+            </button>
+            <button class="filter-tab" data-filter="free">
+              <i class="fas fa-gift"></i> مجاني
+            </button>
+            <button class="filter-tab" data-filter="available">
+              <i class="fas fa-unlock"></i> متاح
+            </button>
+            <button class="filter-tab" data-filter="completed">
+              <i class="fas fa-check-circle"></i> مكتمل
+            </button>
+            <button class="filter-tab" data-filter="in-progress">
+              <i class="fas fa-hourglass-half"></i> جاري
+            </button>
+            <button class="filter-tab" data-filter="locked">
+              <i class="fas fa-lock"></i> مغلق
+            </button>
+          </div>
+        </div>
+
+        <!-- Quizzes Grid -->
+        <div class="quizzes-grid" id="quizzesGrid">
+          <% exams.forEach(exam => { %>
+            <% 
+              // Determine quiz access and status
+              const hasGeneralQuizAccess = false;
+              const hasSpecificQuizAccess = userData.examsPaid && userData.examsPaid.includes(exam._id.toString());
+              const hasQuizAccess = hasGeneralQuizAccess || hasSpecificQuizAccess;
+              const isFreeQuiz = !exam.prepaidStatus || exam.quizPrice === 0;
+              const isCompleted = exam.quizUser && exam.quizUser.isEnterd && !exam.quizUser.inProgress;
+              const isInProgress = exam.quizUser && exam.quizUser.inProgress && !exam.quizUser.isEnterd;
+              
+              let quizStatus = 'locked';
+              let statusText = 'مغلق';
+              let statusClass = 'locked';
+              
+              if (isCompleted) {
+                quizStatus = 'completed';
+                statusText = 'مكتمل';
+                statusClass = 'completed';
+              } else if (isInProgress) {
+                quizStatus = 'in-progress';
+                statusText = 'جاري';
+                statusClass = 'in-progress';
+              } else if (isFreeQuiz) {
+                quizStatus = 'free';
+                statusText = 'مجاني';
+                statusClass = 'free';
+              } else if (hasQuizAccess) {
+                quizStatus = 'available';
+                statusText = 'متاح';
+                statusClass = 'available';
+              }
+            %>
+            
+            <div class="quiz-card" data-filter="<%= quizStatus %>" data-title="<%= exam.quizName %>">
+              <!-- Quiz Header -->
+              <div class="quiz-header">
+                <div class="quiz-status <%= statusClass %>">
+                  <%= statusText %>
                 </div>
                 
-                <div class="exams-table" style="margin-top: 0;">
-                  <div class="Inprogress" id="Inprogress" style="display: none">
-                    <span id="seconds"></span>:<span id="minutes"></span>
-                  </div>
-                  <table>
-                    <thead>
-                      <th style="padding-left: 20px">اسم الامتحان</th>
-                      <th style="padding-left: 20px">عدد الاسئله</th>
-                      <th style="padding-left: 20px">مده الامتحان</th>
-                      <th style="padding-left: 20px">درجه الامتحان</th>
-                      <th style="padding-left: 20px">ترتيبك </th>
-                      <th style="padding-left: 20px"></th>
-                      <th style="padding-left: 20px"></th>
-                    </thead>
-                    <tbody id="tbody">
-                      <% if (exams) { %>
-                        <% exams.forEach(exam => { %>
-                          <% if (exam.permissionToShow) { %>
-
-                            <tr>
-                              <td style="padding-left: 20px"><%= exam.quizName %></td>
-                              <td style="padding-left: 20px"><%= exam.questionsCount %></td>
-                              <td style="padding-left: 20px"><%= exam.timeOfQuiz %> دقيقه</td>
-                         
-
-                              <% if (exam["quizUser"]["isEnterd"]) { %>
-                                <td style="padding-left: 20px"><%= exam["quizUser"]["Score"] %> </td>
-                                <td style="padding-left: 20px"> <%= exam["quizUser"]['lengthOfUsersTakesQuiz']%> / <%= exam["quizUser"]['rank'] %> </td>
-
-                              <% } else {  %>
-                                <td style="padding-left: 20px">لم يتم الدخول</td>
-                                <td style="padding-left: 20px">#</td>
-
-                              <% } %>  
-
-
-
-
-
-                              <% if (exam.isQuizActive) { %>
-
-                                <% if (exam.prepaidStatus) { %>
-
-                                    <% if (exam.isPaid) { %>
-                                      <% if (!exam["quizUser"]["isEnterd"]) { %>
-                                          <td style="padding-left: 20px">
-                                              <button button class="primary my-3" onclick="window.location.href='/student/quiz/<%= exam._id %>'">دخول الامتحان</button>
-                                          </td>
-
-                                        <% } else { %> 
-                                          <td style="padding-left: 20px">
-                                            <button button class="primary my-3" >تم الدخول</button>
-                                        </td>
-                                        <% } %>
-
-                                    <% } else {%>
-
-
-
-                                        <td style="padding-left: 20px">
-
-                                        <form action="/student/buyQuiz/<%= exam._id %>" method="post">
-                                            <div class="col-12">
-                                                <input type="text"   style="border-radius: 1rem;" name="code" placeholder="ادخل الكود" required>
-
-                                            </div>
-                                            <div class="col-12">
-                                                <button type="submit" class="primary my-2" >استخدام الكود</button>
-                                            </div>
-                                        </form>
-                                        </td>
-
-
-
-
-                                    <% } %>  
-                               
-
-                                <% } else{ %>
-                                  <% if ( !exam["quizUser"]["isEnterd"]) { %>
-
-                                     <% if (exam["quizUser"]["inProgress"]) { %>
-                                      
-                                  
-                                      <td style="padding-left: 20px">
-                                        <button button class="primary my-3" onclick="window.location.href='/student/quiz/<%= exam._id %>'">  تكمله الامتحان</button>
-                                    </td>
-                                  
-                                    <% } else { %> 
-
-                                      <td style="padding-left: 20px">
-                                        <button button class="primary my-3" onclick="window.location.href='/student/quiz/<%= exam._id %>'">دخول الامتحان</button>
-                                    </td>
-                                    <% } %>
-
-                                  <% } else { %> 
-                                    <td style="padding-left: 20px">
-                                      <button button class="primary my-3" >تم الدخول</button>
-                                  </td>
-                                  <% } %>
-                                <% } %>    
-
-                              <% } else {  %>
-                                <td style="padding-left: 20px">
-                                  <button  class="primary my-3" onclick="window.location.href='/student/reviewAnswers/<%= exam._id %>?qNumber=1'"> مشاهدة اجاباتي</button>
-                                </td>
-                              <% } %>  
-
-                             
-
-
-                        
-                            </tr>
-
-
-
-                          <% } %>
-
-                        <% }) %>
+                <h3 class="quiz-title"><%= exam.quizName %></h3>
+                
+                <div class="quiz-meta">
+                  <div class="meta-item">
+                    <div class="meta-label">عدد الأسئلة</div>
+                    <div class="meta-value">
+                      <% if (exam.questionsToShow && exam.questionsToShow !== exam.questionsCount) { %>
+                        <%= exam.questionsToShow %> من <%= exam.questionsCount %>
+                      <% } else { %>
+                        <%= exam.questionsCount || 10 %>
                       <% } %>
-
-                 
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="col-lg-4">
-                <div class="left">
-                  <%- include("./partials/top.ejs") %>
-                  
-                  <div class="recent-updates" onclick='window.location.href="/student/ranking"'>
-                    <h2></h2>
-                    <div class="updates">
-                      <div class="third">
-                        <div class="profile-photo">
-                            
-                          <% if (rankedUsers[2] && rankedUsers[2].userPhoto) { %>
-                            <img src="<%= rankedUsers[2].userPhoto %>" id="second" alt="profile photo" />
-                        <% } else { %>
-                          <img src="" id="second" alt="profile photo" />
-
-                        <% } %>
-                        </div>
-                        <div class="text">
-                       
-                          <h3 style="color: #000000; ">3<span style="color: #000000; ">ST</span></h3>
-                        </div>
-                      </div>
-                      <div class="first">
-                        <i class="fa-solid fa-crown"></i>
-                        <div class="profile-photo">
-                          <% if (rankedUsers[0] && rankedUsers[0].userPhoto) { %>
-                            <img src="<%= rankedUsers[0].userPhoto %>" id="second" alt="profile photo" />
-                        <% } else { %>
-
-                          <img src="" id="second" alt="profile photo" />
-
-                        <% } %>
-                     
-                        </div>
-                        <div class="text">
-                          <h3>1<span>ST</span></h3>
-                        </div>
-                      </div>
-                      <div class="second">
-                        <div class="profile-photo">
-                          <% if (rankedUsers[1] && rankedUsers[1].userPhoto) { %>
-                            <img src="<%= rankedUsers[1].userPhoto %>" id="second" alt="profile photo" />
-                        <% } else { %>
-                          <img src="" id="second" alt="profile photo" />
-
-                        <% } %>
-              
-                        </div>
-                        <div class="text">
-                     
-                          <h3 style="color: #000000; ">2<span style="color: #000000; ">ST</span></h3>
-                        </div>
-                      </div>
-                    
                     </div>
                   </div>
-                 
+                  <div class="meta-item">
+                    <div class="meta-label">المدة</div>
+                    <div class="meta-value"><%= exam.timeOfQuiz || 30 %> دقيقة</div>
+                  </div>
+                  <div class="meta-item">
+                    <div class="meta-label">الدرجة الكاملة</div>
+                    <div class="meta-value"><%= (exam.questionsToShow || exam.questionsCount || 10) %> درجة</div>
+                  </div>
+                  <div class="meta-item">
+                    <div class="meta-label">الصف الدراسي</div>
+                    <div class="meta-value">
+                      <% if (exam.Grade === 'Grade1') { %>
+                        الأول الثانوي
+                      <% } else if (exam.Grade === 'Grade2') { %>
+                        الثاني الثانوي
+                      <% } else if (exam.Grade === 'Grade3') { %>
+                        الثالث الثانوي
+                      <% } else { %>
+                        <%= exam.Grade %>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grade-badge">
+                  <i class="fas fa-graduation-cap"></i>
+                  <% if (exam.Grade === 'Grade1') { %>
+                    الصف الأول الثانوي
+                  <% } else if (exam.Grade === 'Grade2') { %>
+                    الصف الثاني الثانوي
+                  <% } else if (exam.Grade === 'Grade3') { %>
+                    الصف الثالث الثانوي
+                  <% } else { %>
+                    <%= exam.Grade %>
+                  <% } %>
                 </div>
               </div>
+
+              <!-- Quiz Body -->
+              <div class="quiz-body">
+                
+                <% if (isInProgress) { %>
+                  <!-- In Progress Display -->
+                  <div class="access-info" style="background: #fff7ed; border-color: #fed7aa;">
+                    <div class="access-icon" style="color: #d97706;">
+                      <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="access-message">
+                      <div class="access-title">الامتحان قيد التقدم</div>
+                      <div class="access-subtitle">
+                        لديك امتحان مبدوء، يمكنك المتابعة من حيث توقفت
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="quiz-actions">
+                    <a href="/student/quiz-taking/<%= exam._id %>?qNumber=1" class="btn btn-primary">
+                      <i class="fas fa-play"></i>
+                      متابعة الامتحان
+                    </a>
+                  </div>
+
+                <% } else if (isCompleted) { %>
+                  <!-- Performance Display -->
+                  <div class="performance-display">
+                    <div class="performance-title">
+                      <i class="fas fa-chart-line"></i>
+                      نتائج أدائك في هذا الامتحان
+                    </div>
+                    
+                    <div class="performance-stats">
+                      <div class="stat-item">
+                        <div class="stat-value"><%= exam.quizUser.Score || 0 %></div>
+                        <div class="stat-label">نقاطك</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-value"><%= (exam.questionsToShow || exam.questionsCount || 10) %></div>
+                        <div class="stat-label">الدرجة الكاملة</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-value"><%= Math.round(((exam.quizUser.Score || 0) / (exam.questionsToShow || exam.questionsCount || 10)) * 100) %>%</div>
+                        <div class="stat-label">النسبة المئوية</div>
+                      </div>
+                      <% if (exam.quizUser.rank) { %>
+                      <div class="stat-item">
+                        <div class="stat-value">#<%= exam.quizUser.rank %></div>
+                        <div class="stat-label">ترتيبك</div>
+                      </div>
+                      <% } %>
+                    </div>
+
+                    <div class="progress-bar">
+                      <div class="progress-fill" data-width="<%= Math.round(((exam.quizUser.Score || 0) / (exam.questionsToShow || exam.questionsCount || 10)) * 100) %>"></div>
+                    </div>
+                  </div>
+
+                  <div class="quiz-actions">
+                    <button class="btn btn-secondary" disabled>
+                      <i class="fas fa-check-circle"></i>
+                      تم الإكمال
+                    </button>
+                    <% if (exam.showAnswersAfterQuiz !== false) { %>
+                      <a href="/student/quiz-review/<%= exam._id %>" class="btn btn-primary">
+                        <i class="fas fa-eye"></i>
+                        الإجابات
+                      </a>
+                    <% } %>
+                  </div>
+
+                <% } else if (isFreeQuiz || hasQuizAccess) { %>
+                  <!-- Quiz Available -->
+                  <div class="access-info granted">
+                    <div class="access-icon success">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="access-message">
+                      <div class="access-title">
+                        <% if (isFreeQuiz) { %>
+                          اختبار مجاني
+                        <% } else if (hasGeneralQuizAccess) { %>
+                          وصول شامل للاختبارات
+                        <% } else { %>
+                          اختبار مُشترى
+                        <% } %>
+                      </div>
+                      <div class="access-subtitle">
+                        <% if (isFreeQuiz) { %>
+                          متاح مجاناً لجميع الطلاب
+                        <% } else if (hasGeneralQuizAccess) { %>
+                          لديك وصول شامل لجميع اختبارات صفك
+                        <% } else { %>
+                          لقد قمت بشراء هذا الاختبار مسبقاً
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="quiz-actions">
+                    <a href="/student/quiz-preparation/<%= exam._id %>" class="btn btn-success">
+                      <i class="fas fa-play"></i>
+                      ابدأ الامتحان
+                    </a>
+                  </div>
+
+                <% } else { %>
+                  <!-- Quiz Locked -->
+                  <div class="access-info purchase-required">
+                    <div class="access-icon warning">
+                      <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="access-message">
+                      <div class="access-title">اختبار مدفوع</div>
+                      <div class="access-subtitle">يتطلب هذا الاختبار كود دخول للمشاركة</div>
+                      <div class="quiz-price">
+                        <i class="fas fa-tag"></i>
+                        <%= exam.quizPrice || 25 %> جنيه
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="quiz-actions">
+                    <button class="btn btn-primary" onclick="toggleCodeInput('<%= exam._id %>')">
+                      <i class="fas fa-key"></i>
+                      أدخل كود الدخول
+                    </button>
+                  </div>
+
+                  <!-- Code Input Section -->
+                  <div class="code-input-section" id="codeInput_<%= exam._id %>">
+                    <form class="quiz-purchase-form" data-quiz-id="<%= exam._id %>">
+                      <input type="text" name="code" class="code-input" placeholder="أدخل كود شراء الاختبار" required>
+                      <button type="submit" class="btn btn-success" style="width: 100%;">
+                        <i class="fas fa-shopping-cart"></i>
+                        شراء وتفعيل الاختبار
+                      </button>
+                    </form>
+                  </div>
+                <% } %>
+
+              </div>
             </div>
-          </main>
+          <% }); %>
         </div>
+
+        <!-- No Results Message -->
+        <div class="no-results" id="noResults" style="display: none;">
+          <div class="no-results-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>لم يتم العثور على أي امتحانات</h3>
+          <p>جرب تغيير كلمات البحث أو المرشحات</p>
+        </div>
+
       </div>
-    </div>
+    </main>
+  </div>
 
+  <script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      filterQuizzes();
+    });
 
-    <script src="../assest/bootstrap.bundle.min.js"></script>
-    <script src="../assest/bootstrap.min.js"></script>
-
-    <script>
-      // Get query string parameters
-      function getQueryStringParams() {
-        var params = {};
-        var search = window.location.search.substring(1);
-        var pairs = search.split('&');
-        for (var i = 0; i < pairs.length; i++) {
-          var pair = pairs[i].split('=');
-          if (pair.length === 2) {
-            var key = decodeURIComponent(pair[0]);
-            var value = decodeURIComponent(pair[1]);
-            params[key] = value;
-          }
-        }
-        return params;
-      }
-    
-      // Handle query string errors
-      function handleQueryStringError() {
-        var params = getQueryStringParams();
-        if (params.error) {
-          var alertElement = document.getElementById('alert');
-          alertElement.style.display = 'block';
-          alertElement.classList.add('show');
-    
-          // Hide the alert after 20 seconds
-          setTimeout(function() {
-            alertElement.classList.remove('show');
-            alertElement.classList.add('hide');
-          }, 15000);
-        }
-      }
-    
-      // Call the function to handle query string errors
-      handleQueryStringError();
-
-
-      document.querySelector('.BTNAlert').addEventListener('click', function() {
-        document.getElementById('alert').classList.add('hide');
+    // Filter functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Update active tab
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        filterQuizzes();
       });
-    </script>
+    });
 
-  </body>
+    function filterQuizzes() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const activeFilter = document.querySelector('.filter-tab.active').getAttribute('data-filter');
+      const quizCards = document.querySelectorAll('.quiz-card');
+      let visibleCount = 0;
+
+      quizCards.forEach(card => {
+        const title = card.getAttribute('data-title').toLowerCase();
+        const filter = card.getAttribute('data-filter');
+        
+        const matchesSearch = title.includes(searchTerm);
+        const matchesFilter = activeFilter === 'all' || filter === activeFilter;
+        
+        if (matchesSearch && matchesFilter) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Show/hide no results message
+      const noResults = document.getElementById('noResults');
+      if (visibleCount === 0) {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+    }
+
+    // Toggle code input
+    function toggleCodeInput(examId) {
+      const container = document.getElementById('codeInput_' + examId);
+      const isVisible = container.style.display === 'block';
+      
+      // Hide all code inputs
+      document.querySelectorAll('.code-input-section').forEach(section => {
+        section.style.display = 'none';
+      });
+      
+      // Show the clicked one if it wasn't visible
+      if (!isVisible) {
+        container.style.display = 'block';
+        container.querySelector('.code-input').focus();
+      }
+    }
+
+    // Handle quiz purchase form submissions with AJAX
+    document.querySelectorAll('.quiz-purchase-form').forEach(form => {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const quizId = this.getAttribute('data-quiz-id');
+        const code = this.querySelector('input[name="code"]').value.trim();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        
+        if (!code) {
+          showToast('error', 'يرجى إدخال كود الدخول');
+          return;
+        }
+        
+        // Show loading state
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        try {
+          const response = await fetch(`/student/buyQuiz/${quizId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code: code })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showToast('success', data.message || 'تم شراء الاختبار بنجاح!');
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+              if (data.redirect) {
+                window.location.href = data.redirect;
+              } else {
+                window.location.reload();
+              }
+            }, 1500);
+          } else {
+            showToast('error', data.message || 'حدث خطأ أثناء شراء الاختبار');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showToast('error', 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى');
+        } finally {
+          // Reset button state
+          submitBtn.classList.remove('loading');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        }
+      });
+    });
+
+    // Toast notification function using SweetAlert2
+    function showToast(type, message) {
+      // Convert English messages to Arabic
+      const arabicMessages = {
+        // Error messages
+        'This code is for Grade2 only': 'هذا الكود مخصص للصف الثاني الثانوي فقط',
+        'Invalid or used code': 'كود غير صحيح أو مستخدم من قبل',
+        'Code is not for this quiz': 'هذا الكود ليس لهذا الاختبار',
+        'Grade mismatch': 'عدم تطابق الصف الدراسي',
+        'Purchase failed': 'فشل في الشراء',
+        'Quiz not found': 'الاختبار غير موجود',
+        'Already have access': 'لديك وصول بالفعل',
+        'Quiz purchased successfully': 'تم شراء الاختبار بنجاح',
+        'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى': 'حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى',
+        'يرجى إدخال كود الدخول': 'يرجى إدخال كود الدخول',
+        'حدث خطأ أثناء شراء الاختبار': 'حدث خطأ أثناء شراء الاختبار',
+        'انتهى وقت الامتحان وتم تسليم إجاباتك تلقائياً': 'انتهى وقت الامتحان وتم تسليم إجاباتك تلقائياً',
+        'الإجابات غير متاحة لهذا الاختبار': 'الإجابات غير متاحة لهذا الاختبار',
+        
+        // Success messages
+        'تم شراء الاختبار بنجاح!': 'تم شراء الاختبار بنجاح!',
+        'تم الإكمال بنجاح': 'تم الإكمال بنجاح',
+        'تم التفعيل بنجاح': 'تم التفعيل بنجاح',
+        
+        // Warning messages
+        'تحذير': 'تحذير',
+        'تنبيه': 'تنبيه',
+        'انتباه': 'انتباه'
+      };
+
+      // Get Arabic message or use original if not found
+      const arabicMessage = arabicMessages[message] || message;
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      Toast.fire({
+        icon: type,
+        title: arabicMessage,
+        background: type === 'success' ? '#10b981' : 
+                   type === 'error' ? '#ef4444' : 
+                   type === 'warning' ? '#f59e0b' : '#3b82f6',
+        color: '#ffffff'
+      });
+    }
+
+    // Handle URL parameters for legacy support
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error')) {
+      const errorMessage = decodeURIComponent(urlParams.get('error'));
+      showToast('error', errorMessage);
+    }
+    if (urlParams.get('success')) {
+      const successMessage = decodeURIComponent(urlParams.get('success'));
+      showToast('success', successMessage);
+    }
+    if (urlParams.get('message') === 'quiz_time_expired') {
+      showToast('warning', 'انتهى وقت الامتحان وتم تسليم إجاباتك تلقائياً');
+    }
+    if (urlParams.get('message') === 'answers_hidden') {
+      showToast('info', 'الإجابات غير متاحة لهذا الاختبار');
+    }
+
+    // Initialize progress bars on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.progress-fill[data-width]').forEach(el => {
+        const width = el.getAttribute('data-width');
+        el.style.width = width + '%';
+      });
+    });
+  </script>
+</body>
 </html>

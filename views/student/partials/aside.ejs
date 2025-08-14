@@ -1,54 +1,124 @@
-
-
-<aside>
-  <div class="top">
-    <div class="logo">
-      <img src="/images/logo.png" alt="logo" />
+<!-- Modern Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <a href="/student/dash" class="sidebar-logo">
+            <i class="fas fa-graduation-cap"></i>
+            منصة الشهادة
+        </a>
     </div>
-    <div class="close" id="close-btn">
-      <i class="fa-solid fa-xmark"></i>
+    
+    <nav class="sidebar-nav">
+        <div class="nav-item">
+            <a href="/student/dash" class="nav-link <%= path === '/dash' ? 'active' : '' %>">
+                <i class="material-icons-outlined nav-icon">dashboard</i>
+                <span>لوحة التحكم</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/student/chapters" class="nav-link <%= path === '/chapters' ? 'active' : '' %>">
+                <i class="material-icons-outlined nav-icon">library_books</i>
+                <span>الأبواب التعليمية</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/student/exams" class="nav-link <%= path === '/exams' ? 'active' : '' %>">
+                <i class="material-icons-outlined nav-icon">quiz</i>
+                <span>الامتحانات</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/student/PDFs" class="nav-link <%= path === '/PDFs' ? 'active' : '' %>">
+                <i class="material-icons-outlined nav-icon">description</i>
+                <span>المواد التعليمية</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/student/ranking" class="nav-link <%= path === '/ranking' ? 'active' : '' %>">
+                <i class="material-icons-outlined nav-icon">leaderboard</i>
+                <span>التصنيف</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/student/settings" class="nav-link <%= path === '/settings' ? 'active' : '' %>">
+                <i class="material-icons-outlined nav-icon">settings</i>
+                <span>الإعدادات</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="/student/logOut" class="nav-link">
+                <i class="material-icons-outlined nav-icon">logout</i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- User Info -->
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-details">
+                <div class="user-name"><%= userData.Username %></div>
+                <div class="user-score">
+                    <i class="fas fa-star"></i>
+                    <span><%= userData.totalScore %> نقطة</span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="sidebar">
-    <p class="me-3 Name">اهلا بك،<b class="UserName">
-       <%= userData.Username %>
-      </b></p>
-    <a href=""><i class="fa-solid fa-brain"><span class="ms-2" style="font-size: 1.3rem">
-          <%= userData.totalScore %>
-        </span></i></a><a href="/student/dash" class="<%= path === '/dash' ? 'active' : '' %>"><i class="fa-solid fa-gauge"></i>
-      <h3>لوحه تحكمي</h3>
-    </a><a href="/student/exams" class="<%= path === '/exams' ? 'active' : '' %>"><span class="material-icons-sharp">quiz</span>
-      <h3>الامتحانات</h3>
-    </a><a href="/student/ranking" class="<%= path === '/ranking' ? 'active' : '' %>"><i class="fa-solid fa-graduation-cap"></i>
-      <h3>ترتيب الطلاب</h3>
-    </a><a href="/student/chapters" class="<%= path === '/chapters' ? 'active' : '' %>"  ><i class="fa-solid fa-box"></i>
-      <h3>الفيدوهات</h3>
-      </a>
-      
-
-
-
-    </a><a href="/student/settings" class="<%= path === '/settings' ? 'active' : '' %>"  ><i class="fa-solid fa-gear"></i>
-      <h3>الاعدادات</h3>
-    </a>
-    <a href="/student/logOut">
-      <i class="fa-solid fa-right-from-bracket"></i>
-      <h3>تسجيل الخروج</h3>
-    </a>
-  </div>
 </aside>
 
-<script>
-  
-  // Get the current URL
-const currentUrl = window.location.href;
+<style>
+.sidebar-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
 
-// Split the URL by '/'
-const urlParts = currentUrl.split('/');
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
 
-// Get the last part of the URL, which should be the video ID
-const videoId = urlParts[urlParts.length - 1];
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
 
-console.log(videoId); // This will log '65c7f4fc56be0128b8b18361'
+.user-details {
+    flex: 1;
+}
 
-</script>
+.user-name {
+    font-weight: 600;
+    color: white;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-score {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+}
+
+.user-score i {
+    color: #ffd700;
+}
+</style>

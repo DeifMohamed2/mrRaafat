@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مراجعة الامتحان - <%= quiz.quizName %> - منصة الشهادة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/student-modern.css">
+  <link rel="stylesheet" href="/css/quiz-modern.css">
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .review-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* Header Card */
+    .review-header {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .quiz-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 1rem;
+    }
+
+    .review-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    /* Score Summary */
+    .score-summary {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .score-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      box-shadow: 0 8px 25px rgba(66, 153, 225, 0.3);
+    }
+
+    .score-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .score-item {
+      text-align: center;
+      padding: 1rem;
+      background: #f7fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .score-label {
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .correct { color: #48bb78; }
+    .incorrect { color: #f56565; }
+    .unanswered { color: #a0aec0; }
+
+    /* Random Questions Notice */
+    .random-notice {
+      background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+      border: 2px solid #f6ad55;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .random-notice .icon {
+      font-size: 1.5rem;
+      color: #c05621;
+    }
+
+    .random-notice .text {
+      color: #744210;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    /* Questions Container */
+    .questions-container {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .question-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .question-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .question-header {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .question-number {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .result-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .result-correct {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .result-incorrect {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .result-unanswered {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .question-body {
+      padding: 2rem;
+    }
+
+    .question-image {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .question-image img {
+      max-width: 100%;
+      height: auto;
+      max-height: 250px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .question-image img:hover {
+      transform: scale(1.05);
+    }
+
+    .question-text {
+      font-size: 1.3rem;
+      font-weight: 500;
+      line-height: 1.8;
+      color: #2d3748;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: #f8fafc;
+      border-radius: 12px;
+      border-right: 4px solid #4299e1;
+    }
+
+    /* Answer Options */
+    .answers-grid {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .answer-option {
+      padding: 1.2rem;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .answer-option.user-selected {
+      border-color: #4299e1;
+      background: #ebf8ff;
+    }
+
+    .answer-option.correct-answer {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+
+    .answer-option.user-incorrect {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+
+    .answer-marker {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .answer-option.correct-answer .answer-marker {
+      background: #48bb78;
+      color: white;
+    }
+
+    .answer-option.user-selected .answer-marker {
+      background: #4299e1;
+      color: white;
+    }
+
+    .answer-option.user-incorrect .answer-marker {
+      background: #f56565;
+      color: white;
+    }
+
+    .answer-text {
+      flex: 1;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .answer-status {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .status-correct { color: #48bb78; }
+    .status-incorrect { color: #f56565; }
+    .status-user { color: #4299e1; }
+
+    /* Analysis Section */
+    .answer-analysis {
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+    }
+
+    .analysis-correct {
+      background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+      border-left: 4px solid #48bb78;
+    }
+
+    .analysis-incorrect {
+      background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+      border-left: 4px solid #f56565;
+    }
+
+    .analysis-unanswered {
+      background: linear-gradient(135deg, #f7fafc 0%, #e2e8f0 100%);
+      border-left: 4px solid #a0aec0;
+    }
+
+    .analysis-limited {
+      background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+      border-left: 4px solid #ed8936;
+    }
+
+    .analysis-title {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .analysis-text {
+      color: #4a5568;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .review-nav {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .nav-info {
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-btn-primary {
+      background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+      color: white;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Image Preview Modal */
+    .image-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-modal.show {
+      display: flex;
+    }
+
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .review-container {
+        padding: 0 0.5rem;
+      }
+
+      .quiz-title {
+        font-size: 1.5rem;
+      }
+
+      .score-circle {
+        width: 120px;
+        height: 120px;
+        font-size: 2rem;
+      }
+
+      .score-details {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .question-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .review-nav {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Include Sidebar -->
+    <%- include('partials/aside') %>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="review-container">
+        
+        <!-- Header -->
+        <div class="review-header">
+          <h1 class="quiz-title"><%= quiz.quizName %></h1>
+          <div class="review-badge">
+            <i class="fas fa-clipboard-check"></i>
+            مراجعة الامتحان
+          </div>
+        </div>
+
+        <!-- Random Questions Notice -->
+        <% if (questionsShown < totalQuestionsPool) { %>
+        <div class="random-notice">
+          <div class="icon">
+            <i class="fas fa-random"></i>
+          </div>
+          <div class="text">
+            <strong>أسئلة عشوائية:</strong> تم عرض <%= questionsShown %> أسئلة عشوائية من أصل <%= totalQuestionsPool %> سؤال في هذا الامتحان
+          </div>
+        </div>
+        <% } %>
+
+        <!-- Score Summary -->
+        <div class="score-summary">
+          <div class="score-circle">
+            <%= userQuizInfo.Score %>/<%= questionsShown %>
+          </div>
+          
+          <div class="score-details">
+            <div class="score-item">
+              <div class="score-value correct"><%= correctAnswers %></div>
+              <div class="score-label">إجابات صحيحة</div>
+            </div>
+            <div class="score-item">
+              <div class="score-value incorrect"><%= incorrectAnswers %></div>
+              <div class="score-label">إجابات خاطئة</div>
+            </div>
+            <div class="score-item">
+              <div class="score-value unanswered"><%= unansweredQuestions %></div>
+              <div class="score-label">لم تُجب عليها</div>
+            </div>
+            <div class="score-item">
+              <div class="score-value" style="color: #805ad5;"><%= Math.round((userQuizInfo.Score / questionsShown) * 100) %>%</div>
+              <div class="score-label">النسبة المئوية</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="review-nav">
+          <div class="nav-info">
+            <i class="fas fa-info-circle"></i>
+            مراجعة <%= questionsShown %> سؤال من أصل <%= totalQuestionsPool %> سؤال
+          </div>
+          <a href="/student/exams" class="nav-btn nav-btn-primary">
+            <i class="fas fa-arrow-right"></i>
+            العودة للامتحانات
+          </a>
+        </div>
+
+        <!-- Questions Review -->
+        <div class="questions-container">
+          <% userQuestions.forEach((question, index) => { %>
+            <% 
+              const questionNumber = index + 1;
+              const questionId = question._id ? question._id.toString() : `q_${question.originalIndex}`;
+              
+              // Find the user's answer for this specific question
+              let userAnswerObj = null;
+              if (userQuizInfo.answers && Array.isArray(userQuizInfo.answers)) {
+                // New format: array of objects
+                userAnswerObj = userQuizInfo.answers.find(a => 
+                  a.questionId === questionId || 
+                  a.questionIndex === index ||
+                  (a.questionIndex === question.originalIndex)
+                );
+              } else if (userQuizInfo.answers && userQuizInfo.answers[index]) {
+                // Legacy format: simple array
+                userAnswerObj = {
+                  selectedAnswer: userQuizInfo.answers[index]
+                };
+              }
+              
+              const userAnswer = userAnswerObj ? userAnswerObj.selectedAnswer : null;
+              const correctAnswerIndex = question.ranswer; // 1-based
+              const isAnswered = !!userAnswer;
+              const isCorrect = isAnswered && parseInt(userAnswer.replace('answer', '')) === correctAnswerIndex;
+              
+              let resultClass = 'result-unanswered';
+              let resultText = 'لم تُجب';
+              let resultIcon = 'fas fa-minus';
+              
+              if (isAnswered) {
+                if (isCorrect) {
+                  resultClass = 'result-correct';
+                  resultText = 'صحيح';
+                  resultIcon = 'fas fa-check';
+                } else {
+                  resultClass = 'result-incorrect';
+                  resultText = 'خطأ';
+                  resultIcon = 'fas fa-times';
+                }
+              }
+            %>
+            
+            <div class="question-card">
+              <div class="question-header">
+                <div class="question-number">السؤال <%= questionNumber %></div>
+                <div class="result-badge <%= resultClass %>">
+                  <i class="<%= resultIcon %>"></i>
+                  <%= resultText %>
+                </div>
+              </div>
+
+              <div class="question-body">
+                <!-- Question Image -->
+                <% if ((question.image && question.image.trim() !== '') || (question.questionPhoto && question.questionPhoto.trim() !== '')) { %>
+                <div class="question-image">
+                  <img src="<%= question.image || question.questionPhoto %>" alt="صورة السؤال" onclick="previewImage('<%= question.image || question.questionPhoto %>')">
+                </div>
+                <% } %>
+
+                <!-- Question Text -->
+                <div class="question-text">
+                  <%= question.question || question.title %>
+                </div>
+
+                <!-- Answer Options -->
+                <div class="answers-grid">
+                  <% 
+                    const answers = [question.answer1, question.answer2, question.answer3, question.answer4];
+                    answers.forEach((answer, answerIndex) => {
+                      if (answer && answer.trim() !== '') {
+                        const optionNumber = answerIndex + 1;
+                        const isUserAnswer = userAnswer === `answer${optionNumber}`;
+                        const isCorrectAnswer = optionNumber === correctAnswerIndex;
+                        
+                        let optionClass = '';
+                        let statusIcon = '';
+                        
+                        if (shouldShowAnswers && isCorrectAnswer) {
+                          optionClass = 'correct-answer';
+                          statusIcon = '<i class="fas fa-check status-correct"></i>';
+                        }
+                        
+                        if (isUserAnswer) {
+                          if (isCorrect) {
+                            optionClass = 'correct-answer';
+                          } else {
+                            optionClass = 'user-incorrect';
+                            statusIcon = '<i class="fas fa-times status-incorrect"></i>';
+                          }
+                        }
+                        
+                        if (isUserAnswer && !isCorrectAnswer) {
+                          optionClass = 'user-selected user-incorrect';
+                        } else if (isUserAnswer && isCorrectAnswer) {
+                          optionClass = 'user-selected correct-answer';
+                        }
+                  %>
+                    <div class="answer-option <%= optionClass %>">
+                      <div class="answer-marker">
+                        <%= String.fromCharCode(1571 + answerIndex) %> <!-- أ، ب، ج، د -->
+                      </div>
+                      <div class="answer-text"><%= answer %></div>
+                      <div class="answer-status"><%- statusIcon %></div>
+                    </div>
+                  <% 
+                      }
+                    });
+                  %>
+                </div>
+
+                <!-- Analysis -->
+                <% if (shouldShowAnswers) { %>
+                  <div class="answer-analysis <%= isCorrect ? 'analysis-correct' : (isAnswered ? 'analysis-incorrect' : 'analysis-unanswered') %>">
+                    <div class="analysis-title">
+                      <% if (isCorrect) { %>
+                        <i class="fas fa-thumbs-up"></i>
+                        أحسنت! إجابة صحيحة
+                      <% } else if (isAnswered) { %>
+                        <i class="fas fa-info-circle"></i>
+                        الإجابة الصحيحة
+                      <% } else { %>
+                        <i class="fas fa-exclamation-circle"></i>
+                        لم تجب على هذا السؤال
+                      <% } %>
+                    </div>
+                    <div class="analysis-text">
+                      <% if (isCorrect) { %>
+                        لقد اخترت الإجابة الصحيحة. استمر في هذا الأداء الممتاز!
+                      <% } else { %>
+                        الإجابة الصحيحة هي: <strong><%= answers[correctAnswerIndex - 1] %></strong>
+                        <% if (isAnswered) { %>
+                          <br>لقد اخترت: <strong><%= answers[parseInt(userAnswer.replace('answer', '')) - 1] %></strong>
+                        <% } else { %>
+                          <br>يُنصح بمراجعة هذا الموضوع مرة أخرى.
+                        <% } %>
+                      <% } %>
+                    </div>
+                  </div>
+                <% } else { %>
+                  <!-- Show limited information when answers are hidden -->
+                  <div class="answer-analysis analysis-limited">
+                    <div class="analysis-title">
+                      <i class="fas fa-info-circle"></i>
+                      تم تسجيل إجابتك
+                    </div>
+                    <div class="analysis-text">
+                      تم تسجيل إجابتك بنجاح. الإجابات الصحيحة لن تظهر في هذا الاختبار.
+                    </div>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <div class="image-modal" id="imageModal" onclick="closeImagePreview()">
+    <img id="modalImage" src="" alt="معاينة الصورة">
+  </div>
+
+  <script>
+    function previewImage(imageSrc) {
+      const modal = document.getElementById('imageModal');
+      const modalImage = document.getElementById('modalImage');
+      
+      if (modal && modalImage) {
+        modalImage.src = imageSrc;
+        modal.classList.add('show');
+      }
+    }
+
+    function closeImagePreview() {
+      const modal = document.getElementById('imageModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
+    }
+
+    // Smooth scroll to top on page load
+    window.addEventListener('load', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html> 
