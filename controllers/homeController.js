@@ -1,14 +1,11 @@
 const User = require('../models/User');
 const Chapter = require('../models/Chapter');
 
-const waapi = require('@api/waapi');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
 const jwtSecret = process.env.JWTSECRET;
-const waapiAPI = process.env.WAAPIAPI;
-waapi.auth(`${waapiAPI}`);
 
 const home_page = async (req, res) => {
 
@@ -306,29 +303,7 @@ const send_verification_code = async (req, res) => {
     const code = Math.floor(Math.random() * 400000 + 600000);
     const message = `كود التحقق الخاص بك هو ${code}`;
 
-    // Send the message via the waapi (already present)
-    await waapi
-      .postInstancesIdClientActionSendMessage(
-        {
-          chatId: `2${phone}@c.us`,
-          message: message,
-        },
-        { id: '21299' }
-      )
 
-      .then(({ data }) => {
-        // Store the verification code and phone in the session or database
-        req.session.verificationCode = code; // Assuming session middleware is used
-        req.session.phone = phone;
-
-        // Send a successful response after setting the session
-        res.status(201).json({ success: true, data });
-      })
-      .catch((err) => {
-        // Handle any error that occurs during the waapi call
-        console.error(err);
-        res.status(500).json({ success: false, error: err });
-      });
   } catch (error) {
     console.log(error);
     res.status(500).send('Internal Server Error');
